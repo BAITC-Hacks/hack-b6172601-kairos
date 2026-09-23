@@ -82,6 +82,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
 | Readable default overview | Peripheral filter starts unchecked; 440 role-bearing accounts shown | Enable the filter to inspect all 2,248 accounts; selected accounts remain visible |
 | Zoom to the selected account | Animated fit of its two-hop neighborhood to 80% of the canvas | Search, top list, canvas and neighbor links share the same selection path; Overview fits back |
+| Clean ego view | One hop by default, optional second hop, amount-sorted columns and outer edge labels | Peripheral neighbors remain visible; reciprocal directions are preserved |
 | Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
 | Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
 | Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |
@@ -100,8 +101,10 @@ The official batch limit is five minutes; automated regression limit is also fiv
 Search a full gid or its last digits and press Enter to focus the first match.
 Click a node or Top-30 entry to inspect its role hypothesis, priority, community,
 metrics and directed incoming/outgoing transfers. Neighbor rows navigate to that
-account. Focus highlights two hops; **Ego view** puts payers left and recipients
-right. Escape returns to overview. Drag to pan and use the wheel to zoom.
+account. Focus highlights two hops; **Ego view** starts with direct neighbors,
+payers left and recipients right, sorted by observed transfer amount. **Show 2nd
+hop** adds their neighbors. Amount labels sit near column ends; drag vertically
+for large columns. Reciprocal neighbors occupy one position on the payer side. Escape returns to overview. Drag to pan and use the wheel to zoom.
 Seeds have black rings; hollow nodes mark the depth-4 observation cutoff.
 
 **Why this role** shows the first matching rule and the earlier rules that failed,

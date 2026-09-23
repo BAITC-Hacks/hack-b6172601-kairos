@@ -228,3 +228,13 @@ Revisit if: never, while these clauses stand.
   not override measured levels; rows do not establish organizational authority.
 - Skeleton view shows every retained node, including peripheral seeds, independent
   of the normal overview filters. Clicking a member preserves this layout.
+
+## Viewer polish: ego ordering
+
+- Ego starts at one hop and includes peripheral neighbors despite the overview
+  filter. Direct neighbors sort by total observed amounts exchanged with the
+  selected account. Reciprocal neighbors occupy the payer side once; arrows
+  preserve direction and offset labels distinguish amounts.
+- Optional second-hop accounts appear on the side with the greater summed
+  amount to direct peers, with payer-side and gid tie-breaking. Tall columns
+  keep readable spacing and vertical pan rather than shrinking all labels.

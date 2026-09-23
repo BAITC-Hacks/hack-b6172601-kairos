@@ -33,7 +33,7 @@
       <section class="section downloads"><h2>Exports</h2><a href="/api/download/nodes_roles.csv" download>Node roles CSV</a><a href="/api/download/clusters.csv" download>Clusters CSV</a><a href="/api/download/top_nodes.csv" download>Top nodes CSV</a></section>
     </aside>
     <section class="map-panel" aria-label="Directed money flow graph">
-      <div class="map-toolbar"><span id="view-label">Overview · drag to pan · wheel to zoom · click a node</span><button id="ego-view" type="button" disabled>Ego view</button></div>
+      <div class="map-toolbar"><span id="view-label">Overview · drag to pan · wheel to zoom · click a node</span><div class="map-actions"><button id="ego-hop" type="button" aria-pressed="false" hidden>Show 2nd hop</button><button id="ego-view" type="button" disabled>Ego view</button></div></div>
       <canvas id="graph-canvas" aria-label="Interactive directed graph of accounts"></canvas>
       <div id="tooltip" class="tooltip" hidden></div>
       <div id="map-error" class="map-error" role="alert" hidden></div>

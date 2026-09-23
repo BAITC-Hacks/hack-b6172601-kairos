@@ -1,10 +1,17 @@
 # Current handoff
 
 Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b items 4, 6, 1, 7, 8 and 5 are implemented; remaining viewer polish is in progress with a
+Spec 03b items 4, 6, 1, 7, 8, 5 and 3 are implemented; remaining viewer polish is in progress with a
 16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
 
 ## Viewer polish
+
+- Item 3: ego defaults to one hop; Show 2nd hop adds actual neighbors. Columns
+  sort by observed incident amount and gid, with reciprocal peers on the payer
+  side. Peripheral neighbors remain visible in ego; amount labels sit toward
+  outer column ends. Large columns retain vertical pan. Browser verified
+  one-hop -> two-hop -> one-hop counts of 10 -> 63 -> 10 for a real account.
+  Node VM checks cover amount ordering, toggle, filtering and exit.
 
 - Item 5: Method modal loads six pipeline steps and ordered rule thresholds
   from /api/method, derived from pipeline/config.py. Endpoint remains available
@@ -66,6 +73,6 @@ Spec 03b items 4, 6, 1, 7, 8 and 5 are implemented; remaining viewer polish is i
 ## Next steps
 
 User confirmed the new addendum immediately after item 4: items 6-8 are complete;
-finish items 3 and 2. Item 1 is integrated as the item 7 zoom dependency.
+finish item 2. Item 1 is integrated as the item 7 zoom dependency.
 Commit and push each finished item, and working progress by 16:20.
 Do not start spec 05 automatically.
