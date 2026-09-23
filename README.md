@@ -326,6 +326,17 @@ and evaluate a supervised model only when reliable labels exist. Evaluate the ex
 reduce missing-flow uncertainty, subject to authorized access and matching.
 These are future directions, not implemented capabilities.
 
+Concrete next steps identified during the build (not implemented):
+
+| Area | Next step |
+|---|---|
+| Hierarchy view | Lay the skeleton out by inferred hierarchy level (coordinators on top) instead of observed seed-hop depth. |
+| Detectors | Return-flow cycles, structuring just above the 5,000 KZT threshold, node profiles anomalous for their hop. |
+| Robustness | Sensitivity analysis: vary every threshold by ±20% and report which roles stay stable; use stability as role confidence. |
+| Twin groups | Merge shared-source twins into one "candidate controller" card with combined flows. |
+| Assistant | Evaluation set of analyst questions with expected tool calls and cited gids; Russian/Kazakh answers. |
+| Case workflow | Export a review package per account (card, paths, evidence) and record analyst verdicts for the feedback loop. |
+
 ## Tests and provenance
 
 After the Python installation, activate the environment and run:
