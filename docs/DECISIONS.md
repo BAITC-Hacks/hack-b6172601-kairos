@@ -246,3 +246,12 @@ Revisit if: never, while these clauses stand.
   Peripheral visibility does not change this membership; smaller components
   retain their coordinates and remain searchable. Equal-size components choose
   the one containing the smallest string gid; isolates participate normally.
+
+## Submission startup (spec 05)
+
+- Docker installs the committed lockfile without a ranges fallback: failure must
+  be visible instead of silently changing the tested dependency set. This
+  supersedes the Docker fallback in historical D6.
+- Startup checks all eight artifacts, including the hierarchy/continuation and
+  counterfactual exports. Any missing/empty artifact triggers recomputation.
+  The health start period covers the case's five-minute pipeline budget.

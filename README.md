@@ -15,6 +15,8 @@ docker compose up --build
 Open [localhost:8000](http://localhost:8000) after the pipeline finishes and the
 server starts. Keep port 8000 free; run Docker or Python, not both at once.
 The image installs locked dependencies and computes outputs from official inputs.
+If any of the eight output artifacts is missing or empty, startup regenerates the
+complete set. Health checks allow up to five minutes for the initial computation.
 No `.env`, API key, personal account or GPU is required. Building/installing needs
 internet access; analysis and the viewer work offline afterward, with no CDN.
 

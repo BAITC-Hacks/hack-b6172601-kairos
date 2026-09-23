@@ -1,11 +1,5 @@
-# One command for a reviewer who has Docker and nothing else:
-#
-#   docker compose up --build
-#
-# No Python on the host is needed: the container computes official Parquet
-# inputs into out/ on first start. No .env is needed: the service starts without a
-# key and reports llm_configured=false on /api/health. To use a model, either
-# create .env from .env.example or export LLM_API_KEY before running.
+# Docker alone is sufficient: build, compute official Parquet inputs, serve.
+# No .env or API key is needed. Local out/ is excluded from the build context.
 services:
   app:
     build: .
@@ -24,6 +18,5 @@ services:
       AGENT_TIMEOUT_SECONDS: "${AGENT_TIMEOUT_SECONDS:-60}"
       RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-0}"
       TRUST_PROXY_HEADERS: "${TRUST_PROXY_HEADERS:-false}"
-      DATA_DIR: /app/data
       TRACE_DIR: /app/.traces
     restart: unless-stopped

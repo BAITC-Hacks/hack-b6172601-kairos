@@ -33,6 +33,16 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
   is signed out of the private repository; GitHub live Mermaid rendering remains
   unverified (both Mermaid sources are identical).
 
+- D complete: startup checks all eight exports, Docker uses the exact lock
+  without a silent fallback, and health checks allow the five-minute pipeline
+  budget. Full tests: 65 pass; language, diff and deploy-config guards pass.
+  Missing official nodes file fails clearly; image contains neither .env nor out/.
+  Offline disposable container (network none, 512 MiB, 1 CPU) completes in
+  54.72s at 421,220 KiB peak RSS, with expected counts.
+  New image is healthy; deleting only skeleton_edges.csv triggers full
+  regeneration in 42.77s and restores all eight outputs. HTTP smoke passes
+  before and after regeneration.
+
 ## Current analysis and viewer
 
 - 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Role counts:
@@ -57,6 +67,5 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
 
 ## Remaining work
 
-D Docker completion checks,
 E remote clean clone with Docker and a fresh Python venv, F bounded Fly deploy.
 Record failures honestly; keep the public URL out of README unless verified.
