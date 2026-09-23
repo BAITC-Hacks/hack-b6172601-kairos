@@ -33,6 +33,9 @@ class PipelineConfig:
     scatter_gather_min_branches: int = 2
     finding_priority_bonus: float = 0.05
     finding_priority_cap: float = 0.15
+    continuation_min_depth: int = 1
+    continuation_degree_edges: tuple[int, ...] = (2, 3, 5)
+    extension_min_probability: float = 0.5
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7

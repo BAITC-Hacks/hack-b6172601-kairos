@@ -72,6 +72,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
 | `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings and one-sentence evidence |
+| `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
 
 | Viewer requirement | Implementation | Check |
@@ -202,3 +203,11 @@ scatter/gather. The latter requires simple paths of 2-3 hops from the same sourc
 through at least two distinct first intermediaries; cycles and a lone chain do
 not qualify. Each fired finding is explained in metrics and top-node reasons.
 Fast-pass is timing correlation, not proof that the same money was forwarded.
+
+
+Hop-4 continuation estimates use only depth 1-3 nodes, where outgoing transfers
+were traced. Empirical forwarding rates are grouped by in-degree (1, 2, 3-4, 5+)
+and incoming-value quartiles learned from that visible subset. Tied quartile
+boundaries collapse; empty cells use the overall visible-node forwarding rate.
+Only truncated nodes receive p_continues; without training data it stays unknown.
+These are observed peer frequencies, not validated individual predictions.

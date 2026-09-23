@@ -14,9 +14,13 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
   Cluster summaries use final roles/priorities. README role rule updated.
 - D: boolean common-counterparty, synchronous-inflow, fast-pass and scatter/gather
   findings; one-sentence explanations and capped pre-normalization priority bonus.
+- E: empirical visible-peer continuation estimates, cut-off evidence and
+  extension_requests.csv sorted by taint; empty-bin fallback is documented.
 - Existing user edit to 00_CONTEXT.md is included with A.
 
 ## Verification
+
+- Section E: full pytest -q passes (53 tests); smoke, language and diff checks pass.
 
 - Section D: full pytest -q passes (52 tests); smoke, language and diff checks pass.
 
@@ -27,6 +31,6 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
 
 ## Next
 
-Implement E, G, B, C, F in order. Test, update this file, commit and push each
+Implement G, B, C, F in order. Test, update this file, commit and push each
 section. Add H documentation only. End with make pipeline and report computed
 role counts, flag counts and blocking summary.

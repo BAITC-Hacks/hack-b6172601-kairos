@@ -5,6 +5,7 @@ import time
 
 from pipeline.clusters import add_clusters, assign_clusters
 from pipeline.export import write_outputs
+from pipeline.continuation import add_continuation
 from pipeline.features import compute_features
 from pipeline.findings import add_findings, FINDING_TEXT
 from pipeline.load import load_data
@@ -21,6 +22,7 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     metrics, _ = assign_clusters(metrics, edges, graph)
     metrics = add_roles(metrics, edges)
     metrics = add_findings(metrics, transactions, graph)
+    metrics = add_continuation(metrics)
     metrics = add_priority(metrics)
     metrics, clusters, projected = add_clusters(metrics, edges, graph)
     write_outputs(metrics, clusters, edges, projected, out)

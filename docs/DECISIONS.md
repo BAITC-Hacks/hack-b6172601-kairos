@@ -193,3 +193,6 @@ Revisit if: never, while these clauses stand.
   intermediaries from one source to a target. A lone path or cycle is insufficient.
 - Finding bonuses apply before existing seed/cut-off multipliers and global
   maximum normalization, so those uncertainty discounts still apply.
+- Continuation uses visible depth 1-3 quartile boundaries and empirical cell
+  means. Duplicate boundaries collapse; empty cells fall back to the visible
+  population mean. Missing training data yields unknown, never a fabricated rate.

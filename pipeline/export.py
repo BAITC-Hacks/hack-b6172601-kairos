@@ -9,6 +9,7 @@ import numpy as np
 import pandas as pd
 
 from pipeline.config import CONFIG
+from pipeline.continuation import extension_requests
 
 
 ROLE_COLUMNS = ["gid", "role", "role_score", "cluster_id", "priority_score", "evidence"]
@@ -40,6 +41,7 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
     directory = Path(directory)
     directory.mkdir(parents=True, exist_ok=True)
     ordered = metrics.sort_values("gid")
+    extension_requests(metrics).to_csv(directory / "extension_requests.csv", index=False, float_format="%.12g")
     ordered[ROLE_COLUMNS].to_csv(directory / "nodes_roles.csv", index=False, float_format="%.12g")
     clusters[CLUSTER_COLUMNS].to_csv(directory / "clusters.csv", index=False, float_format="%.12g")
     ordered.to_csv(directory / "metrics.csv", index=False, float_format="%.12g")

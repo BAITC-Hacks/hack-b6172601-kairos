@@ -39,3 +39,19 @@ def test_findings_dates_boundaries_and_distinct_branches():
     assert result.loc[0, list(FINDING_TEXT)].all()
     assert not result.loc[1, list(FINDING_TEXT)].any()
     assert "converge" in result.loc[0, "findings"]
+
+
+def test_continuation_uses_visible_peers_and_exports_only_cutoffs():
+    from pipeline.continuation import add_continuation, extension_requests
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4, 5], "depth": [1, 2, 3, 4, 0],
+        "in_deg": [1] * 5, "in_kzt": [100] * 5,
+        "out_deg": [1, 1, 0, 0, 0], "truncated": [False, False, False, True, False],
+        "taint_kzt": [100] * 5, "evidence": ["original"] * 5,
+    })
+    result = add_continuation(metrics)
+    assert abs(result.loc[3, "p_continues"] - 2 / 3) < 1e-12
+    assert result.loc[[0, 1, 2, 4], "p_continues"].isna().all()
+    assert extension_requests(result).gid.tolist() == [4]
+    assert "67%" in result.loc[3, "evidence"]
+    assert add_continuation(metrics.iloc[[3]]).p_continues.isna().all()
