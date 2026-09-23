@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money Graph — Analyst assistant</title>
+<style>
+  :root { --bg:#f6f6f3; --panel:#fff; --ink:#1d1f1e; --muted:#6b706c; --line:#e2e3df; --accent:#2f6b57; }
+  * { box-sizing: border-box; }
+  body { margin:0; font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--ink); }
+  header { display:flex; justify-content:space-between; align-items:center; padding:14px 24px; background:var(--panel); border-bottom:1px solid var(--line); }
+  header h1 { font-size:20px; margin:0; } header p { margin:2px 0 0; color:var(--muted); font-size:13px; }
+  header a { color:var(--accent); font-weight:600; text-decoration:none; border:1px solid var(--line); padding:6px 12px; border-radius:8px; }
+  main { max-width:980px; margin:24px auto; padding:0 16px; display:grid; gap:16px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+  textarea { width:100%; min-height:84px; font:inherit; padding:10px 12px; border:1px solid var(--line); border-radius:8px; resize:vertical; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; margin-top:10px; align-items:center; }
+  button { font:inherit; border:1px solid var(--line); background:#fff; border-radius:8px; padding:6px 12px; cursor:pointer; }
+  button.primary { background:var(--accent); color:#fff; border-color:var(--accent); font-weight:600; }
+  button:disabled { opacity:.6; cursor:wait; }
+  .chip { font-size:13px; color:var(--accent); }
+  .answer { white-space:pre-wrap; }
+  .muted { color:var(--muted); font-size:13px; }
+  .gid { font-family:ui-monospace,Menlo,monospace; background:#eef3f0; padding:0 4px; border-radius:4px; cursor:pointer; }
+  details { border-top:1px solid var(--line); padding-top:8px; margin-top:8px; }
+  summary { cursor:pointer; color:var(--muted); font-size:13px; }
+  pre { background:#f3f4f1; padding:10px; border-radius:8px; overflow:auto; font-size:12px; max-height:320px; }
+  .error { color:#a3352b; }
+</style>
+</head>
+<body>
+<header>
+  <div><h1>Analyst assistant <span class="chip">experimental</span></h1><p>Questions in natural language, answered only from graph tools. Hypotheses for review, not conclusions of guilt.</p></div>
+  <a href="/">← Network viewer</a>
+</header>
+<main>
+  <section class="card">
+    <textarea id="q" placeholder="e.g. Who collects money from the payers of ...284100? / Why is ...284100 ranked first? / How did money get from ...175100 to ...284100?"></textarea>
+    <div class="row">
+      <button class="primary" id="ask">Ask</button>
+      <span class="muted">Examples:</span>
+      <button class="ex">Why is ...284100 ranked first?</button>
+      <button class="ex">Who collects money from the payers of ...284100?</button>
+      <button class="ex">List the top 5 coordinators and what they have in common.</button>
+    </div>
+    <p class="muted" id="status"></p>
+  </section>
+  <section class="card" id="result" hidden>
+    <div class="answer" id="answer"></div>
+    <details><summary>Tool calls (what the assistant actually looked up)</summary><div id="steps"></div></details>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+function renderAnswer(text) {
+  const box = $("answer"); box.replaceChildren();
+  const parts = String(text || "").split(/(\b\d{12,20}\b|\.\.\.\d{4,8}\b|…\d{4,8}\b)/g);
+  for (const part of parts) {
+    if (/^(\d{12,20}|\.\.\.\d{4,8}|…\d{4,8})$/.test(part)) {
+      const span = document.createElement("span"); span.className = "gid"; span.textContent = part;
+      span.title = "Click to copy, then search it in the network viewer";
+      span.onclick = () => navigator.clipboard && navigator.clipboard.writeText(part.replace(/^(\.\.\.|…)/, ""));
+      box.append(span);
+    } else box.append(document.createTextNode(part));
+  }
+}
+async function ask(question) {
+  if (!question.trim()) return;
+  $("ask").disabled = true; $("status").textContent = "Thinking… the assistant is calling graph tools.";
+  $("result").hidden = true;
+  try {
+    const res = await fetch("/api/ask", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ question }) });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || body.ok === false) throw new Error(body.error?.message || body.error || body.detail || `HTTP ${res.status}`);
+    renderAnswer(body.answer);
+    const steps = (body.trace?.steps || []).filter((s) => s.kind === "tool");
+    $("steps").replaceChildren(...(steps.length ? steps.map((s) => {
+      const pre = document.createElement("pre");
+      pre.textContent = `${s.name}(${JSON.stringify(s.input || {})})\n→ ${JSON.stringify(s.output, null, 1).slice(0, 2500)}`;
+      return pre;
+    }) : [Object.assign(document.createElement("p"), { className: "muted", textContent: "No tools were called." })]));
+    $("result").hidden = false; $("status").textContent = "";
+  } catch (err) {
+    $("status").innerHTML = ""; const e = document.createElement("span"); e.className = "error";
+    e.textContent = `Assistant unavailable: ${err.message}. The assistant needs LLM_API_KEY; the pipeline and viewer work without it.`;
+    $("status").append(e);
+  } finally { $("ask").disabled = false; }
+}
+$("ask").onclick = () => ask($("q").value);
+$("q").addEventListener("keydown", (e) => { if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) ask($("q").value); });
+document.querySelectorAll(".ex").forEach((b) => b.onclick = () => { $("q").value = b.textContent; ask(b.textContent); });
+</script>
+</body>
+</html>

@@ -113,7 +113,7 @@ calibrated probability. The node card shows failed earlier predicates through
 the matching rule. The complete scoring implementation is
 [pipeline/roles.py](pipeline/roles.py). Supplied-data counts: **29 coordinators,
 38 consolidators, 42 distributors, 67 transit, 264 terminal, 1,808 peripheral**.
-No LLM assigns roles, explains metrics or chooses rankings.
+No LLM assigns pipeline roles or rankings; viewer-card explanations are generated deterministically.
 
 ## How data caveats are handled
 
@@ -215,7 +215,7 @@ of criminal groups. Source datasets remain immutable.
 | Folder | Responsibility |
 |---|---|
 | `pipeline/` | Independent batch validation, features, rules, taint, communities, findings and exports |
-| `app/` | FastAPI, artifact-backed read-only viewer endpoints, errors and logging; retained generic agent infrastructure has no case tools |
+| `app/` | FastAPI, artifact-backed read-only viewer endpoints, errors and logging; experimental assistant with five read-only graph tools |
 | `static/` | Vanilla JavaScript Canvas, HTML and CSS; no build step or CDN |
 | `tests/` | Pipeline, findings, explainability, API and regression checks |
 | `data/raw/` | Three committed organiser Parquet inputs |
@@ -233,12 +233,12 @@ paid analysis API.
 | `APP_NAME` | `kairos`; health response label |
 | `APP_ENV` | `local` in Python, `docker` in Compose; health response label |
 | `LOG_LEVEL` | `INFO`; server logging |
-| `RATE_LIMIT_PER_MINUTE` | `0` locally; applies only to the retained generic `/api/ask` endpoint, not viewer reads |
-| `TRUST_PROXY_HEADERS` | `false` locally; caller identification for the generic endpoint |
+| `RATE_LIMIT_PER_MINUTE` | `0` locally; applies only to the experimental `/api/ask` endpoint, not viewer reads |
+| `TRUST_PROXY_HEADERS` | `false` locally; caller identification for the assistant endpoint |
 | `CLIENT_IP_HEADER` | Empty locally; `fly-client-ip` in Fly configuration |
 
-No environment setup is needed for the main scenario. The legacy agent settings
-in `.env.example` are outside this case's viewer; an AI analyst is not implemented.
+No environment setup is needed for the main scenario. The optional assistant uses the provider, model and key settings in `.env.example`;
+the pipeline and viewer remain key-free.
 
 ## Inspecting graph neighborhoods
 
@@ -256,6 +256,23 @@ clickable. Pan vertically through tall columns; omitted branches are not expande
 The hierarchy skeleton wraps wide levels into sub-rows. Overview restores the
 full layout.
 
+## Analyst assistant (experimental)
+
+A natural-language entry point at `/assistant.html` (link back to the viewer in its header). It is a foundation for
+further development, **not a finished or fully evaluated feature**; the core pipeline, roles, exports and viewer do not
+depend on it.
+
+- Five read-only tools compute and retrieve facts from the same pipeline outputs the viewer uses
+  (`app/tools/graph.py`): `get_account` (full card, accepts the last digits of a gid), `top_accounts` (optionally by role),
+  `who_collects_from` (accounts downstream of at least two given accounts), `money_paths` (directed paths up to 4 hops with
+  amounts) and `cluster_summary`. The answer view exposes the tool-call trace, including when no tool was called.
+- Requires `LLM_API_KEY` in `.env` (see `.env.example`); without a key the page says so and everything else keeps working.
+  The public demo runs without a key, so the assistant is available only locally.
+- Known limitations: answers depend on the model choosing the right tool sequence (it sometimes needs a second call after a
+  tool returns a hint); no evaluation set yet; English and Russian questions were tried manually only.
+- Tests: `tests/test_graph_tools.py` checks the tools deterministically without a key.
+
+
 ## Limitations
 
 - No ground truth; thresholds were tuned on this one dataset, not validated on
@@ -271,8 +288,8 @@ full layout.
 - The viewer and dense layout are built for this supplied graph. Very large ego
   networks need vertical pan; million-node scalability is a design direction.
 - Dependency installation and Docker builds need internet; runtime analysis does
-  not. Generic agent infrastructure is retained, but no case-aware AI assistant
-  or automatic enforcement action is shipped.
+  not. The experimental assistant needs a configured model and key;
+  no automatic enforcement action is shipped.
 
 ## Scaling to approximately one million nodes
 
@@ -286,8 +303,7 @@ The current dense force layout must be replaced before attempting that scale.
 ## Development potential
 
 Collect analyst confirmations and false positives, retune thresholds, then train
-and evaluate a supervised model only when reliable labels exist. A future AI
-assistant could query graph tools and cite their evidence. Multi-bank data could
+and evaluate a supervised model only when reliable labels exist. Evaluate the experimental assistant's tool selection and evidence citations before operational use. Multi-bank data could
 reduce missing-flow uncertainty, subject to authorized access and matching.
 These are future directions, not implemented capabilities.
 
