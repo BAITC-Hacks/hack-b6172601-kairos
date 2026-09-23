@@ -45,7 +45,7 @@ case-specific changes are reviewable in the competition commit history.
 
 OpenAI Codex was used for implementation, testing, documentation and coordination.
 Claude / Claude Code was also used for the experimental analyst assistant and
-for code generation/review recorded in the original scaffold disclosure. Human direction selected the case, constraints and thresholds; generated
+for code generation/review recorded in the original scaffold disclosure. During the event Claude (Cowork) also acted as planning assistant: case analysis, exploratory data analysis used to calibrate thresholds, the solution design and the specs in docs/specs/, manual review of the viewer, and small README/test edits. Human direction selected the case, constraints and thresholds; generated
 work was checked against executed tests and supplied data.
 
 No model is trained or used by the role assignment, scoring, findings, pipeline
