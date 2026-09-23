@@ -2,7 +2,15 @@
 
 Updated: 2026-09-23, 16:42 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
 and 05 are implemented. Spec 04 H remains documentation only; no case-aware
-LLM assistant is implemented. This task finishes before the 17:30 hard stop.
+LLM assistant is implemented. Spec 06 is now authorized, in order 0, 1 + 1b, 2, 3, with a 17:35
+Asia/Almaty hard stop (UTC+05). Root remains the only writer; optional agents
+may perform read-only verification.
+
+## Spec 06 progress
+
+- Item 0: hierarchy legend order and upward-flow hint implemented. README role
+  table follows display order while explicitly preserving actual rule precedence.
+  Spec 06 is included in this first commit. Verified: all 65 pytest tests, local smoke test and language guard pass.
 
 ## Spec 05 delivered
 
@@ -79,7 +87,7 @@ or .venv. Raw Parquet files remain unchanged.
 
 ## Next session
 
-Ready for handoff. No remaining implementation in spec 05. Keep the verified
+Spec 06 work is in progress. Keep the verified
 public instance and clean local startup working; do not start another spec
 without user direction. The temporary clean clone remains in /tmp/clean-check;
 its Docker/Python verification services have been stopped.

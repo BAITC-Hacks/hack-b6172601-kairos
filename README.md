@@ -92,7 +92,10 @@ ranking. [docs/diagram.md](docs/diagram.md) contains the same diagram.
 
 ## Role rules and thresholds
 
-**Order matters: the first matching rule wins.** This table is generated from
+**Rule precedence matters: the first matching rule wins.** Execution order is
+coordinator, consolidator, distributor, transit, terminal, peripheral. The table
+and viewer legend use hierarchy order (transit above distributor), which does
+not change rule precedence. This table is generated from
 [pipeline/config.py](pipeline/config.py) and measured export evidence. Degree
 counts distinct counterparties. Amounts are observed July totals in KZT.
 
@@ -100,8 +103,8 @@ counts distinct counterparties. Amounts are observed July totals in KZT.
 |---|---|---|---|
 | coordinator | Non-seed; receives from >= 3 consolidator candidates (in-degree >= 5); betweenness breaks score ties | >= 3 candidate payers; candidate in-degree >= 5 | Signs of coordination: receives from 4 consolidator candidates (...5100, ...3100, ...0100), 393K KZT in. |
 | consolidator | In-degree >= 5 | >= 5 payers | Signs of consolidation: receives from 5 payers (3 seeds within 2 hops), 985K KZT in, forwards 2336%. |
-| distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) | >= 10 recipients; >= 2 x max(payers, 1) | Fan-out hypothesis: sends 426K KZT to 15 recipients after receiving from 1 payers. |
 | transit | Non-seed; in/out-degree >= 1; observed out/in ratio 0.8-1.2 | 0.8-1.2 out/in | Pass-through hypothesis: forwards 100% of 90K KZT received; 44% forwarded within 2 days. |
+| distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) | >= 10 recipients; >= 2 x max(payers, 1) | Fan-out hypothesis: sends 426K KZT to 15 recipients after receiving from 1 payers. |
 | terminal | Depth <= 3; incoming > 0; zero outgoing or non-seed out/in < 0.2; in-degree >= 2 or incoming >= 300,000 KZT | depth <= 3; out/in < 0.2 or no outgoing; >= 2 payers or >= 300,000 KZT | Possible holding point: receives 110K KZT from 3 payers; observed onward flow is 15%. |
 | peripheral | Everything else; cut-off, one-off, isolated seed, or other sub-reason | Fallback after all earlier rules fail | Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account. |
 
@@ -197,6 +200,7 @@ in spreadsheets (ordinary numeric cells can lose precision).
 | `extension_requests.csv` | `gid, p_continues, taint_kzt, in_deg, in_kzt, evidence` | Cut-off accounts meeting the continuation threshold |
 | `skeleton_edges.csv` | `src, dst, sum_kzt` | Exact retained directed edges shown by the hierarchy viewer |
 | `blocking_plan.csv` | `step, gid, role, cut_share_cumulative` | Ten simulated removals with monotone cumulative cut |
+| Hierarchy legend | Coordinator, consolidator, transit, distributor, terminal, peripheral; money-flow hint | Display order follows the chain; role rules and CSV values are unchanged |
 | `graph.json` | `nodes, edges, roles_count, generated_at`; coordinates, exact IDs, role/priority explanations | Offline directed map, role/cluster colours, full/suffix search, node details and neighbors |
 
 Louvain uses an undirected projection that **sums both directional amounts**,

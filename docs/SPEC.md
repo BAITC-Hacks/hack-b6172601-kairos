@@ -74,7 +74,9 @@ by observed seed-hop level and preserves the layout while inspecting a member.
 Spec 03b item 5 adds GET /api/method with steps and ordered role rules generated
 from pipeline/config.py; the header modal displays this response.
 Spec 05 is authorized for cleanup, README/disclosure, clean-start verification
-and Fly deployment after the remote clean-clone gate. Other specs remain out of scope.
+and Fly deployment after the remote clean-clone gate. Spec 06 is authorized for
+hierarchy legend order, collision-free close inspection, layered ego networks,
+node dragging and shared-source twin findings, in that order. Other specs remain out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,
 interactive viewer, documentation and meaningful tests. Reuse FastAPI and Docker.
