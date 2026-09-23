@@ -238,3 +238,11 @@ Revisit if: never, while these clauses stand.
 - Optional second-hop accounts appear on the side with the greater summed
   amount to direct peers, with payer-side and gid tie-breaking. Tall columns
   keep readable spacing and vertical pan rather than shrinking all labels.
+
+## Viewer polish: overview bounds
+
+- Initial overview and Overview fit the largest weakly connected component,
+  computed from both edge directions. The supplied graph has 1,877 members.
+  Peripheral visibility does not change this membership; smaller components
+  retain their coordinates and remain searchable. Equal-size components choose
+  the one containing the smallest string gid; isolates participate normally.

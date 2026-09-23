@@ -51,7 +51,7 @@ Counts are validation expectations for supplied data, not hardcoded output logic
 - Real dataset is immutable. Remove synthetic seeding from the case runtime.
 
 ## Scope
-Implemented milestones: docs/specs/01_PIPELINE.md, docs/specs/03_VIEWER.md, and docs/specs/04_FINDINGS.md (A-G code, H documentation only),
+Implemented milestones: docs/specs/01_PIPELINE.md, docs/specs/03_VIEWER.md, docs/specs/03b_VIEWER_POLISH.md (items 1-8), and docs/specs/04_FINDINGS.md (A-G code, H documentation only),
 with threshold tuning in docs/specs/04b_TUNING.md, following 00_CONTEXT.md.
 Coordinators are non-seeds receiving from >=3 first-pass consolidator candidates
 (in-degree >=5); source clusters do not qualify. Scatter/gather requires >=3

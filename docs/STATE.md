@@ -1,78 +1,64 @@
 # Current handoff
 
-Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b items 4, 6, 1, 7, 8, 5 and 3 are implemented; remaining viewer polish is in progress with a
-16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
+Updated: 2026-09-23. Specs 01, 03, 03b (all eight items), assigned 04 and 04b
+are implemented. Spec 04 H is documentation only; spec 05 is not implemented.
+This task finishes before its 16:20 Asia/Almaty hard stop. No Fly changes.
 
-## Viewer polish
+## Viewer polish delivered
 
-- Item 3: ego defaults to one hop; Show 2nd hop adds actual neighbors. Columns
-  sort by observed incident amount and gid, with reciprocal peers on the payer
-  side. Peripheral neighbors remain visible in ego; amount labels sit toward
-  outer column ends. Large columns retain vertical pan. Browser verified
-  one-hop -> two-hop -> one-hop counts of 10 -> 63 -> 10 for a real account.
-  Node VM checks cover amount ordering, toggle, filtering and exit.
+- Why this role displays failed preceding rules through the match, measured
+  values and configured thresholds. The same predicates assign the role.
+- Why this priority displays all five weighted components, finding bonus,
+  seed/cut-off multipliers, normalization and payout adjustment. Both explanation
+  structures are pipeline-generated in graph.json and JSON metrics.csv columns;
+  the node API parses them and the browser does not recompute analysis.
+- Selection animates to two-hop bounds; Overview fits the largest weak component
+  (1,877 nodes). Drag/wheel/reselection cancel animation; reduced motion works.
+- Peripheral starts unchecked (440 role-bearing accounts); role/finding lists
+  discover accounts without gids. Five finding filters include 10 continuation
+  requests. Selecting a hidden peripheral account reveals it.
+- Hierarchy skeleton shows 174 nodes and exactly 446 retained edges, not the
+  472-edge induced graph. Observed seed-hop rows put seeds below; selecting a
+  member preserves the layout. Normal role filters do not hide skeleton nodes.
+- Method modal serves configured rules and six conceptual stages via /api/method.
+  Close/Escape preserves the selected account. No thresholds duplicated in JS.
+- Ego starts at one hop, with an optional second hop and amount-sorted columns.
+  Reciprocal peers occupy the payer side once; arrows preserve directions.
+  Outer-column labels and vertical pan keep large neighborhoods readable.
+- Added read-only /api/accounts, /api/skeleton and /api/method; no new dependency,
+  setting, external service, frontend build or deployment requirement.
 
-- Item 5: Method modal loads six pipeline steps and ordered rule thresholds
-  from /api/method, derived from pipeline/config.py. Endpoint remains available
-  without artifacts. Browser verified modal content, Close/Escape and selection
-  preservation. Smoke now checks method, skeleton and account-list endpoints.
+## Verification
 
-- Item 8: hierarchy skeleton shows all 174 retained nodes in seed-hop rows with
-  seeds below and the exact 446 retained edges via /api/skeleton. Role filters
-  do not hide skeleton members; selecting one preserves the hierarchy layout.
-  Browser verified row layout; API tests compare every edge with its export.
+- Full pytest -q: 71 pass, including two official-data pipeline runs and CSV
+  determinism. Existing dependency deprecation warnings remain.
+- Expanded HTTP smoke passes on http://localhost:8002. Language and diff guards
+  pass. Optional `node tests/test_viewer_layout.js` checks weak components,
+  deterministic ties, isolates, official count and camera bounds.
+- Manual browser checks: role/priority explanations, lists (29 coordinators,
+  10 extensions), hidden account selection, skeleton rows/click persistence,
+  Method content/Escape, ego toggle (10 -> 63 -> 10 accounts), and overview fit.
+  No browser console errors. Node VM checks also covered animation cancellation,
+  ego amount ordering and filter behavior.
+- Regenerated exports in 44.89 seconds. Role, top-node, cluster and blocking CSVs
+  remain byte-identical to previous output; thresholds and rankings unchanged.
+- All eight items committed and pushed separately (item 1 precedes item 7 as its
+  click-to-zoom dependency). Raw data is immutable and identifiers stay exact.
 
-- Item 7: role-name buttons and five Flagged lists show short gids, priority
-  and first finding using validated filters over cached pipeline metrics.
-  Browser verified 29 coordinators and 10 extension requests, including
-  selecting a normally hidden peripheral account and opening the correct card.
-- Full pytest -q passes after browsing/zoom integration; smoke, diff and
-  language guards pass. API tests cover all role/flag counts and ordering.
-
-- Item 1 camera animation is integrated as a prerequisite for item 7's
-  click-to-focus-and-zoom lists. All selection routes fit two-hop bounds to 80%
-  of the canvas; Overview fits back. Drag/wheel/reselection cancel the animation.
-  Reduced-motion preference is respected. Browser selection and Node VM camera
-  checks pass, including cancellation and isolated-account bounds.
-
-- Default overview hides peripheral nodes (440 visible accounts); the checkbox
-  restores them. Searching/selecting a peripheral account still reveals it.
-- Node cards show Why this role: failed preceding rules through the first match,
-  with actual measurements and thresholds from pipeline/config.py.
-- Why this priority exposes all five weighted contributions, finding bonus,
-  seed/cut-off multipliers, global normalization and payout adjustment.
-- Pipeline exports both explanations as structured graph.json values and JSON
-  columns in metrics.csv. The node API parses them; JS does not recompute scores.
-- Rule assignment uses the same predicates as the explanation trace. Unknown
-  pass-through is shown as unknown. No analysis thresholds or scores changed.
-- Regenerated official exports in 44.89 seconds. Worker verified role, top-node,
-  cluster and blocking CSVs byte-identical to earlier output.
-- Full pytest -q passes (64 tests); focused explanation/findings tests pass. Manual browser verification confirms
-  failed coordinator + matched consolidator rules and the full priority breakdown.
-- HTTP smoke passes on http://localhost:8002; language and diff guards pass.
-
-## Verified analysis results and limits
+## Analysis results and limits
 
 - 2,248 nodes, 3,119 edges, 88 clusters. Roles: coordinator 29; consolidator 38;
   distributor 42; transit 67; terminal 264; peripheral 1,808.
-- Flags: common_counterparty 24; synchronous_inflow 38; fast_pass 89;
+- Findings: common_counterparty 24; synchronous_inflow 38; fast_pass 89;
   scatter_gather 25; likely_legit_payouts 2; seed_hub 9.
-- Skeleton: 174 nodes, 446 edges. Continuation estimates for all 444 cut-off
-  nodes; 10 extension requests at the 0.5 threshold.
-- Blocking 10 accounts cuts 14.3094% of observed repeated-hop exposure, a model
-  counterfactual rather than unique currency or a real blocking action.
-- All nodes retained; raw data immutable; gids remain exact strings in browser.
-  No new dependency, setting, external enrichment or deployment change.
-- Roles/findings are hypotheses, not validated labels. Incoming flows are
-  incomplete and depth-4 outgoing flows unknown. The existing peripheral-count
-  warning and dependency deprecation warnings remain.
-- Spec 04 H remains documentation only. Docker was verified in spec 01;
-  startup/dependencies are unchanged here.
+- Continuation estimates cover 444 cut-off nodes. Blocking 10 accounts cuts
+  14.3094% of modeled repeated-hop exposure, not unique currency or real action.
+- Hypotheses are not validated labels; incoming flows are incomplete and depth-4
+  outflows unknown. Seed-hop rows are not proven organizational ranks.
+- Docker was verified in spec 01, not rebuilt here; startup/dependencies unchanged.
 
-## Next steps
+## Next session
 
-User confirmed the new addendum immediately after item 4: items 6-8 are complete;
-finish item 2. Item 1 is integrated as the item 7 zoom dependency.
-Commit and push each finished item, and working progress by 16:20.
-Do not start spec 05 automatically.
+Ready for the next assigned spec. Do not start spec 05 or deploy automatically.
+The updated viewer is served locally on port 8002; an older process on port 8001
+needs restarting to understand the new explanation columns.

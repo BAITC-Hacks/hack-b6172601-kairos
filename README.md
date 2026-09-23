@@ -1,7 +1,8 @@
 # Money Graph
 
 Offline, explainable analysis of the HackAlem AI financial transaction network.
-Implemented milestones: **spec 01 batch pipeline and spec 03 analyst viewer**.
+Implemented milestones: **spec 01 pipeline, spec 03 viewer, spec 03b viewer polish,
+and assigned spec 04 findings with spec 04b threshold tuning**.
 The offline canvas viewer supports directed exploration, exact identifier search,
 role and cluster colours, evidence cards and CSV downloads. No LLM analyst from
 other specs is implemented.
@@ -81,6 +82,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 |---|---|---|
 | Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
 | Readable default overview | Peripheral filter starts unchecked; 440 role-bearing accounts shown | Enable the filter to inspect all 2,248 accounts; selected accounts remain visible |
+| Fit the main network | Initial overview and Overview fit the largest weakly connected component (1,877 accounts) | Other components remain searchable; no nodes are removed |
 | Zoom to the selected account | Animated fit of its two-hop neighborhood to 80% of the canvas | Search, top list, canvas and neighbor links share the same selection path; Overview fits back |
 | Clean ego view | One hop by default, optional second hop, amount-sorted columns and outer edge labels | Peripheral neighbors remain visible; reciprocal directions are preserved |
 | Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
@@ -98,6 +100,8 @@ The official batch limit is five minutes; automated regression limit is also fiv
 
 ## Analyst viewer
 
+Overview fits the largest weakly connected component (1,877 accounts), keeping
+other components available by search or pan. The peripheral filter starts off.
 Search a full gid or its last digits and press Enter to focus the first match.
 Click a node or Top-30 entry to inspect its role hypothesis, priority, community,
 metrics and directed incoming/outgoing transfers. Neighbor rows navigate to that
@@ -264,7 +268,8 @@ survive, reducing incidental small payments. Skeleton membership means an endpoi
 of a retained edge. Levels are shortest forward seed-hop distances (seed = 0);
 cycles can produce same-level or backward edges, so levels are observational
 distance, not a proven organizational rank. Nonmembers have level -1.
-CSV edges and graph JSON skeleton/level fields are exported; the viewer is unchanged.
+CSV edges and graph JSON skeleton/level fields are exported and used by the
+Hierarchy skeleton view.
 
 
 The likely_legit_payouts flag requires out-degree >=10, at least half of outgoing

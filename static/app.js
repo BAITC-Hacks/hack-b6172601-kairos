@@ -61,10 +61,29 @@ function moveCamera(scale, panX, panY, animate = true) {
   }
   state.cameraFrame = requestAnimationFrame(step);
 }
+function largestComponent(nodes, incoming, outgoing) {
+  const byId = new Map(nodes.map((node) => [node.id, node])), seen = new Set();
+  let largest = [];
+  // Sorted roots make equal-size component selection deterministic, including isolates.
+  for (const root of [...byId.keys()].sort()) {
+    if (seen.has(root)) continue;
+    const component = [root]; seen.add(root);
+    for (let index = 0; index < component.length; index++) {
+      const id = component[index];
+      for (const edge of [...(incoming.get(id) || []), ...(outgoing.get(id) || [])]) {
+        const other = edge.source === id ? edge.target : edge.source;
+        if (byId.has(other) && !seen.has(other)) { seen.add(other); component.push(other); }
+      }
+    }
+    if (component.length > largest.length) largest = component;
+  }
+  return largest.map((id) => byId.get(id));
+}
 function fitOverview(animate = false) {
   if (!state.nodes.length || !state.width || !state.height) return;
-  const xs = state.nodes.map((n) => num(n.x));
-  const ys = state.nodes.map((n) => num(n.y));
+  const nodes = state.overviewNodes?.length ? state.overviewNodes : state.nodes;
+  const xs = nodes.map((n) => num(n.x));
+  const ys = nodes.map((n) => num(n.y));
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
   const scale = Math.min((state.width - 90) / Math.max(1, right - left), (state.height - 110) / Math.max(1, bottom - top));
   moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale, animate);
@@ -522,6 +541,7 @@ async function start() {
       if (!state.incoming.has(edge.target)) state.incoming.set(edge.target, []);
       state.outgoing.get(edge.source).push(edge); state.incoming.get(edge.target).push(edge);
     }
+    state.overviewNodes = largestComponent(state.nodes, state.incoming, state.outgoing);
     renderFilters(graph.roles_count || {}); renderTop(top); renderFindingFilters();
     $("graph-status").textContent = `${state.nodes.length.toLocaleString("en-US")} accounts · ${state.edges.length.toLocaleString("en-US")} directed links`;
     fitOverview();
