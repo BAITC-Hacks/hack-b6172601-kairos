@@ -10,6 +10,7 @@ import pandas as pd
 
 from pipeline.config import CONFIG
 from pipeline.continuation import extension_requests
+from pipeline.layout import remove_overlaps
 
 
 ROLE_COLUMNS = ["gid", "role", "role_score", "cluster_id", "priority_score", "evidence"]
@@ -51,7 +52,7 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
     top = metrics.sort_values(["priority_score", "gid"], ascending=[False, True]).head(CONFIG.top_count).copy()
     top.insert(0, "rank", range(1, len(top) + 1))
     top[TOP_COLUMNS].to_csv(directory / "top_nodes.csv", index=False, float_format="%.12g")
-    positions = _layout(projected)
+    positions = remove_overlaps(_layout(projected), dict(zip(metrics.gid, metrics.priority_score)))
     nodes = []
     for row in ordered.itertuples(index=False):
         x, y = positions[int(row.gid)]

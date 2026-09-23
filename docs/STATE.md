@@ -8,6 +8,11 @@ may perform read-only verification.
 
 ## Spec 06 progress
 
+- Items 1 + 1b: pipeline circle separation, fixed-size collision-safe inspection
+  layouts, priority picking, skeleton sub-rows and directional ego depths 1–4
+  implemented. Full pytest suite, official/synthetic JS geometry checks, browser
+  interaction, local smoke and language guard pass. Fly redeploy is next.
+
 - Item 0: hierarchy legend order and upward-flow hint implemented. README role
   table follows display order while explicitly preserving actual rule precedence.
   Spec 06 is included in this first commit. Verified: all 65 pytest tests, local smoke test and language guard pass.

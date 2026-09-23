@@ -200,6 +200,7 @@ in spreadsheets (ordinary numeric cells can lose precision).
 | `extension_requests.csv` | `gid, p_continues, taint_kzt, in_deg, in_kzt, evidence` | Cut-off accounts meeting the continuation threshold |
 | `skeleton_edges.csv` | `src, dst, sum_kzt` | Exact retained directed edges shown by the hierarchy viewer |
 | `blocking_plan.csv` | `step, gid, role, cut_share_cumulative` | Ten simulated removals with monotone cumulative cut |
+| Clickable graph and layered ego | Separate circles at inspection zoom; directional 1–4 hop columns, 25 accounts per column | Far-out overlap allowed; highest priority wins clicks; omitted branches are counted |
 | Hierarchy legend | Coordinator, consolidator, transit, distributor, terminal, peripheral; money-flow hint | Display order follows the chain; role rules and CSV values are unchanged |
 | `graph.json` | `nodes, edges, roles_count, generated_at`; coordinates, exact IDs, role/priority explanations | Offline directed map, role/cluster colours, full/suffix search, node details and neighbors |
 
@@ -238,6 +239,22 @@ paid analysis API.
 
 No environment setup is needed for the main scenario. The legacy agent settings
 in `.env.example` are outside this case's viewer; an AI analyst is not implemented.
+
+## Inspecting graph neighborhoods
+
+Select an account to fit its two-hop neighborhood. From that fitted zoom inward,
+circles stay separate and retain their screen size; far-out overlap is allowed.
+The highest-priority account is drawn on top and wins clicks on overlapping
+circles. Edge labels that would cover a circle are omitted.
+
+**Ego view** offers 1, 2, 3 or 4 directional hops: payers to the left,
+recipients to the right, one column per hop. Each column retains the 25 largest
+observed flows from the previous displayed column and marks omitted accounts
+with `+N more`. Shared accounts appear once (nearest displayed hop; payer side
+wins ties). Parent barycentres determine ordering, with spacing to keep circles
+clickable. Pan vertically through tall columns; omitted branches are not expanded.
+The hierarchy skeleton wraps wide levels into sub-rows. Overview restores the
+full layout.
 
 ## Limitations
 

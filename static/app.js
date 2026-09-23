@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $("graph-canvas");
 const ctx = canvas.getContext("2d");
 const roleOrder = ["coordinator", "consolidator", "transit", "distributor", "terminal", "peripheral"];
-const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoSecondHop: false, egoPositions: new Map(), skeleton: false, skeletonPositions: new Map(), skeletonRows: [], skeletonEdges: null, colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
+const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoDepth: 1, egoColumns: [], inspectionScale: 1, collisionPositions: new Map(), collisionKey: null, egoPositions: new Map(), skeleton: false, skeletonPositions: new Map(), skeletonRows: [], skeletonEdges: null, colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
 const roleColours = Object.fromEntries(roleOrder.map((role) => [role, getComputedStyle(document.documentElement).getPropertyValue(`--role-${role}`).trim()]));
 const canvasColours = Object.fromEntries(["--label-background", "--text-primary", "--node-ring", "--surface-1", "--edge-focus", "--edge-muted"].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(name).trim()]));
 const cssColour = (name) => canvasColours[name];
@@ -28,7 +28,7 @@ function percent(value) { return `${Math.round(num(value) * 100)}%`; }
 function shortId(id) { return `…${String(id).slice(-6)}`; }
 function clusterColour(value) { return `hsl(${(num(value) * 137.508) % 360}, 55%, 52%)`; }
 function nodeColour(node) { return state.colourBy === "role" ? (roleColours[node.role] || roleColours.peripheral) : clusterColour(node.cluster); }
-function nodeRadius(node) { return (3 + 9 * num(node?.priority)) * (state.skeleton ? Math.min(1, state.scale) : 1); }
+function nodeRadius(node) { return 3 + 9 * num(node?.priority); }
 function visible(node) { return state.skeleton ? !!node.skeleton : state.ego ? state.egoPositions.has(node.id) : state.visibleRoles.has(node.role) || node.id === state.selected; }
 async function getJson(url) {
   const response = await fetch(url);
@@ -96,6 +96,7 @@ function fitFocus() {
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
   // A minimum extent keeps isolated and tightly packed accounts at a useful size.
   const scale = Math.min(3, state.width * .8 / Math.max(100, right - left), state.height * .8 / Math.max(100, bottom - top));
+  state.inspectionScale = scale; state.collisionKey = null;
   moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale);
 }
 function buildSkeleton() {
@@ -110,12 +111,17 @@ function buildSkeleton() {
   if (levels.includes(-1)) { levels.splice(levels.indexOf(-1), 1); levels.unshift(-1); }
   state.skeletonPositions.clear();
   state.skeletonRows = [];
-  levels.forEach((level, row) => {
+  let y = 0;
+  for (const level of levels) {
     const nodes = groups.get(level).sort((a, b) => num(b.priority) - num(a.priority) || a.id.localeCompare(b.id));
-    const y = (row - (levels.length - 1) / 2) * 160;
     state.skeletonRows.push({level, y});
-    nodes.forEach((node, index) => state.skeletonPositions.set(node.id, {x: (index - (nodes.length - 1) / 2) * 30, y}));
-  });
+    for (let start = 0; start < nodes.length; start += 18) {
+      const row = nodes.slice(start, start + 18);
+      row.forEach((node, index) => state.skeletonPositions.set(node.id, {x: (index - (row.length - 1) / 2) * 52, y}));
+      y += 64;
+    }
+    y += 100;
+  }
 }
 function fitSkeleton() {
   const positions = [...state.skeletonPositions.values()];
@@ -123,6 +129,7 @@ function fitSkeleton() {
   const xs = positions.map((p) => p.x), ys = positions.map((p) => p.y);
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
   const scale = Math.min(1.5, (state.width - 90) / Math.max(100, right - left), (state.height - 110) / Math.max(100, bottom - top));
+  state.inspectionScale = scale; state.collisionKey = null;
   moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale, false);
 }
 function resize() {
@@ -137,10 +144,65 @@ function resize() {
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   if (!oldWidth && state.nodes.length) fitOverview(); else requestDraw();
 }
+// Highest priority owns the original position; lower priorities move to free space.
+// The spatial hash bounds neighbour checks. The final placement has no pass limit:
+// each accepted circle is checked against every nearby accepted circle.
+function separateCircles(nodes, positions, scale, verticalOnly = false) {
+  const result = new Map(), grid = new Map(), cell = 36 / scale;
+  const ordered = [...nodes].sort((a, b) => num(b.priority) - num(a.priority) || a.id.localeCompare(b.id));
+  function key(x, y) { return `${x},${y}`; }
+  function free(p, radius) {
+    const gx = Math.floor(p.x / cell), gy = Math.floor(p.y / cell);
+    for (let x = gx - 1; x <= gx + 1; x++) for (let y = gy - 1; y <= gy + 1; y++) {
+      for (const other of grid.get(key(x, y)) || []) {
+        if (Math.hypot(p.x - other.x, p.y - other.y) < radius + other.radius + 8 / scale) return false;
+      }
+    }
+    return true;
+  }
+  for (const node of ordered) {
+    const original = positions.get(node.id); if (!original) continue;
+    const radius = nodeRadius(node) / scale;
+    let p = {...original}, ring = 0;
+    while (!free(p, radius)) {
+      ring++;
+      if (verticalOnly) {
+        p = {x: original.x, y: original.y + Math.ceil(ring / 2) * cell * (ring % 2 ? 1 : -1)};
+      } else {
+        // Golden-angle spiral searches outward without favouring an axis.
+        const angle = ring * 2.399963229728653;
+        const distance = cell * Math.sqrt(ring);
+        p = {x: original.x + Math.cos(angle) * distance, y: original.y + Math.sin(angle) * distance};
+      }
+    }
+    result.set(node.id, p);
+    const k = key(Math.floor(p.x / cell), Math.floor(p.y / cell));
+    if (!grid.has(k)) grid.set(k, []);
+    grid.get(k).push({...p, radius});
+  }
+  return result;
+}
+function basePosition(node) {
+  return state.skeleton ? state.skeletonPositions.get(node.id) : state.ego ? state.egoPositions.get(node.id) : node;
+}
+function ensureCollisionPositions() {
+  const nodes = state.nodes.filter(visible);
+  const key = `${state.skeleton}:${state.ego}:${state.egoDepth}:${state.selected}:${state.inspectionScale}:${nodes.map(n => n.id).join(",")}`;
+  if (state.collisionKey === key) return;
+  state.collisionPositions = separateCircles(nodes, new Map(nodes.map(n => [n.id, basePosition(n)])), state.inspectionScale, state.ego);
+  state.collisionKey = key;
+}
 function point(node) {
-  const pos = state.skeleton ? state.skeletonPositions.get(node.id) : state.ego ? state.egoPositions.get(node.id) : node;
+  const pos = state.scale >= state.inspectionScale - 1e-9 ? state.collisionPositions.get(node.id) || basePosition(node) : basePosition(node);
   if (!pos) return null;
   return {x: state.width / 2 + state.panX + num(pos.x) * state.scale, y: state.height / 2 + state.panY + num(pos.y) * state.scale};
+}
+function labelClear(x, y, width, height) {
+  return !(state.drawCircles || []).some(circle => {
+    const dx = circle.x - Math.max(x, Math.min(circle.x, x + width));
+    const dy = circle.y - Math.max(y, Math.min(circle.y, y + height));
+    return dx * dx + dy * dy <= (circle.radius + 2) ** 2;
+  });
 }
 function requestDraw() {
   if (state.dirty) return;
@@ -164,6 +226,7 @@ function drawArrow(a, b, radius, alpha, width, colour, label, labelFraction = .5
     ctx.font = "11px system-ui";
     const x = a.x + dx * labelFraction - uy * 12, y = a.y + dy * labelFraction + ux * 12;
     const textWidth = ctx.measureText(label).width;
+    if (!labelClear(x - textWidth / 2 - 3, y - 13, textWidth + 6, 16)) return;
     ctx.fillStyle = cssColour("--label-background");
     ctx.fillRect(x - textWidth / 2 - 3, y - 13, textWidth + 6, 16);
     ctx.fillStyle = cssColour("--text-primary");
@@ -184,6 +247,7 @@ function drawNode(node, p, alpha) {
 function draw() {
   ctx.clearRect(0, 0, state.width, state.height);
   if (!state.nodes.length) return;
+  ensureCollisionPositions();
   const positions = new Map();
   for (const node of state.nodes) {
     if (!visible(node) || (state.ego && !state.egoPositions.has(node.id))) continue;
@@ -191,18 +255,19 @@ function draw() {
     if (p.x < -30 || p.x > state.width + 30 || p.y < -30 || p.y > state.height + 30) continue;
     positions.set(node.id, p);
   }
-  const focusMode = !!state.selected && !state.skeleton;
+  state.drawCircles = [...positions].map(([id, p]) => ({...p, radius: nodeRadius(state.byId.get(id))}));
+  const focusMode = !!state.selected && !state.skeleton && !state.ego;
   for (const edge of state.skeleton ? state.skeletonEdges || [] : state.edges) {
     const a = positions.get(edge.source), b = positions.get(edge.target);
     if (!a || !b) continue;
     const focused = !focusMode || (state.focus.has(edge.source) && state.focus.has(edge.target));
     if (state.ego && !focused) continue;
-    const alpha = state.skeleton ? .48 : focusMode ? (focused ? .78 : .025) : .1;
+    const alpha = state.ego ? .78 : state.skeleton ? .48 : focusMode ? (focused ? .78 : .025) : .1;
     const label = state.ego ? amount(edge.sum_kzt) : focusMode && focused && (edge.source === state.selected || edge.target === state.selected) ? amount(edge.sum_kzt) : null;
     const labelFraction = state.ego ? (Math.abs(a.x - state.width / 2 - state.panX) > Math.abs(b.x - state.width / 2 - state.panX) ? .2 : .8) : .5;
     drawArrow(a, b, nodeRadius(state.byId.get(edge.target)), alpha, (state.skeleton ? Math.min(1, state.scale) : 1) * Math.min(3.3, .5 + Math.log10(Math.max(1, num(edge.sum_kzt))) * .28), focused ? cssColour("--edge-focus") : cssColour("--edge-muted"), label, labelFraction);
   }
-  for (const node of state.nodes) {
+  for (const node of [...state.nodes].sort((a, b) => num(a.priority) - num(b.priority) || b.id.localeCompare(a.id))) {
     const p = positions.get(node.id);
     if (!p) continue;
     drawNode(node, p, focusMode && !state.focus.has(node.id) ? .12 : 1);
@@ -215,8 +280,29 @@ function draw() {
       if (y < -15 || y > state.height + 15) continue;
       const label = row.level < 0 ? "Unassigned" : row.level === 0 ? "Seeds · level 0" : `Observed seed hops · level ${row.level}`;
       const width = ctx.measureText(label).width + 12;
+      if (!labelClear(7, y - 12, width, 18)) continue;
       ctx.globalAlpha = .9; ctx.fillStyle = cssColour("--label-background"); ctx.fillRect(7, y - 12, width, 18);
       ctx.globalAlpha = 1; ctx.fillStyle = cssColour("--text-primary"); ctx.fillText(label, 13, y + 1);
+    }
+  }
+  if (state.ego) {
+    ctx.font = "11px system-ui"; ctx.textAlign = "center"; ctx.globalAlpha = 1;
+    for (const column of state.egoColumns) {
+      const positions = column.ids.map(id => point(state.byId.get(id)));
+      const x = state.width / 2 + state.panX + column.column * state.egoGap * state.scale;
+      const labels = [{text: column.label, y: Math.min(...positions.map(p => p.y)) - 30}];
+      if (column.more) labels.push({text: `+${column.more} more`, y: Math.max(...positions.map(p => p.y)) + 35});
+      for (const label of labels) {
+        const lines = label.text.split(" of ").map((line, index) => index ? `of ${line}` : line);
+        const fontSize = Math.min(11, Math.max(7, state.egoGap * state.scale / 7));
+        ctx.font = `${fontSize}px system-ui`;
+        const width = Math.max(...lines.map(line => ctx.measureText(line).width)) + 6;
+        const height = lines.length * 13 + 4, top = label.y - height + 4;
+        if (!labelClear(x - width / 2, top, width, height)) continue;
+        ctx.fillStyle = cssColour("--label-background"); ctx.fillRect(x - width / 2, top, width, height);
+        ctx.fillStyle = cssColour("--text-primary");
+        lines.forEach((line, index) => ctx.fillText(line, x, top + 12 + index * 13));
+      }
     }
   }
   ctx.globalAlpha = 1;
@@ -236,63 +322,59 @@ function buildFocus(id) {
   state.focus = seen;
 }
 function buildEgo() {
-  const selected = state.selected;
-  const sides = new Map([[selected, 0]]), directAmounts = new Map();
-  for (const edge of state.incoming.get(selected) || []) {
-    if (edge.source === selected) continue;
-    sides.set(edge.source, -1);
-    directAmounts.set(edge.source, (directAmounts.get(edge.source) || 0) + num(edge.sum_kzt));
-  }
-  for (const edge of state.outgoing.get(selected) || []) {
-    if (edge.target === selected) continue;
-    if (!sides.has(edge.target)) sides.set(edge.target, 1);
-    directAmounts.set(edge.target, (directAmounts.get(edge.target) || 0) + num(edge.sum_kzt));
-  }
-  const secondAmounts = new Map();
-  if (state.egoSecondHop) {
-    for (const [id, side] of sides) {
-      if (Math.abs(side) !== 1) continue;
-      for (const edge of [...(state.incoming.get(id) || []), ...(state.outgoing.get(id) || [])]) {
-        const other = edge.source === id ? edge.target : edge.source;
-        if (sides.has(other)) continue;
-        if (!secondAmounts.has(other)) secondAmounts.set(other, {left: 0, right: 0});
-        const totals = secondAmounts.get(other);
-        if (side < 0) totals.left += num(edge.sum_kzt); else totals.right += num(edge.sum_kzt);
+  const selected = state.selected, used = new Set([selected]);
+  state.egoPositions = new Map([[selected, {x: 0, y: 0}]]);
+  state.egoColumns = [{column: 0, ids: [selected], label: "Selected", more: 0}];
+  // Columns fit horizontally; long columns remain pannable rather than shrinking circles.
+  state.scale = Math.max(.05, Math.min(1.15, (state.width - 100) / (state.egoDepth * 480 + 100)));
+  state.egoGap = 240;
+  const spacing = 48 / state.scale;
+  const frontiers = new Map([[-1, [selected]], [1, [selected]]]);
+  for (let depth = 1; depth <= state.egoDepth; depth++) for (const direction of [-1, 1]) {
+    const candidates = new Map();
+    for (const parent of frontiers.get(direction)) {
+      const edges = (direction < 0 ? state.incoming : state.outgoing).get(parent) || [];
+      for (const edge of edges) {
+        const id = direction < 0 ? edge.source : edge.target;
+        if (used.has(id)) continue;
+        if (!candidates.has(id)) candidates.set(id, {id, amount: 0, parents: new Set()});
+        const candidate = candidates.get(id); candidate.amount += num(edge.sum_kzt); candidate.parents.add(parent);
       }
     }
-    for (const [id, totals] of secondAmounts) sides.set(id, totals.left >= totals.right ? -2 : 2);
+    const ranked = [...candidates.values()].sort((a, b) => b.amount - a.amount || a.id.localeCompare(b.id));
+    const shown = ranked.slice(0, 25);
+    for (const node of shown) node.barycentre = [...node.parents].reduce((sum, id) => sum + state.egoPositions.get(id).y, 0) / node.parents.size;
+    shown.sort((a, b) => a.barycentre - b.barycentre || b.amount - a.amount || a.id.localeCompare(b.id));
+    let previous = -Infinity;
+    const ys = shown.map(node => { previous = Math.max(node.barycentre, previous + spacing); return previous; });
+    const offset = shown.length ? ys.reduce((sum, y, i) => sum + y - shown[i].barycentre, 0) / shown.length : 0;
+    shown.forEach((node, index) => {
+      used.add(node.id); state.egoPositions.set(node.id, {x: direction * depth * state.egoGap, y: ys[index] - offset});
+    });
+    const ids = shown.map(node => node.id); frontiers.set(direction, ids);
+    if (ids.length) {
+      const noun = direction < 0 ? "Payers" : "Recipients";
+      const label = noun + (depth > 1 ? ` of ${noun.toLowerCase()}`.repeat(depth - 1) : "");
+      state.egoColumns.push({column: direction * depth, ids, label, more: ranked.length - shown.length});
+    }
   }
-  const columns = new Map([[-2, []], [-1, []], [0, []], [1, []], [2, []]]);
-  for (const [id, side] of sides) columns.get(side).push(id);
-  state.egoPositions.clear();
-  for (const [column, ids] of columns) {
-    const score = (id) => Math.abs(column) === 2 ? Math.max(secondAmounts.get(id)?.left || 0, secondAmounts.get(id)?.right || 0) : directAmounts.get(id) || 0;
-    ids.sort((a, b) => score(b) - score(a) || a.localeCompare(b));
-    ids.forEach((id, index) => state.egoPositions.set(id, {x: column * 240, y: (index - (ids.length - 1) / 2) * 52}));
-  }
-  state.scale = Math.min(1.15, Math.max(.25, (state.width - 120) / (state.egoSecondHop ? 1000 : 520)));
+  state.inspectionScale = state.scale; state.collisionKey = null;
   state.panX = 0; state.panY = 0;
 }
 function setEgo(enabled) {
   if (!state.selected) return;
   cancelCamera();
   if (enabled && state.skeleton) { state.skeleton = false; $("skeleton-view").setAttribute("aria-pressed", "false"); }
-  state.ego = enabled;
-  state.egoSecondHop = false;
+  state.ego = enabled; state.egoDepth = 1; $("ego-depth").value = "1";
   if (enabled) buildEgo(); else fitFocus();
   $("ego-view").textContent = enabled ? "Overview layout" : "Ego view";
-  $("ego-hop").hidden = !enabled; $("ego-hop").setAttribute("aria-pressed", "false"); $("ego-hop").textContent = "Show 2nd hop";
-  $("view-label").textContent = enabled ? "Ego view · direct links · money flows left → right · drag vertically to inspect" : "Two-hop focus · drag to pan · wheel to zoom";
-  updateVisibleCount();
-  requestDraw();
+  $("ego-hop").hidden = !enabled;
+  $("view-label").textContent = enabled ? "Directional ego · money flows left to right · pan to inspect" : "Two-hop focus · drag to pan · wheel to zoom";
+  updateVisibleCount(); requestDraw();
 }
-function toggleEgoHop() {
+function changeEgoDepth() {
   if (!state.ego) return;
-  state.egoSecondHop = !state.egoSecondHop;
-  buildEgo();
-  $("ego-hop").setAttribute("aria-pressed", String(state.egoSecondHop));
-  $("ego-hop").textContent = state.egoSecondHop ? "Hide 2nd hop" : "Show 2nd hop";
-  $("view-label").textContent = state.egoSecondHop ? "Ego view · two observed hops · drag vertically to inspect" : "Ego view · direct links · money flows left → right · drag vertically to inspect";
+  cancelCamera(); state.egoDepth = Number($("ego-depth").value); buildEgo();
   updateVisibleCount(); requestDraw();
 }
 async function setSkeleton() {
@@ -302,7 +384,7 @@ async function setSkeleton() {
   try {
     if (!state.skeletonEdges) state.skeletonEdges = await getJson("/api/skeleton");
     cancelCamera();
-    state.skeleton = true; state.ego = false; state.egoSecondHop = false; state.egoPositions.clear(); $("ego-hop").hidden = true;
+    state.skeleton = true; state.ego = false; state.egoDepth = 1; state.egoPositions.clear(); $("ego-hop").hidden = true;
     if (state.selected && !state.byId.get(state.selected)?.skeleton) {
       state.selected = null; state.focus.clear();
       $("node-card").replaceChildren(el("div", "empty-detail", "Select a skeleton account to inspect its observed money flow."));
@@ -319,7 +401,8 @@ async function setSkeleton() {
   } finally { button.disabled = false; }
 }
 function resetView() {
-  state.selected = null; state.focus.clear(); state.ego = false; state.egoSecondHop = false; state.egoPositions.clear(); state.skeleton = false;
+  state.inspectionScale = 1; state.collisionKey = null;
+  state.selected = null; state.focus.clear(); state.ego = false; state.egoDepth = 1; state.egoPositions.clear(); state.skeleton = false;
   $("ego-hop").hidden = true;
   $("skeleton-view").setAttribute("aria-pressed", "false");
   $("ego-view").disabled = true; $("ego-view").textContent = "Ego view";
@@ -333,7 +416,7 @@ async function selectNode(id) {
   if (!state.byId.has(id)) return;
   const inSkeleton = state.skeleton && !!state.byId.get(id).skeleton;
   if (state.skeleton && !inSkeleton) { state.skeleton = false; $("skeleton-view").setAttribute("aria-pressed", "false"); }
-  state.selected = id; state.ego = false; state.egoSecondHop = false; state.egoPositions.clear(); $("ego-hop").hidden = true; buildFocus(id);
+  state.selected = id; state.ego = false; state.egoDepth = 1; state.egoPositions.clear(); $("ego-hop").hidden = true; buildFocus(id);
   updateVisibleCount();
   $("ego-view").disabled = false; $("ego-view").textContent = "Ego view";
   $("view-label").textContent = inSkeleton ? "Hierarchy skeleton · observed seed-hop levels, seeds below · drag and wheel to inspect" : "Two-hop focus · drag to pan · wheel to zoom";
@@ -468,11 +551,12 @@ function renderTop(rows) {
   }
 }
 function hitTest(x, y) {
-  let best = null, distance = Infinity;
+  ensureCollisionPositions();
+  let best = null;
   for (const node of state.nodes) {
-    if (!visible(node) || (state.ego && !state.egoPositions.has(node.id))) continue;
-    const p = point(node), d = Math.hypot(x - p.x, y - p.y), radius = nodeRadius(node);
-    if (d <= Math.max(6, radius + 2) && d < distance) { best = node; distance = d; }
+    if (!visible(node)) continue;
+    const p = point(node), d = Math.hypot(x - p.x, y - p.y);
+    if (d <= nodeRadius(node) + 2 && (!best || num(node.priority) > num(best.priority) || (num(node.priority) === num(best.priority) && node.id < best.id))) best = node;
   }
   return best;
 }
@@ -499,7 +583,7 @@ canvas.addEventListener("wheel", (event) => {
   event.preventDefault();
   cancelCamera();
   const rect = canvas.getBoundingClientRect(), x = event.clientX - rect.left - state.width / 2, y = event.clientY - rect.top - state.height / 2;
-  const next = Math.max(.03, Math.min(15, state.scale * Math.exp(-event.deltaY * .001)));
+  const next = Math.max(.03, Math.min(40, state.scale * Math.exp(-event.deltaY * .001)));
   const factor = next / state.scale; state.panX = x - (x - state.panX) * factor; state.panY = y - (y - state.panY) * factor; state.scale = next; requestDraw();
 }, {passive: false});
 $("search-form").addEventListener("submit", async (event) => {
@@ -513,7 +597,7 @@ $("colour-role").addEventListener("click", () => setColour("role"));
 $("colour-cluster").addEventListener("click", () => setColour("cluster"));
 function setColour(value) { state.colourBy = value; $("colour-role").setAttribute("aria-pressed", value === "role"); $("colour-cluster").setAttribute("aria-pressed", value === "cluster"); requestDraw(); }
 $("ego-view").addEventListener("click", () => setEgo(!state.ego));
-$("ego-hop").addEventListener("click", toggleEgoHop);
+$("ego-depth").addEventListener("change", changeEgoDepth);
 $("skeleton-view").addEventListener("click", setSkeleton);
 $("reset-view").addEventListener("click", resetView);
 $("method-open").addEventListener("click", async () => {

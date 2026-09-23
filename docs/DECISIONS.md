@@ -263,3 +263,16 @@ Revisit if: never, while these clauses stand.
   Fly's validator caps HTTP startup grace at 60 seconds, so configure that
   supported value; Docker retains its 300-second local startup grace. No
   application secrets are required for the case scenario.
+
+## Spec 06 inspection geometry
+
+Circle radii stay at 3 + 9 * priority screen pixels. Exported coordinates use
+spatial-hash repulsion for up to 200 passes plus deterministic free-space
+placement for residual collisions. Browser inspection positions are separated
+at the fitted neighborhood scale and reused at higher zoom, so zooming inward
+cannot recreate overlap. Zooming below that threshold returns to the base layout.
+Priority-descending placement preserves important accounts first; drawing and
+picking use the same priority and gid tie-break. Ego columns use incoming-only
+and outgoing-only traversal; nearest displayed hop wins, then payer side.
+Columns cap at 25 by flow, expand only displayed parents, and pack around parent
+barycentres. Long columns remain pannable to preserve screen-size click targets.

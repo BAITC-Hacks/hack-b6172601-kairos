@@ -83,3 +83,12 @@ interactive viewer, documentation and meaningful tests. Reuse FastAPI and Docker
 Optional only after core passes: temporal indicators and an LLM analyst assistant.
 No account blocking, external notifications or law-enforcement submissions.
 No model training, auth platform, cloud dependency or broad framework rewrite.
+
+### Spec 06 graph inspection additions
+
+Graph coordinates separate radius `3 + 9 * priority` circles with at least two
+layout units of clearance at zoom 1. Browser layouts preserve non-overlap from
+selected-neighborhood fit through maximum zoom (40); far-out overlap is allowed.
+Highest-priority circles are drawn last and selected first. Ego view supports
+1–4 directional hops, unique accounts, parent-barycentre ordering and at most
+25 accounts per column, with omitted counts. Labels never cover circles.
