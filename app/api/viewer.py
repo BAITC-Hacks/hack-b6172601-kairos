@@ -11,7 +11,7 @@ from threading import RLock
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 
-from pipeline.config import CONFIG, ROLE_WEIGHTS
+from pipeline.config import CONFIG, ROLE_WEIGHTS, method_description
 
 router = APIRouter()
 DOWNLOADS = frozenset({"nodes_roles.csv", "clusters.csv", "top_nodes.csv"})
@@ -95,6 +95,12 @@ def graph():
     if isinstance(data, Response):
         return data
     return Response(data["raw"]["graph.json"], media_type="application/json")
+
+
+@router.get("/method")
+def method():
+    """Describe the pipeline and current configured role thresholds."""
+    return method_description()
 
 
 @router.get("/skeleton")

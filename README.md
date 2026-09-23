@@ -87,6 +87,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |
 | Discover accounts without a gid | Click a role name or a Flagged filter for a priority-ordered account list | Each row shows short gid, priority and first finding; click focuses and zooms |
 | Hierarchy skeleton | 174 retained accounts in observed seed-hop rows, seeds below, with 446 exported directed edges | Click keeps the hierarchy visible and opens the account card; Overview exits |
+| Explain the method | Header Method modal loads six pipeline steps and ordered rules from /api/method | Thresholds come from pipeline/config.py; works without generated artifacts |
 
 Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
 cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
@@ -128,6 +129,10 @@ Exactly one supported filter is required; invalid filters return HTTP 400.
 seeds even while their normal overview filter is off. Rows follow observed shortest
 seed-hop levels, with seeds below; they are not proven organizational ranks.
 `/api/skeleton` serves the exact retained edges from `skeleton_edges.csv`.
+
+**Method** opens the six pipeline steps and first-match role table, served from
+`pipeline/config.py` through `/api/method`. Close or Escape returns to the selected
+account without changing the graph. No role thresholds are duplicated in JS.
 
 ## Role rules
 

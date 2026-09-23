@@ -17,7 +17,7 @@ code=$(curl -s -o /dev/null -w '%{http_code}' "${BASE}/" || true)
 [ "$code" = "200" ] || fail "GET / returned ${code}"
 echo "  static UI     OK"
 
-for path in /app.js /api/graph /api/top /api/clusters /api/download/nodes_roles.csv; do
+for path in /app.js /api/graph /api/top /api/clusters /api/method /api/skeleton '/api/accounts?role=coordinator' /api/download/nodes_roles.csv; do
   code=$(curl -s -o /dev/null -w '%{http_code}' "${BASE}${path}" || true)
   [ "$code" = "200" ] || fail "GET ${path} returned ${code}"
 done

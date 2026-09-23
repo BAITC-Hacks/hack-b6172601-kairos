@@ -1,10 +1,15 @@
 # Current handoff
 
 Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b items 4, 6, 1, 7 and 8 are implemented; remaining viewer polish is in progress with a
+Spec 03b items 4, 6, 1, 7, 8 and 5 are implemented; remaining viewer polish is in progress with a
 16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
 
 ## Viewer polish
+
+- Item 5: Method modal loads six pipeline steps and ordered rule thresholds
+  from /api/method, derived from pipeline/config.py. Endpoint remains available
+  without artifacts. Browser verified modal content, Close/Escape and selection
+  preservation. Smoke now checks method, skeleton and account-list endpoints.
 
 - Item 8: hierarchy skeleton shows all 174 retained nodes in seed-hop rows with
   seeds below and the exact 446 retained edges via /api/skeleton. Role filters
@@ -61,6 +66,6 @@ Spec 03b items 4, 6, 1, 7 and 8 are implemented; remaining viewer polish is in p
 ## Next steps
 
 User confirmed the new addendum immediately after item 4: items 6-8 are complete;
-finish items 5, 3, 2. Item 1 is integrated as the item 7 zoom dependency.
+finish items 3 and 2. Item 1 is integrated as the item 7 zoom dependency.
 Commit and push each finished item, and working progress by 16:20.
 Do not start spec 05 automatically.

@@ -71,6 +71,8 @@ gid, role, priority_score and findings in priority-descending/gid-ascending orde
 Extension requests require truncated and p_continues >= the configured threshold. Spec 03b item 8 adds GET /api/skeleton for the exact retained edge list with
 string source/target identifiers and sum_kzt. The viewer groups skeleton nodes
 by observed seed-hop level and preserves the layout while inspecting a member.
+Spec 03b item 5 adds GET /api/method with steps and ordered role rules generated
+from pipeline/config.py; the header modal displays this response.
 Other specs remain out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,

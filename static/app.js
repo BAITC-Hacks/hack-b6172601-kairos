@@ -303,8 +303,9 @@ function explanationSections(node) {
   const explanation = node.priority_explanation;
   if (explanation) {
     const list = el("dl", "metrics");
+    const names = {taint: "Case-money taint", seed_sources: "Seeds within 2 hops", pagerank: "Weighted PageRank", betweenness: "Betweenness", role: "Role support weight"};
     for (const component of explanation.components) {
-      addMetric(list, `${component.name} · ${percent(component.weight)} weight`, `${num(component.value).toFixed(4)} → ${num(component.contribution).toFixed(4)}`);
+      addMetric(list, `${names[component.name] || component.name} · ${percent(component.weight)} weight`, `${num(component.value).toFixed(4)} → ${num(component.contribution).toFixed(4)}`);
     }
     addMetric(list, "Finding bonus (before multipliers)", `+${num(explanation.finding_bonus).toFixed(4)}`);
     addMetric(list, "Seed multiplier", `×${explanation.seed_multiplier}`);
@@ -460,7 +461,20 @@ function setColour(value) { state.colourBy = value; $("colour-role").setAttribut
 $("ego-view").addEventListener("click", () => setEgo(!state.ego));
 $("skeleton-view").addEventListener("click", setSkeleton);
 $("reset-view").addEventListener("click", resetView);
-document.addEventListener("keydown", (event) => { if (event.key === "Escape") resetView(); });
+$("method-open").addEventListener("click", async () => {
+  const dialog = $("method-dialog"), content = $("method-content");
+  content.replaceChildren(el("p", "subtle", "Loading method…")); dialog.showModal();
+  try {
+    const method = await getJson("/api/method"), steps = el("ol", "method-steps"), table = el("table", "method-table"), head = el("thead"), headings = el("tr"), body = el("tbody");
+    for (const step of method.steps) steps.append(el("li", "", step));
+    headings.append(el("th", "", "Role"), el("th", "", "First-matching rule")); head.append(headings);
+    for (const rule of method.rules) { const row = el("tr"); row.append(el("th", "", rule.role), el("td", "", rule.rule)); body.append(row); }
+    table.append(head, body);
+    content.replaceChildren(el("h3", "", "Pipeline steps"), steps, el("h3", "", "Role rules in precedence order"), table, el("p", "subtle", "Roles are hypotheses and priority scores are heuristic investigation signals, not probabilities of guilt. Incoming transfers are incomplete; outgoing transfers at the depth-4 boundary are unknown."));
+  } catch (error) { content.replaceChildren(el("p", "subtle", error.message)); }
+});
+$("method-close").addEventListener("click", () => $("method-dialog").close());
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !$("method-dialog").open) resetView(); });
 new ResizeObserver(resize).observe(canvas);
 
 async function start() {
