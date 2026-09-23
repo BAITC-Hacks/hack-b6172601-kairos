@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $("graph-canvas");
 const ctx = canvas.getContext("2d");
 const roleOrder = ["consolidator", "coordinator", "distributor", "transit", "terminal", "peripheral"];
-const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), colourBy: "role", visibleRoles: new Set(roleOrder), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false};
+const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false};
 const roleColours = Object.fromEntries(roleOrder.map((role) => [role, getComputedStyle(document.documentElement).getPropertyValue(`--role-${role}`).trim()]));
 const canvasColours = Object.fromEntries(["--label-background", "--text-primary", "--node-ring", "--surface-1", "--edge-focus", "--edge-muted"].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(name).trim()]));
 const cssColour = (name) => canvasColours[name];
@@ -266,7 +266,7 @@ function renderFilters(counts) {
   const parent = $("role-filters"); parent.replaceChildren();
   for (const role of roleOrder) {
     const label = el("label", "role-filter"), input = el("input"), swatch = el("span", "swatch");
-    input.type = "checkbox"; input.checked = true; input.dataset.role = role; swatch.style.background = roleColours[role];
+    input.type = "checkbox"; input.checked = state.visibleRoles.has(role); input.dataset.role = role; swatch.style.background = roleColours[role];
     input.addEventListener("change", () => { if (input.checked) state.visibleRoles.add(role); else state.visibleRoles.delete(role); updateVisibleCount(); requestDraw(); });
     label.append(input, swatch, el("span", "", role), el("span", "role-count", counts[role] || 0)); parent.append(label);
   }

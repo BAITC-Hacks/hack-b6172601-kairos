@@ -80,6 +80,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | Viewer requirement | Implementation | Check |
 |---|---|---|
 | Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
+| Readable default overview | Peripheral filter starts unchecked; 440 role-bearing accounts shown | Enable the filter to inspect all 2,248 accounts; selected accounts remain visible |
 | Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
 | Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
 | Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |

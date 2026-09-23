@@ -1,11 +1,13 @@
 # Current handoff
 
 Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b item 4 is implemented; remaining viewer polish is in progress with a
+Spec 03b items 4 and 6 are implemented; remaining viewer polish is in progress with a
 16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
 
-## Viewer polish: item 4
+## Viewer polish: items 4 and 6
 
+- Default overview hides peripheral nodes (440 visible accounts); the checkbox
+  restores them. Searching/selecting a peripheral account still reveals it.
 - Node cards show Why this role: failed preceding rules through the first match,
   with actual measurements and thresholds from pipeline/config.py.
 - Why this priority exposes all five weighted contributions, finding bonus,
@@ -40,7 +42,6 @@ Spec 03b item 4 is implemented; remaining viewer polish is in progress with a
 
 ## Next steps
 
-User confirmed the new addendum immediately after item 4: finish items 6, 7,
-and 8, then return to items 1, 5, 3, 2. Item 1 camera patch is prepared in
+User confirmed the new addendum immediately after item 4: finish items 7 and 8, then return to items 1, 5, 3, 2. Item 1 camera patch is prepared in
 /tmp/kairos-item1-camera.patch for later integration. Commit and push each finished
 item, and commit/push working progress by 16:20. Do not start spec 05 automatically.
