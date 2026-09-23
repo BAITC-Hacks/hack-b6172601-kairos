@@ -100,3 +100,19 @@ def test_payout_flag_all_conditions_and_exact_priority_discount():
     assert ranked.loc[1, "priority_score"] == baseline.loc[1, "priority_score"]
     assert len(flagged.loc[0, "evidence"]) <= 200
     assert flagged.loc[0, "evidence"].endswith("verify before escalating.")
+
+
+def test_seed_hub_requires_seed_and_preserves_priority():
+    from pipeline.findings import add_seed_hub_flag
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4], "is_seed": [True, True, False, True],
+        "in_deg": [5, 0, 10, 4], "out_deg": [0, 20, 30, 19],
+        "evidence": ["5 observed transfers."] * 4,
+        "priority_score": [.1, .2, .3, .4], "role": ["consolidator"] * 4,
+    })
+    result = add_seed_hub_flag(metrics)
+    assert result.seed_hub.tolist() == [True, True, False, False]
+    pd.testing.assert_series_equal(result.priority_score, metrics.priority_score)
+    pd.testing.assert_series_equal(result.role, metrics.role)
+    assert "above street level" in result.loc[0, "evidence"]
+    assert result.loc[2, "evidence"] == metrics.loc[2, "evidence"]

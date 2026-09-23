@@ -72,3 +72,13 @@ def add_payout_flag(metrics: pd.DataFrame, transactions: pd.DataFrame) -> pd.Dat
     result.loc[result.likely_legit_payouts, "evidence"] = result.loc[
         result.likely_legit_payouts, "evidence"].map(lambda evidence: append_evidence(evidence, suffix))
     return result
+
+
+def add_seed_hub_flag(metrics: pd.DataFrame) -> pd.DataFrame:
+    result = metrics.copy()
+    result["seed_hub"] = result.is_seed & (
+        result.in_deg.ge(CONFIG.seed_hub_min_in) | result.out_deg.ge(CONFIG.seed_hub_min_out))
+    suffix = "Known seed acting as a hub — case may reach above street level."
+    result.loc[result.seed_hub, "evidence"] = result.loc[result.seed_hub, "evidence"].map(
+        lambda evidence: append_evidence(evidence, suffix))
+    return result

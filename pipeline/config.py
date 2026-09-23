@@ -45,6 +45,8 @@ class PipelineConfig:
     payout_max_cv: float = 0.5
     payout_max_taint_share: float = 0.2
     payout_priority_multiplier: float = 0.5
+    seed_hub_min_in: int = 5
+    seed_hub_min_out: int = 20
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7

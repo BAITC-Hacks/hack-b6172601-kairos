@@ -8,7 +8,7 @@ from pipeline.clusters import add_clusters, assign_clusters
 from pipeline.export import write_outputs
 from pipeline.continuation import add_continuation
 from pipeline.features import compute_features
-from pipeline.findings import add_findings, add_payout_flag, FINDING_TEXT
+from pipeline.findings import add_findings, add_payout_flag, add_seed_hub_flag, FINDING_TEXT
 from pipeline.load import load_data
 from pipeline.priority import add_priority
 from pipeline.roles import add_roles
@@ -25,6 +25,7 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     metrics = add_roles(metrics, edges)
     metrics = add_findings(metrics, transactions, graph)
     metrics = add_payout_flag(metrics, transactions)
+    metrics = add_seed_hub_flag(metrics)
     metrics = add_continuation(metrics)
     metrics = add_priority(metrics)
     metrics, clusters, projected = add_clusters(metrics, edges, graph)
@@ -38,7 +39,7 @@ def run(data: str = "data/raw", out: str = "out") -> None:
         print(f"{role}: {count}")
         if count == 0 or count > 500:
             print(f"Warning: {role} count is outside the expected range")
-    for flag in (*FINDING_TEXT, "likely_legit_payouts"):
+    for flag in (*FINDING_TEXT, "likely_legit_payouts", "seed_hub"):
         print(f"{flag}: {int(metrics[flag].sum())}")
     print(f"Analyzed {len(nodes)} nodes, {len(edges)} edges and {len(clusters)} clusters in {time.monotonic() - started:.2f}s")
 

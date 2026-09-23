@@ -20,9 +20,13 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
   boolean membership / shortest seed-hop levels in metrics and graph JSON.
 - B: payout-pattern flag requires all four thresholds and halves normalized
   priority without changing roles; full caution suffix fits the evidence limit.
+- C: seed-hub flag and full evidence suffix; no role or priority changes.
+  Coordinator evidence now accurately names first-pass consolidator candidates.
 - Existing user edit to 00_CONTEXT.md is included with A.
 
 ## Verification
+
+- Section C: full pytest -q passes (56 tests); smoke, language and diff checks pass.
 
 - Section B: full pytest -q passes (55 tests); smoke, language and diff checks pass.
   Repeatability rerun passes after freezing a mid-test punctuation edit.
@@ -40,6 +44,6 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
 
 ## Next
 
-Implement C, F in order. Test, update this file, commit and push each
+Implement F in order. Test, update this file, commit and push each
 section. Add H documentation only. End with make pipeline and report computed
 role counts, flag counts and blocking summary.

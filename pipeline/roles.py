@@ -42,7 +42,7 @@ def add_roles(metrics: pd.DataFrame, edges: pd.DataFrame) -> pd.DataFrame:
             score = min(0.99, 0.5 + 0.1 * (support - 1)) + 0.01 * betweenness_pct[index]
             if row.consolidator_payers >= CONFIG.coordinator_min_consolidators:
                 suffixes = ", ".join("..." + str(gid)[-4:] for gid in collectors[row.gid][:3])
-                source = f"{row.consolidator_payers} consolidators ({suffixes})"
+                source = f"{row.consolidator_payers} consolidator candidates ({suffixes})"
             else:
                 source = f"{row.source_clusters} source clusters via {row.in_deg} payers"
             explanation = f"Signs of coordination: receives from {source}, {_amount(row.in_kzt)} KZT in."
