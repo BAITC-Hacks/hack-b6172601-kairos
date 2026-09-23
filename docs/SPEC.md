@@ -51,9 +51,12 @@ Counts are validation expectations for supplied data, not hardcoded output logic
 - Real dataset is immutable. Remove synthetic seeding from the case runtime.
 
 ## Scope
-Current milestone: only docs/specs/01_PIPELINE.md, following 00_CONTEXT.md.
-It defines the implemented analysis contract, including metrics.csv and graph.json
-in addition to the three required case CSVs. The viewer remains future work.
+Implemented milestones: docs/specs/01_PIPELINE.md and docs/specs/03_VIEWER.md,
+following 00_CONTEXT.md. The pipeline produces metrics.csv and graph.json
+in addition to the three required case CSVs. The read-only viewer serves these
+artifacts through the six endpoints specified in 03_VIEWER.md, preserving exact
+string identifiers, and provides offline canvas exploration. Other specs remain
+out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,
 interactive viewer, documentation and meaningful tests. Reuse FastAPI and Docker.

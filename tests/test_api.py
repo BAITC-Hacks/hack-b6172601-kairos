@@ -30,4 +30,5 @@ def test_empty_question_is_rejected():
 def test_static_index_is_served():
     response = client.get("/")
     assert response.status_code == 200
-    assert "Kairos" in response.text
+    assert "Money Graph" in response.text
+    assert 'id="graph-canvas"' in response.text

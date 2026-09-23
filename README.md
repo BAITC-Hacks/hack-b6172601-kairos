@@ -1,9 +1,10 @@
 # Money Graph
 
 Offline, explainable analysis of the HackAlem AI financial transaction network.
-This milestone implements **spec 01: the batch pipeline only**. The graph JSON is
-ready for a later viewer; the existing web page is still the scaffold. No viewer,
-case-specific HTTP API or LLM assistant from other specs is implemented here.
+Implemented milestones: **spec 01 batch pipeline and spec 03 analyst viewer**.
+The offline canvas viewer supports directed exploration, exact identifier search,
+role and cluster colours, evidence cards and CSV downloads. No LLM analyst from
+other specs is implemented.
 
 ## Setup and run
 
@@ -14,6 +15,7 @@ make install
 make pipeline
 source .venv/bin/activate
 pytest -q
+make run
 ```
 
 Equivalent pipeline command:
@@ -36,10 +38,12 @@ Docker (only Docker required on the host):
 docker compose up --build
 ```
 
-The container computes all outputs before starting the retained FastAPI scaffold
+Open http://localhost:8000 after `make run`.
+
+The container computes all outputs before starting FastAPI
 when outputs are absent/incomplete. The image excludes local `out/` and `.env`,
 so a clean image computes results from the supplied raw data. `/api/health`,
-`/api/tools` and the scaffold page remain available at localhost:8000. Old example
+`/api/tools` and the analyst viewer are available at localhost:8000. Old example
 account tools have been removed. No new deployment is part of this milestone.
 
 ## Architecture
@@ -51,6 +55,8 @@ flowchart LR
   C --> D[Rules and Louvain communities]
   D --> E[Priority and numeric explanations]
   E --> F[Four CSV files and graph JSON]
+  F --> G[Read-only FastAPI viewer API]
+  G --> H[Offline canvas and node evidence]
 ```
 
 The Python package `pipeline/` is independent of the web application. All input
@@ -66,13 +72,35 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
 | `out/metrics.csv` | All calculated features and peripheral sub-reason | Numerical basis for explanations |
-| `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | Data artifact only; interactive viewer pending |
+| `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
+
+| Viewer requirement | Implementation | Check |
+|---|---|---|
+| Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
+| Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
+| Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
 
 Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
 cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
 `generated_at` in graph JSON is intentionally the current generation timestamp;
 CSV content is deterministic. Pipeline logs report role counts and elapsed time.
 The official batch limit is five minutes; automated regression limit is 60 seconds.
+
+## Analyst viewer
+
+Search a full gid or its last digits and press Enter to focus the first match.
+Click a node or Top-30 entry to inspect its role hypothesis, priority, community,
+metrics and directed incoming/outgoing transfers. Neighbor rows navigate to that
+account. Focus highlights two hops; **Ego view** puts payers left and recipients
+right. Escape returns to overview. Drag to pan and use the wheel to zoom.
+Seeds have black rings; hollow nodes mark the depth-4 observation cutoff.
+
+The API serves `/api/graph`, `/api/node/{gid}`, `/api/search?q=...`, `/api/top`,
+`/api/clusters` and `/api/download/{name}`. Downloads allow only `nodes_roles.csv`,
+`clusters.csv` and `top_nodes.csv`. IDs are strings throughout. Artifacts load at
+startup and refresh when file modification times change. Missing or incomplete
+artifacts return HTTP 503 with the message "Run `make pipeline` first".
+The existing `/api/ask` endpoint retains its original configuration requirements.
 
 ## Role rules
 
@@ -139,7 +167,10 @@ private fallback is covered by the pinned NetworkX version and end-to-end tests.
 - High outflow/inflow alone is not evidence of wrongdoing. No identities, missing
   transactions or customer attributes are inferred from external sources.
 - No ground-truth roles exist. The thresholds and ranking are transparent hypotheses.
-- Interactive graph, analyst chat and case APIs are later work, not claimed complete.
+- Analyst chat and other unassigned specs are not implemented. The retained ask
+  endpoint has no case-analysis tools.
+- Dense ego neighborhoods can overlap; pan/zoom and neighbor tables help inspection.
+  The full canvas is designed for this dataset, not a million-node browser view.
 
 ## Scale to one million nodes
 
@@ -152,10 +183,11 @@ Measure any alternative clustering method before changing the interpretation.
 ## Verification and provenance
 
 `bash scripts/verify_all.sh --no-docker` checks the pipeline, tests, language,
-clean-copy behavior and HTTP scaffold. The full command additionally builds and
+clean-copy behavior and HTTP service. The full command additionally builds and
 starts Docker, checks generated artifacts and secret exclusion, and rejects missing
 raw data. These checks make no external LLM calls.
 
 See `DISCLOSURE.md` for the pre-built scaffold. Official task/context and the
-implemented specification are `docs/specs/00_CONTEXT.md` and `01_PIPELINE.md`.
+implemented specifications are `docs/specs/00_CONTEXT.md`, `01_PIPELINE.md` and
+`03_VIEWER.md`.
 The next session should read `docs/STATE.md` for verified status and scope boundaries.

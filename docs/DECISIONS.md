@@ -27,6 +27,17 @@ This section supersedes conflicting pre-competition decisions below.
 - Lock dependencies against both Python 3.11 (Docker) and local Python 3.14;
   initial local-only NumPy/NetworkX pins did not resolve in the image.
 
+## Viewer implementation clarifications (spec 03)
+
+- Ambiguous substring search matches sort by descending priority then gid, so
+  the top-1 account is first even when its last six digits match other accounts.
+- Ego layout assigns direct neighbors before second-hop nodes and keeps horizontal
+  spacing readable; large columns use vertical pan rather than shrinking the whole
+  graph. Reciprocal neighbors share one position (payer side takes precedence),
+  with arrows preserving both directions and amount labels on opposite sides.
+- Read-only APIs cache artifact bytes and indexed rows; file mtimes/sizes trigger
+  reload. No new storage, settings, dependencies or writes through the API.
+
 ## Historical scaffold rationale (context only)
 
 # Decisions
