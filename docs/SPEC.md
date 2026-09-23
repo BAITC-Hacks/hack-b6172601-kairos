@@ -68,8 +68,10 @@ score) to graph nodes and JSON-valued metrics.csv columns. Node details expose
 these as structured JSON; the browser only displays them. Spec 03b item 7 adds
 GET /api/accounts with exactly one validated role or flag filter, returning
 gid, role, priority_score and findings in priority-descending/gid-ascending order.
-Extension requests require truncated and p_continues >= the configured threshold. Other specs remain
-out of scope.
+Extension requests require truncated and p_continues >= the configured threshold. Spec 03b item 8 adds GET /api/skeleton for the exact retained edge list with
+string source/target identifiers and sum_kzt. The viewer groups skeleton nodes
+by observed seed-hop level and preserves the layout while inspecting a member.
+Other specs remain out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,
 interactive viewer, documentation and meaningful tests. Reuse FastAPI and Docker.

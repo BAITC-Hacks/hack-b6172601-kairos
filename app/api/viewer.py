@@ -97,6 +97,17 @@ def graph():
     return Response(data["raw"]["graph.json"], media_type="application/json")
 
 
+@router.get("/skeleton")
+def skeleton():
+    """Serve retained hierarchy edges, preserving identifiers as strings."""
+    try:
+        with (store.directory / "skeleton_edges.csv").open(newline="", encoding="utf-8") as handle:
+            return [{"source": row["src"], "target": row["dst"], "sum_kzt": float(row["sum_kzt"])}
+                    for row in csv.DictReader(handle)]
+    except (OSError, ValueError, KeyError, TypeError):
+        return JSONResponse(status_code=503, content={"error": "Run `make pipeline` first"})
+
+
 @router.get("/node/{gid}")
 def node(gid: str):
     data = snapshot()

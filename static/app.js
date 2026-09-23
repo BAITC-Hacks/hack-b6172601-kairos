@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $("graph-canvas");
 const ctx = canvas.getContext("2d");
 const roleOrder = ["consolidator", "coordinator", "distributor", "transit", "terminal", "peripheral"];
-const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
+const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), skeleton: false, skeletonPositions: new Map(), skeletonRows: [], skeletonEdges: null, colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
 const roleColours = Object.fromEntries(roleOrder.map((role) => [role, getComputedStyle(document.documentElement).getPropertyValue(`--role-${role}`).trim()]));
 const canvasColours = Object.fromEntries(["--label-background", "--text-primary", "--node-ring", "--surface-1", "--edge-focus", "--edge-muted"].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(name).trim()]));
 const cssColour = (name) => canvasColours[name];
@@ -28,7 +28,8 @@ function percent(value) { return `${Math.round(num(value) * 100)}%`; }
 function shortId(id) { return `…${String(id).slice(-6)}`; }
 function clusterColour(value) { return `hsl(${(num(value) * 137.508) % 360}, 55%, 52%)`; }
 function nodeColour(node) { return state.colourBy === "role" ? (roleColours[node.role] || roleColours.peripheral) : clusterColour(node.cluster); }
-function visible(node) { return state.visibleRoles.has(node.role) || node.id === state.selected; }
+function nodeRadius(node) { return (3 + 9 * num(node?.priority)) * (state.skeleton ? Math.min(1, state.scale) : 1); }
+function visible(node) { return state.skeleton ? !!node.skeleton : state.visibleRoles.has(node.role) || node.id === state.selected; }
 async function getJson(url) {
   const response = await fetch(url);
   let data;
@@ -78,6 +79,33 @@ function fitFocus() {
   const scale = Math.min(3, state.width * .8 / Math.max(100, right - left), state.height * .8 / Math.max(100, bottom - top));
   moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale);
 }
+function buildSkeleton() {
+  const groups = new Map();
+  for (const node of state.nodes) {
+    if (!node.skeleton) continue;
+    const level = Number.isInteger(Number(node.level)) && Number(node.level) >= 0 ? Number(node.level) : -1;
+    if (!groups.has(level)) groups.set(level, []);
+    groups.get(level).push(node);
+  }
+  const levels = [...groups.keys()].sort((a, b) => b - a);
+  if (levels.includes(-1)) { levels.splice(levels.indexOf(-1), 1); levels.unshift(-1); }
+  state.skeletonPositions.clear();
+  state.skeletonRows = [];
+  levels.forEach((level, row) => {
+    const nodes = groups.get(level).sort((a, b) => num(b.priority) - num(a.priority) || a.id.localeCompare(b.id));
+    const y = (row - (levels.length - 1) / 2) * 160;
+    state.skeletonRows.push({level, y});
+    nodes.forEach((node, index) => state.skeletonPositions.set(node.id, {x: (index - (nodes.length - 1) / 2) * 30, y}));
+  });
+}
+function fitSkeleton() {
+  const positions = [...state.skeletonPositions.values()];
+  if (!positions.length || !state.width || !state.height) return;
+  const xs = positions.map((p) => p.x), ys = positions.map((p) => p.y);
+  const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
+  const scale = Math.min(1.5, (state.width - 90) / Math.max(100, right - left), (state.height - 110) / Math.max(100, bottom - top));
+  moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale, false);
+}
 function resize() {
   cancelCamera();
   const rect = canvas.getBoundingClientRect();
@@ -91,7 +119,7 @@ function resize() {
   if (!oldWidth && state.nodes.length) fitOverview(); else requestDraw();
 }
 function point(node) {
-  const pos = state.ego ? state.egoPositions.get(node.id) : node;
+  const pos = state.skeleton ? state.skeletonPositions.get(node.id) : state.ego ? state.egoPositions.get(node.id) : node;
   if (!pos) return null;
   return {x: state.width / 2 + state.panX + num(pos.x) * state.scale, y: state.height / 2 + state.panY + num(pos.y) * state.scale};
 }
@@ -125,7 +153,7 @@ function drawArrow(a, b, radius, alpha, width, colour, label) {
   }
 }
 function drawNode(node, p, alpha) {
-  const radius = 3 + 9 * num(node.priority);
+  const radius = nodeRadius(node);
   ctx.globalAlpha = alpha;
   ctx.lineWidth = node.id === state.selected ? 3 : node.seed ? 2 : 1;
   ctx.strokeStyle = node.id === state.selected ? cssColour("--text-primary") : node.seed ? cssColour("--node-ring") : nodeColour(node);
@@ -144,19 +172,31 @@ function draw() {
     if (p.x < -30 || p.x > state.width + 30 || p.y < -30 || p.y > state.height + 30) continue;
     positions.set(node.id, p);
   }
-  const focusMode = !!state.selected;
-  for (const edge of state.edges) {
+  const focusMode = !!state.selected && !state.skeleton;
+  for (const edge of state.skeleton ? state.skeletonEdges || [] : state.edges) {
     const a = positions.get(edge.source), b = positions.get(edge.target);
     if (!a || !b) continue;
     const focused = !focusMode || (state.focus.has(edge.source) && state.focus.has(edge.target));
     if (state.ego && !focused) continue;
-    const alpha = focusMode ? (focused ? .78 : .025) : .1;
-    drawArrow(a, b, 3 + 9 * num(state.byId.get(edge.target)?.priority), alpha, Math.min(3.3, .5 + Math.log10(Math.max(1, num(edge.sum_kzt))) * .28), focused ? cssColour("--edge-focus") : cssColour("--edge-muted"), focusMode && focused && (edge.source === state.selected || edge.target === state.selected) ? amount(edge.sum_kzt) : null);
+    const alpha = state.skeleton ? .48 : focusMode ? (focused ? .78 : .025) : .1;
+    drawArrow(a, b, nodeRadius(state.byId.get(edge.target)), alpha, (state.skeleton ? Math.min(1, state.scale) : 1) * Math.min(3.3, .5 + Math.log10(Math.max(1, num(edge.sum_kzt))) * .28), focused ? cssColour("--edge-focus") : cssColour("--edge-muted"), focusMode && focused && (edge.source === state.selected || edge.target === state.selected) ? amount(edge.sum_kzt) : null);
   }
   for (const node of state.nodes) {
     const p = positions.get(node.id);
     if (!p) continue;
     drawNode(node, p, focusMode && !state.focus.has(node.id) ? .12 : 1);
+  }
+  if (state.skeleton) {
+    ctx.font = "11px system-ui";
+    ctx.textAlign = "left";
+    for (const row of state.skeletonRows) {
+      const y = state.height / 2 + state.panY + row.y * state.scale - 17;
+      if (y < -15 || y > state.height + 15) continue;
+      const label = row.level < 0 ? "Unassigned" : row.level === 0 ? "Seeds · level 0" : `Observed seed hops · level ${row.level}`;
+      const width = ctx.measureText(label).width + 12;
+      ctx.globalAlpha = .9; ctx.fillStyle = cssColour("--label-background"); ctx.fillRect(7, y - 12, width, 18);
+      ctx.globalAlpha = 1; ctx.fillStyle = cssColour("--text-primary"); ctx.fillText(label, 13, y + 1);
+    }
   }
   ctx.globalAlpha = 1;
 }
@@ -195,14 +235,39 @@ function buildEgo() {
 function setEgo(enabled) {
   if (!state.selected) return;
   cancelCamera();
+  if (enabled && state.skeleton) { state.skeleton = false; $("skeleton-view").setAttribute("aria-pressed", "false"); }
   state.ego = enabled;
   if (enabled) buildEgo(); else fitFocus();
   $("ego-view").textContent = enabled ? "Overview layout" : "Ego view";
   $("view-label").textContent = enabled ? "Ego view · money flows left → right · Esc for overview" : "Two-hop focus · drag to pan · wheel to zoom";
   requestDraw();
 }
+async function setSkeleton() {
+  if (state.skeleton) { resetView(); return; }
+  const button = $("skeleton-view");
+  button.disabled = true;
+  try {
+    if (!state.skeletonEdges) state.skeletonEdges = await getJson("/api/skeleton");
+    cancelCamera();
+    state.skeleton = true; state.ego = false; state.egoPositions.clear();
+    if (state.selected && !state.byId.get(state.selected)?.skeleton) {
+      state.selected = null; state.focus.clear();
+      $("node-card").replaceChildren(el("div", "empty-detail", "Select a skeleton account to inspect its observed money flow."));
+      document.querySelectorAll(".top-list button").forEach((item) => item.classList.remove("active"));
+    }
+    buildSkeleton(); fitSkeleton(); updateVisibleCount();
+    button.setAttribute("aria-pressed", "true");
+    $("ego-view").disabled = !state.selected;
+    $("ego-view").textContent = "Ego view";
+    $("view-label").textContent = "Hierarchy skeleton · observed seed-hop levels, seeds below · drag and wheel to inspect";
+    requestDraw();
+  } catch (error) {
+    $("view-label").textContent = `Hierarchy skeleton unavailable: ${error.message}`;
+  } finally { button.disabled = false; }
+}
 function resetView() {
-  state.selected = null; state.focus.clear(); state.ego = false; state.egoPositions.clear();
+  state.selected = null; state.focus.clear(); state.ego = false; state.egoPositions.clear(); state.skeleton = false;
+  $("skeleton-view").setAttribute("aria-pressed", "false");
   $("ego-view").disabled = true; $("ego-view").textContent = "Ego view";
   $("view-label").textContent = "Overview · drag to pan · wheel to zoom · click a node";
   $("node-card").replaceChildren(el("div", "empty-detail", "Select an account to inspect its role and money flow."));
@@ -212,11 +277,13 @@ function resetView() {
 }
 async function selectNode(id) {
   if (!state.byId.has(id)) return;
+  const inSkeleton = state.skeleton && !!state.byId.get(id).skeleton;
+  if (state.skeleton && !inSkeleton) { state.skeleton = false; $("skeleton-view").setAttribute("aria-pressed", "false"); }
   state.selected = id; state.ego = false; state.egoPositions.clear(); buildFocus(id);
   updateVisibleCount();
   $("ego-view").disabled = false; $("ego-view").textContent = "Ego view";
-  $("view-label").textContent = "Two-hop focus · drag to pan · wheel to zoom";
-  fitFocus();
+  $("view-label").textContent = inSkeleton ? "Hierarchy skeleton · observed seed-hop levels, seeds below · drag and wheel to inspect" : "Two-hop focus · drag to pan · wheel to zoom";
+  if (!inSkeleton) fitFocus();
   document.querySelectorAll(".top-list button").forEach((button) => button.classList.toggle("active", button.dataset.gid === id));
   requestDraw();
   $("node-card").replaceChildren(el("p", "subtle", "Loading account…"));
@@ -349,7 +416,7 @@ function hitTest(x, y) {
   let best = null, distance = Infinity;
   for (const node of state.nodes) {
     if (!visible(node) || (state.ego && !state.egoPositions.has(node.id))) continue;
-    const p = point(node), d = Math.hypot(x - p.x, y - p.y), radius = 3 + 9 * num(node.priority);
+    const p = point(node), d = Math.hypot(x - p.x, y - p.y), radius = nodeRadius(node);
     if (d <= Math.max(6, radius + 2) && d < distance) { best = node; distance = d; }
   }
   return best;
@@ -391,6 +458,7 @@ $("colour-role").addEventListener("click", () => setColour("role"));
 $("colour-cluster").addEventListener("click", () => setColour("cluster"));
 function setColour(value) { state.colourBy = value; $("colour-role").setAttribute("aria-pressed", value === "role"); $("colour-cluster").setAttribute("aria-pressed", value === "cluster"); requestDraw(); }
 $("ego-view").addEventListener("click", () => setEgo(!state.ego));
+$("skeleton-view").addEventListener("click", setSkeleton);
 $("reset-view").addEventListener("click", resetView);
 document.addEventListener("keydown", (event) => { if (event.key === "Escape") resetView(); });
 new ResizeObserver(resize).observe(canvas);

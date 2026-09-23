@@ -219,3 +219,12 @@ Revisit if: never, while these clauses stand.
   the 100,000 KZT fallback is unnecessary. Amounts are aggregate edge totals.
 - These thresholds are tuned on the supplied graph for reviewable hypotheses,
   not validated against role labels. Revisit with labelled analyst feedback.
+
+## Viewer polish: retained hierarchy
+
+- Skeleton view uses the 446 exported retained edges, not all 472 observed edges
+  induced by its 174 nodes. This preserves the pipeline's pruning semantics.
+- Rows use existing shortest seed-hop levels (seeds below). Role hypotheses do
+  not override measured levels; rows do not establish organizational authority.
+- Skeleton view shows every retained node, including peripheral seeds, independent
+  of the normal overview filters. Clicking a member preserves this layout.
