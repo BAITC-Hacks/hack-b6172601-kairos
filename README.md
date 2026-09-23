@@ -1,305 +1,282 @@
 # Money Graph
 
-Offline, explainable analysis of the HackAlem AI financial transaction network.
-Implemented milestones: **spec 01 pipeline, spec 03 viewer, spec 03b viewer polish,
-and assigned spec 04 findings with spec 04b threshold tuning**.
-The offline canvas viewer supports directed exploration, exact identifier search,
-role and cluster colours, evidence cards and CSV downloads. No LLM analyst from
-other specs is implemented.
+Which of the **2,248 accounts** should an analyst review first, and why?
+Money Graph turns the organiser's transaction graph into reproducible role hypotheses,
+ranked evidence and a directed viewer. These are investigation leads, never findings of guilt.
 
-## Setup and run
+## Quick start
 
-Python 3.11+:
-
-```bash
-make install
-make pipeline
-source .venv/bin/activate
-pytest -q
-make run
-```
-
-Equivalent pipeline command:
-
-```bash
-python -m pipeline.run --data data/raw --out out
-```
-
-The pipeline works offline after dependency installation. It needs no API key,
-external account, GPU or paid service. The three official Parquet files in
-`data/raw/` are immutable inputs. Missing/inconsistent data fails explicitly;
-there is no synthetic replacement. Exact tested versions are in
-`requirements.lock.txt`; allowed ranges are in `requirements.txt`.
-Aggregated amounts are compared with an absolute tolerance of 0.000001 KZT
-to accommodate binary floating-point summation; transaction counts match exactly.
-
-Docker (only Docker required on the host):
+From the repository root, with Docker Engine and Compose available:
 
 ```bash
 docker compose up --build
 ```
 
-Open http://localhost:8000 after `make run`.
+Open [localhost:8000](http://localhost:8000) after the pipeline finishes and the
+server starts. Keep port 8000 free; run Docker or Python, not both at once.
+The image installs locked dependencies and computes outputs from official inputs.
+No `.env`, API key, personal account or GPU is required. Building/installing needs
+internet access; analysis and the viewer work offline afterward, with no CDN.
 
-The container computes all outputs before starting FastAPI
-when outputs are absent/incomplete. The image excludes local `out/` and `.env`,
-so a clean image computes results from the supplied raw data. `/api/health`,
-`/api/tools` and the analyst viewer are available at localhost:8000. No synthetic-data generator or example-data accessor remains.
-No new deployment is part of this milestone.
+Alternatively, with Python 3.11+ and Make installed:
 
-## Architecture
-
-```mermaid
-flowchart LR
-  A[Three raw Parquet files] --> B[Validation and directed graph]
-  B --> C[Metrics and haircut taint]
-  C --> D[Rules and Louvain communities]
-  D --> E[Priority and numeric explanations]
-  E --> F[Four CSV files and graph JSON]
-  F --> G[Read-only FastAPI viewer API]
-  G --> H[Offline canvas and node evidence]
+```bash
+make install && make pipeline && make run
 ```
 
-The Python package `pipeline/` is independent of the web application. All input
-nodes are inserted before edges, including isolated seeds. Identifiers stay
-int64 for computations and exact decimal strings in graph JSON, because browser
-JavaScript cannot safely represent these approximately 1e17 integers as numbers.
+The virtual environment is selected automatically. Stop the foreground server
+with Ctrl+C. The measured local pipeline runtime is **45.79 seconds** for
+2,248 nodes, 3,119 directed edges and 4,840 transactions (including layout and
+counterfactual analysis). Hardware affects runtime; the acceptance limit is five
+minutes. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
+allowed ranges: [requirements.txt](requirements.txt).
+
+## How to verify the main scenario
+
+Five steps, about five minutes once dependencies are installed:
+
+1. **Run the computation.** The Docker quick start runs it at first container
+   startup. For the Python path, `make pipeline` regenerates all outputs. Watch
+   the elapsed-time and role-count log; this is a live computation from Parquet.
+2. **Count the three required CSVs.** With Docker running:
+
+   ```bash
+   docker compose exec -T app python -c 'import csv; print({f: sum(1 for _ in csv.DictReader(open("out/"+f+".csv"))) for f in ("nodes_roles", "clusters", "top_nodes")})'
+   ```
+
+   Expected: `nodes_roles: 2248`, `clusters: 88`, `top_nodes: 30` (at least 20).
+   With Python, the same check is:
+
+   ```bash
+   .venv/bin/python -c 'import csv; print({f: sum(1 for _ in csv.DictReader(open("out/"+f+".csv"))) for f in ("nodes_roles", "clusters", "top_nodes")})'
+   ```
+
+3. **Open the viewer** at [localhost:8000](http://localhost:8000). The Top 30
+   priorities list and directed map load. Peripheral accounts start hidden;
+   all accounts remain searchable. Download the three CSVs from **Exports**.
+4. **Find the top account.** Click the first **Top 30 priorities** entry, copy the
+   last six digits of its full gid from the node card, paste them into **Find an
+   account**, and click **Find**. Search orders matches by priority then gid, so
+   the top account is first even if that suffix is shared.
+5. **Explain 2-3 accounts.** Click **Ego view**: payers are left, recipients right;
+   reciprocal peers appear once on the payer side with both arrows retained.
+   Inspect **Why this role**, **Why this priority**, amounts and evidence. Then
+   select another role via its name in the sidebar, and one hollow hop-4 account
+   via **Extension requests** under **Flagged**. Explain the measured rule and
+   uncertainty for each. **Hierarchy skeleton** shows the retained flow paths;
+   **Overview** returns to the main network. **Method** displays configured rules.
+
+## Solution diagram
+
+```mermaid
+flowchart TD
+  P["Official Parquet: edges, nodes, transactions"] --> V["Validation: IDs, sums, counts, amounts"]
+  V --> M["Directed features and haircut taint"]
+  M --> R["Ordered role rules"]
+  R --> C["Louvain communities and summaries"]
+  C --> F["Priority, findings and hierarchy skeleton"]
+  F --> O["Seven CSV exports and graph.json"]
+  O --> A["Read-only FastAPI viewer API"]
+  A --> U["Offline JavaScript canvas viewer"]
+```
+
+The diagram shows conceptual stages. Community membership is computed before
+role assignment so source-community metrics are available; summaries follow
+ranking. [docs/diagram.md](docs/diagram.md) contains the same diagram.
+
+## Role rules and thresholds
+
+**Order matters: the first matching rule wins.** This table is generated from
+[pipeline/config.py](pipeline/config.py) and measured export evidence. Degree
+counts distinct counterparties. Amounts are observed July totals in KZT.
+
+| Role | Rule | Threshold | Example evidence from this run |
+|---|---|---|---|
+| coordinator | Non-seed; receives from >= 3 consolidator candidates (in-degree >= 5); betweenness breaks score ties | >= 3 candidate payers; candidate in-degree >= 5 | Signs of coordination: receives from 4 consolidator candidates (...5100, ...3100, ...0100), 393K KZT in. |
+| consolidator | In-degree >= 5 | >= 5 payers | Signs of consolidation: receives from 5 payers (3 seeds within 2 hops), 985K KZT in, forwards 2336%. |
+| distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) | >= 10 recipients; >= 2 x max(payers, 1) | Fan-out hypothesis: sends 426K KZT to 15 recipients after receiving from 1 payers. |
+| transit | Non-seed; in/out-degree >= 1; observed out/in ratio 0.8-1.2 | 0.8-1.2 out/in | Pass-through hypothesis: forwards 100% of 90K KZT received; 44% forwarded within 2 days. |
+| terminal | Depth <= 3; incoming > 0; zero outgoing or non-seed out/in < 0.2; in-degree >= 2 or incoming >= 300,000 KZT | depth <= 3; out/in < 0.2 or no outgoing; >= 2 payers or >= 300,000 KZT | Possible holding point: receives 110K KZT from 3 payers; observed onward flow is 15%. |
+| peripheral | Everything else; cut-off, one-off, isolated seed, or other sub-reason | Fallback after all earlier rules fail | Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account. |
+
+Role scores in [0,1] express heuristic support for the matched rule, not a
+calibrated probability. The node card shows failed earlier predicates through
+the matching rule. The complete scoring implementation is
+[pipeline/roles.py](pipeline/roles.py). Supplied-data counts: **29 coordinators,
+38 consolidators, 42 distributors, 67 transit, 264 terminal, 1,808 peripheral**.
+No LLM assigns roles, explains metrics or chooses rankings.
+
+## How data caveats are handled
+
+| Data caveat | Handling |
+|---|---|
+| Hop-4 outgoing transfers were not traced | All 444 affected nodes are marked truncated and excluded from terminal rules. Earlier inflow-based roles can still match; otherwise they are peripheral. `p_continues` estimates continuation from similar depth-1..3 nodes; values >=0.5 enter extension requests. No outgoing edges are invented. |
+| Seed inflow is understated | Seeds cannot match transit or the nonzero-outflow terminal ratio rule. Their priority is discounted; observed ratios are retained as metrics, not trusted as seed role evidence. |
+| Only outgoing flows were traced | Incoming totals are incomplete. Net observed flow is not a balance; out/in >1 alone is not suspicious. |
+| Transfers below 5,000 KZT are missing | Findings describe only the supplied thresholded graph, not complete account activity. |
+| Orphan seeds | All input nodes enter the graph before edges. The 19 isolates remain in roles, metrics and singleton communities. |
+| 16 connected fragments in the brief | Measured graph has 16 components containing edges plus 19 isolates: 35 weak components total. No fragments are silently dropped; overview fits the largest (1,877 nodes). |
+| No customer attributes | No names, identities, occupations or external enrichment are inferred. |
+| No ground-truth roles | Rules and clusters are reviewable hypotheses. There is no claimed classification accuracy. |
+
+Validation rejects invalid/duplicate identifiers, unknown endpoints, invalid
+amounts and inconsistent transaction aggregates. Aggregate sums allow 0.000001
+KZT absolute floating-point tolerance; counts must match exactly.
+
+## Priority, findings and hierarchy
+
+Let `pct(x)` be the average-rank percentile `(rank - 1) / (n - 1)`:
+
+```text
+base = 0.30*pct(taint_kzt) + 0.20*pct(seed_sources_2hop)
+     + 0.15*pct(pagerank) + 0.15*pct(betweenness) + 0.20*role_weight
+raw = (base + min(0.05*number_of_core_findings, 0.15))
+      * (0.6 if seed else 1) * (0.7 if truncated else 1)
+priority = raw / max(raw) * (0.5 if likely_legit_payouts else 1)
+```
+
+If the maximum is zero, priorities are zero. Role weights are coordinator 1.0,
+consolidator 0.9, distributor 0.7, transit 0.6, terminal 0.4, peripheral 0.1.
+Ties sort by ascending exact gid. Scores rank review effort, not guilt.
+
+**Haircut taint** starts seed shares at 1. Each account receives the sum of
+incoming amounts times sender shares, then divides by the larger of observed
+inflow/outflow, capped at 1. Seed shares stay fixed. Stop after 20 passes or
+maximum change below 1 KZT. This discounts visible dilution but cannot identify
+individual units of money. PageRank uses directed amount weights; betweenness
+uses unweighted directed paths, never transfer amounts as path distances.
+
+| Finding | Implemented criterion | Accounts |
+|---|---|---:|
+| Common counterparty | Receives directly from >=2 seeds | 24 |
+| Synchronous inflow | >=3 distinct payers on one date | 38 |
+| Fast pass | >=80% of outgoing value occurs within 2 days after some incoming transfer; >=100,000 KZT outgoing | 89 |
+| Scatter/gather | >=3 distinct first intermediaries on simple 2-3-hop paths from one source; every edge >=50,000 KZT | 25 |
+| Possible regular payouts | >=10 recipients, >=50% of outgoing transaction count on the busiest 2 dates, amount CV <=0.5, taint share <0.2 | 2 |
+| Seed hub | Seed with >=5 payers or >=20 recipients | 9 |
+
+Only the first four findings add the capped priority bonus. Payout resemblance
+halves priority after normalization; it does not establish legitimacy.
+
+**Continuation** uses observed depth-1..3 accounts grouped by incoming-amount
+quartiles and payer-count bins (boundaries 2, 3, 5). Each bin's fraction with
+outgoing edges estimates `p_continues`; empty bins use the visible population
+mean. This produces 10 extension requests, not new transfer records.
+
+**Hierarchy skeleton:** trace forward up to four hops from seeds and backward
+up to four hops from coordinators/consolidators in their top taint quartile.
+Keep the intersection with positive taint (or seeds), then retain edges worth
+at least 1% of recipient inflow. The result has **174 accounts and 446 edges**.
+Rows show shortest observed seed-hop distance, with seeds below. Cycles remain;
+these rows do not prove organizational authority.
+
+**Blocking plan** is an offline counterfactual only. Ten greedy non-seed removals
+maximize marginal reduction at surviving accounts using fixed haircut
+denominators and 20 passes. The supplied run cuts **14.3094% of modeled
+repeated-hop exposure**, not unique currency. It never blocks an actual account.
+A 60-second search budget triggers a restart over the top 100 priority candidates.
 
 ## Outputs and requirement coverage
 
-| File | Contents | Check |
+All artifacts are written to `out/`; the three required CSVs also download from
+the viewer. Gids are exact decimal strings in JSON and must be imported as text
+in spreadsheets (ordinary numeric cells can lose precision).
+
+| Artifact | Schema / contents | Requirement verified |
 |---|---|---|
-| `out/nodes_roles.csv` | gid, role, role_score, cluster_id, priority_score, evidence | Every one of 2,248 nodes exactly once; evidence <=200 chars |
-| `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
-| `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
-| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; tuned coordinator and scatter/gather rules meet spec 04b count targets; boolean findings and evidence |
-| `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
-| `out/skeleton_edges.csv` | src, dst, sum_kzt from the two-sided hierarchy trace | Drops edges below 1% of recipient inflow |
-| `out/blocking_plan.csv` | step, gid, role, cut_share_cumulative for 10 greedy non-seed removals | Deterministic choices; cumulative cut never decreases |
-| `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
+| `nodes_roles.csv` | `gid, role, role_score, cluster_id, priority_score, evidence` | Exactly 2,248 unique nodes, finite scores in [0,1], evidence <=200 characters |
+| `clusters.csv` | `cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis, n_consolidator, n_distributor, n_transit, taint_kzt` | All nodes assigned; 88 explained communities; top gids separated by semicolons |
+| `top_nodes.csv` | `rank, gid, role, priority_score, why` | 30 unique accounts, descending priority, deterministic gid ties |
+| `metrics.csv` | Per-node flow, degree, centrality, timing, findings, continuation, skeleton and score metrics; JSON `role_explanation` and `priority_explanation` columns | Reproducible numerical basis for every node card |
+| `extension_requests.csv` | `gid, p_continues, taint_kzt, in_deg, in_kzt, evidence` | Cut-off accounts meeting the continuation threshold |
+| `skeleton_edges.csv` | `src, dst, sum_kzt` | Exact retained directed edges shown by the hierarchy viewer |
+| `blocking_plan.csv` | `step, gid, role, cut_share_cumulative` | Ten simulated removals with monotone cumulative cut |
+| `graph.json` | `nodes, edges, roles_count, generated_at`; coordinates, exact IDs, role/priority explanations | Offline directed map, role/cluster colours, full/suffix search, node details and neighbors |
 
-| Viewer requirement | Implementation | Check |
-|---|---|---|
-| Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
-| Readable default overview | Peripheral filter starts unchecked; 440 role-bearing accounts shown | Enable the filter to inspect all 2,248 accounts; selected accounts remain visible |
-| Fit the main network | Initial overview and Overview fit the largest weakly connected component (1,877 accounts) | Other components remain searchable; no nodes are removed |
-| Zoom to the selected account | Animated fit of its two-hop neighborhood to 80% of the canvas | Search, top list, canvas and neighbor links share the same selection path; Overview fits back |
-| Clean ego view | One hop by default, optional second hop, amount-sorted columns and outer edge labels | Peripheral neighbors remain visible; reciprocal directions are preserved |
-| Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
-| Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
-| Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |
-| Discover accounts without a gid | Click a role name or a Flagged filter for a priority-ordered account list | Each row shows short gid, priority and first finding; click focuses and zooms |
-| Hierarchy skeleton | 174 retained accounts in observed seed-hop rows, seeds below, with 446 exported directed edges | Click keeps the hierarchy visible and opens the account card; Overview exits |
-| Explain the method | Header Method modal loads six pipeline steps and ordered rules from /api/method | Thresholds come from pipeline/config.py; works without generated artifacts |
+Louvain uses an undirected projection that **sums both directional amounts**,
+resolution 1.0 and seed 42. Isolates get their own communities; IDs sort by
+community size then minimum gid. CSVs reproduce identically with the tested
+versions; JSON's `generated_at` intentionally changes. Clusters are not labels
+of criminal groups. Source datasets remain immutable.
 
-Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
-cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
-`generated_at` in graph JSON is intentionally the current generation timestamp;
-CSV content is deterministic. Pipeline logs report role counts and elapsed time.
-The official batch limit is five minutes; automated regression limit is also five minutes, including counterfactual blocking.
+## Architecture and technologies
 
-## Analyst viewer
+| Folder | Responsibility |
+|---|---|
+| `pipeline/` | Independent batch validation, features, rules, taint, communities, findings and exports |
+| `app/` | FastAPI, artifact-backed read-only viewer endpoints, errors and logging; retained generic agent infrastructure has no case tools |
+| `static/` | Vanilla JavaScript Canvas, HTML and CSS; no build step or CDN |
+| `tests/` | Pipeline, findings, explainability, API and regression checks |
+| `data/raw/` | Three committed organiser Parquet inputs |
+| `out/` | Computed artifacts; Docker excludes these from its build context and recomputes them |
 
-Overview fits the largest weakly connected component (1,877 accounts), keeping
-other components available by search or pan. The peripheral filter starts off.
-Search a full gid or its last digits and press Enter to focus the first match.
-Click a node or Top-30 entry to inspect its role hypothesis, priority, community,
-metrics and directed incoming/outgoing transfers. Neighbor rows navigate to that
-account. Focus highlights two hops; **Ego view** starts with direct neighbors,
-payers left and recipients right, sorted by observed transfer amount. **Show 2nd
-hop** adds their neighbors. Amount labels sit near column ends; drag vertically
-for large columns. Reciprocal neighbors occupy one position on the payer side. Escape returns to overview. Drag to pan and use the wheel to zoom.
-Seeds have black rings; hollow nodes mark the depth-4 observation cutoff.
+Python 3.11 in Docker; pandas, PyArrow, NetworkX and NumPy for analysis;
+FastAPI/Uvicorn for HTTP; Docker Compose for local startup; Fly.io configuration
+for the public deployment. No database, GPU, learned model or paid analysis API.
 
-**Why this role** shows the first matching rule and the earlier rules that failed,
-using the node's measured values and configured thresholds. **Why this priority**
-shows all five weighted contributions, the finding bonus, seed/cut-off discounts,
-global normalization and the payout adjustment. These explanations are generated
-by the pipeline and exported as structured JSON in `graph.json` and JSON columns
-in `metrics.csv`; the browser does not recompute the analysis.
+| Environment parameter | Default / effect |
+|---|---|
+| `PORT` | Startup currently uses fixed port 8000; setting `PORT` alone has no effect |
+| `APP_NAME` | `kairos`; health response label |
+| `APP_ENV` | `local` in Python, `docker` in Compose; health response label |
+| `LOG_LEVEL` | `INFO`; server logging |
+| `RATE_LIMIT_PER_MINUTE` | `0` locally; applies only to the retained generic `/api/ask` endpoint, not viewer reads |
+| `TRUST_PROXY_HEADERS` | `false` locally; caller identification for the generic endpoint |
+| `CLIENT_IP_HEADER` | Empty locally; `fly-client-ip` in Fly configuration |
 
-The API serves `/api/graph`, `/api/node/{gid}`, `/api/search?q=...`, `/api/top`,
-`/api/clusters` and `/api/download/{name}`. Downloads allow only `nodes_roles.csv`,
-`clusters.csv` and `top_nodes.csv`. IDs are strings throughout. Artifacts load at
-startup and refresh when file modification times change. Missing or incomplete
-artifacts return HTTP 503 with the message "Run `make pipeline` first".
-The existing `/api/ask` endpoint retains its original configuration requirements.
+No environment setup is needed for the main scenario. The legacy agent settings
+in `.env.example` are outside this case's viewer; an AI analyst is not implemented.
 
-Click a role name to list accounts; its checkbox controls map visibility independently.
-**Flagged** lists common counterparties, synchronous inflow, scatter/gather, likely
-legitimate payouts and extension requests (cut-off with continuation probability
->=0.5). Lists sort by priority descending then gid; selecting a hidden account
-reveals it. `/api/accounts?role=...` or `/api/accounts?flag=...` serves these lists.
-Exactly one supported filter is required; invalid filters return HTTP 400.
+## Limitations
 
-**Hierarchy skeleton** shows the pipeline-retained network, including peripheral
-seeds even while their normal overview filter is off. Rows follow observed shortest
-seed-hop levels, with seeds below; they are not proven organizational ranks.
-`/api/skeleton` serves the exact retained edges from `skeleton_edges.csv`.
+- No ground truth; thresholds were tuned on this one dataset, not validated on
+  independent cases. Role scores and priorities are not probabilities of guilt.
+- Incoming flows and hop-4 outgoing flows are incomplete; the continuation
+  estimate is statistical and may not generalize to a deeper export.
+- Payout flags describe a pattern, not a legality check. Fast-pass timing is
+  correlation, not matched money. Same-day transactions have no intraday order.
+- Taint and counterfactual cuts can count exposure along several hops; they do
+  not estimate unique illicit currency or predict a real intervention.
+- The graph is July 2026 only, excludes transfers below 5,000 KZT, and contains
+  no identity attributes or external evidence.
+- The viewer and dense layout are built for this supplied graph. Very large ego
+  networks need vertical pan; million-node scalability is a design direction.
+- Dependency installation and Docker builds need internet; runtime analysis does
+  not. Generic agent infrastructure is retained, but no case-aware AI assistant
+  or automatic enforcement action is shipped.
 
-**Method** opens the six pipeline steps and first-match role table, served from
-`pipeline/config.py` through `/api/method`. Close or Escape returns to the selected
-account without changing the graph. No role thresholds are duplicated in JS.
+## Scaling to approximately one million nodes
 
-## Role rules
+This scale has **not** been benchmarked. Replace Python-object graph storage with
+igraph/graph-tool or distributed Spark GraphFrames; evaluate Leiden instead of
+Louvain. Use approximate/sampled betweenness and sparse-matrix taint iterations.
+Recompute changed neighborhoods incrementally each day. Serve precomputed
+layouts/tiles and show skeleton plus ego networks only, never all nodes at once.
+The current dense force layout must be replaced before attempting that scale.
 
-<!-- ROLE_RULES_START -->
-| Role | First-matching rule |
-| --- | --- |
-| Coordinator | Non-seed; receives from >=3 consolidator candidates (in-degree >=5); betweenness breaks score ties |
-| Consolidator | In-degree >= 5 |
-| Distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) |
-| Transit | Non-seed; in/out-degree >= 1; observed out/in ratio 0.8-1.2 |
-| Terminal | Depth <= 3; incoming > 0; zero outgoing or non-seed out/in < 0.2; in-degree >= 2 or incoming >= 300,000 KZT |
-| Peripheral | Everything else; cut-off, one-off, isolated seed, or other sub-reason |
-<!-- ROLE_RULES_END -->
+## Development potential
 
-Rules are applied in the listed order: the first match wins, as required by
-spec 01. Scores measure heuristic support, not calibrated probabilities or guilt.
-Seed accounts are excluded from ratio-based transit classification. Their terminal
-classification can use observed zero outflow, but never an understated inflow ratio.
-Every conclusion is an investigation hypothesis about the observed network.
+Collect analyst confirmations and false positives, retune thresholds, then train
+and evaluate a supervised model only when reliable labels exist. A future AI
+assistant could query graph tools and cite their evidence. Multi-bank data could
+reduce missing-flow uncertainty, subject to authorized access and matching.
+These are future directions, not implemented capabilities.
 
-## Metrics, tracing and ranking
+## Tests and provenance
 
-Metrics include distinct payers/recipients, observed amounts and transaction
-counts, directly paying seeds, distinct seed sources within two directed hops,
-weighted PageRank and exact unweighted directed betweenness. PageRank uses NumPy
-power iteration, avoiding a SciPy dependency.
+After the Python installation, activate the environment and run:
 
-Haircut tracing fixes each seed's outgoing share to 1. Other nodes receive the
-sum of upstream amounts times upstream shares, then divide by the larger of their
-observed inflow and outflow (capped at 1). This dilutes the attributed share where
-outflow exceeds observed inflow. Synchronous iterations stop below 1 KZT change or
-at 20 passes. This is an attribution model, not proof of the origin of each transfer;
-cyclic graphs can retain uncertainty and sums across nodes are not unique money.
+```bash
+source .venv/bin/activate
+pytest -q
+```
 
-Priority combines percentile ranks of attributed inflow (0.30), two-hop seed
-sources (0.20), PageRank (0.15), betweenness (0.15), and role weight (0.20).
-Seed scores are multiplied by 0.6; depth-cut-off scores by 0.7, then all scores
-are normalized by the maximum. These are specified review priorities, not guilt
-probabilities. Each top entry names its two strongest weighted components.
+The suite checks official-data coverage and CSV determinism across two pipeline
+runs, score bounds, role precedence, cut-off handling, isolates, findings,
+continuation, skeleton pruning, counterfactual monotonicity, explanation parity,
+exact-ID APIs, input errors and the language/secret guards. The pipeline regression
+allows five minutes per run. HTTP smoke checks exercise the running viewer.
 
-`fast_pass_share` is the fraction of outgoing amount whose transaction date is
-0-2 days after **any** incoming transfer, exactly as spec 01 defines it. It does
-not match monetary lots, establish provenance, or prove that the same money moved.
-
-## Communities and graph coordinates
-
-Louvain deliberately uses an undirected projection to group accounts that trade
-with one another; reciprocal directed amounts are summed. Direction remains intact
-for role metrics and exports. Louvain seed is 42 and resolution is 1.0. Isolates
-receive individual clusters, numbered by descending size with stable tie-breaking.
-Graph coordinates use a seeded, unweighted spring layout with 100 iterations,
-scaled to [-1000,1000].
-Without SciPy, NetworkX's dense NumPy Fruchterman-Reingold implementation is used
-because its public layout switches to a SciPy-backed path for this graph size.
-The specified seed, unweighted forces and iteration count are preserved; the
-private fallback is covered by the pinned NetworkX version and end-to-end tests.
-
-## Limits and interpretation
-
-- Depth-4 zero-outflow nodes are censored by traversal and are not assigned terminal.
-- Earlier zero-outflow nodes are stops **in this observed dataset**, not proven final recipients.
-- Only July 2026, intra-bank transfers >=5,000 KZT are observed. Inflows are incomplete,
-  particularly for seeds; net observed flow is not an account balance.
-- High outflow/inflow alone is not evidence of wrongdoing. No identities, missing
-  transactions or customer attributes are inferred from external sources.
-- No ground-truth roles exist. The thresholds and ranking are transparent hypotheses.
-- Analyst chat and other unassigned specs are not implemented. The retained ask
-  endpoint has no case-analysis tools.
-- Dense ego neighborhoods can overlap; pan/zoom and neighbor tables help inspection.
-  The full canvas is designed for this dataset, not a million-node browser view.
-
-## Scale to one million nodes
-
-Replace in-memory pandas/NetworkX passes with partitioned columnar processing and
-an efficient graph engine; use sampled rather than exact betweenness. Preserve
-fixed seeds and documented role rules. Serve precomputed communities and bounded
-neighborhoods instead of laying out or transferring the entire graph to a browser.
-Measure any alternative clustering method before changing the interpretation.
-
-## Verification and provenance
-
-`bash scripts/verify_all.sh --no-docker` checks the pipeline, tests, language,
-clean-copy behavior and HTTP service. The full command additionally builds and
-starts Docker, checks generated artifacts and secret exclusion, and rejects missing
-raw data. These checks make no external LLM calls.
-
-See `DISCLOSURE.md` for the pre-built scaffold. Official task/context and the
-implemented specifications are `docs/specs/00_CONTEXT.md`, `01_PIPELINE.md` and
-`03_VIEWER.md`.
-The next session should read `docs/STATE.md` for verified status and scope boundaries.
-
-Coordinator roles use two passes: consolidator candidates meet the in-degree rule before coordinator precedence is applied. Source clusters do not qualify a coordinator. Clusters are assigned before roles; cluster summaries use final roles and priorities.
-
-
-Findings add 0.05 each (capped at 0.15) to raw priority before seed/cut-off
-multipliers and normalization: direct inflow from >=2 seeds, >=3 distinct payers
-on one calendar date, fast-pass share >=0.8 with outgoing >=100,000 KZT, and
-scatter/gather. The latter requires simple paths of 2-3 hops from the same source
-through at least three distinct first intermediaries, with every branch edge
->=50,000 KZT; cycles and a lone chain do not qualify. Each fired finding is explained in metrics and top-node reasons.
-Fast-pass is timing correlation, not proof that the same money was forwarded.
-
-After spec 04b tuning, roles are coordinator 29, consolidator 38, distributor 42,
-transit 67, terminal 264 and peripheral 1,808. Finding counts are
-common_counterparty 24, synchronous_inflow 38, fast_pass 89, scatter_gather 25,
-likely_legit_payouts 2 and seed_hub 9. Two consolidator payers produced 94
-coordinators, so the configured threshold is three. The 50,000 KZT branch floor
-already meets the scatter/gather target; no increase to 100,000 was needed.
-The refreshed pipeline completed in 42.20 seconds on the development machine.
-These thresholds were tuned on this dataset, without ground-truth labels.
-
-
-Hop-4 continuation estimates use only depth 1-3 nodes, where outgoing transfers
-were traced. Empirical forwarding rates are grouped by in-degree (1, 2, 3-4, 5+)
-and incoming-value quartiles learned from that visible subset. Tied quartile
-boundaries collapse; empty cells use the overall visible-node forwarding rate.
-Only truncated nodes receive p_continues; without training data it stays unknown.
-These are observed peer frequencies, not validated individual predictions.
-
-
-The hierarchy skeleton intersects forward traces from seeds (up to four hops,
-positive taint, with seeds retained as origins) and backward traces from the top
-taint quartile of coordinator/consolidator candidates (up to four hops).
-Only intersecting edges carrying at least 1% of their recipient's observed inflow
-survive, reducing incidental small payments. Skeleton membership means an endpoint
-of a retained edge. Levels are shortest forward seed-hop distances (seed = 0);
-cycles can produce same-level or backward edges, so levels are observational
-distance, not a proven organizational rank. Nonmembers have level -1.
-CSV edges and graph JSON skeleton/level fields are exported and used by the
-Hierarchy skeleton view.
-
-
-The likely_legit_payouts flag requires out-degree >=10, at least half of outgoing
-transactions on the two busiest calendar dates, population coefficient of
-variation of outgoing amounts <=0.5, and taint_share <0.2. All conditions must
-hold. It halves the normalized priority score without changing the role.
-The evidence asks the analyst to verify possible salary/business payouts before
-escalating; this is a pattern hypothesis, not a confirmed legitimate business.
-
-
-Known seeds with in-degree >=5 or out-degree >=20 receive a seed_hub flag and an
-evidence suffix noting that the case may reach above street level. This changes
-neither their role nor their priority score.
-
-
-Blocking impact is a counterfactual calculation, not an account-blocking action.
-At each of ten steps it removes the non-seed whose removal reduces taint reaching
-other remaining accounts the most, with priority then gid breaking ties.
-The haircut model retains original incoming/outgoing denominators and uses 20
-synchronous passes for every scenario, so missing edges cannot inflate the
-remaining accounts' shares. All candidates are considered; if that search
-exceeds 60 seconds, it restarts with the top 100 by priority. The cumulative cut
-compares total remaining node taint with the original total, including prevented
-inflow to removed accounts. This is observed transfer exposure across multiple
-hops, not unique currency, a prediction of real-world interdiction, or proof of guilt.
-
-Development potential: an analyst could mark alerts as confirmed or false
-positive, for example "legit business." As those labels accumulate, thresholds
-and priority weights could be re-tuned and evaluated on held-out labels. Later,
-a supervised model could replace the fixed weights. This feedback loop is a
-future direction only; no labeling or model-training functionality is implemented.
-
-Blocking these 10 accounts would cut 14.3% of case money flow in the observed graph.
+The generic pre-built scaffold was imported in **H1, commit `b92291c`**.
+All case-specific analysis and the graph viewer were built during the event.
+See [DISCLOSURE.md](DISCLOSURE.md) for provenance, AI tools and library licences.
