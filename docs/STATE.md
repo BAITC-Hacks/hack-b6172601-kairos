@@ -1,17 +1,26 @@
 # Current handoff
 
-Updated: 2026-09-23, 16:42 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
-and 05 are implemented. Spec 04 H remains documentation only; no case-aware
-LLM assistant is implemented. Spec 06 is now authorized, in order 0, 1 + 1b, 2, 3, with a 17:35
-Asia/Almaty hard stop (UTC+05). Root remains the only writer; optional agents
-may perform read-only verification.
+Updated: 2026-09-23, 17:04 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
+and 05 are implemented. The separately authorized experimental assistant is
+integrated; the public deployment remains key-free. Spec 06 runs in order
+0, 1 + 1b, 2, 3, with a 17:35 Asia/Almaty hard stop (UTC+05). Root writes
+spec 06 and commits/pushes; optional subagents verify read-only.
 
 ## Spec 06 progress
+
+- Experimental assistant from Claude integrated separately in c9902d1 after
+  all 70 tests passed. Five read-only tools; public LLM remains unconfigured.
+
+- Item 2: node dragging in overview, ego and skeleton, background pan and
+  Overview reset implemented. Browser dragging and JS geometry/reset checks pass;
+  all 70 pytest tests, smoke and language guard pass.
 
 - Items 1 + 1b: pipeline circle separation, fixed-size collision-safe inspection
   layouts, priority picking, skeleton sub-rows and directional ego depths 1–4
   implemented. Full pytest suite, official/synthetic JS geometry checks, browser
-  interaction, local smoke and language guard pass. Fly redeploy is next.
+  interaction, local smoke and language guard pass. Fly deployment of 933a2e3
+  succeeded; pipeline 140.63s on shared CPU / 1 GiB. Public health/viewer/download/tool smoke checks pass; all 2,248 exported
+  circles have at least 2.0005 layout units of clearance at zoom 1.
 
 - Item 0: hierarchy legend order and upward-flow hint implemented. README role
   table follows display order while explicitly preserving actual rule precedence.

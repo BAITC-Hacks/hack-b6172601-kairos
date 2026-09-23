@@ -92,3 +92,7 @@ selected-neighborhood fit through maximum zoom (40); far-out overlap is allowed.
 Highest-priority circles are drawn last and selected first. Ego view supports
 1–4 directional hops, unique accounts, parent-barycentre ordering and at most
 25 accounts per column, with omitted counts. Labels never cover circles.
+
+Dragging moves accounts and their connected edges in overview, ego and skeleton
+layouts. Close-zoom neighbors move aside while the dragged node follows the
+pointer. Background drag pans; Overview clears all manual positions.

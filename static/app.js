@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $("graph-canvas");
 const ctx = canvas.getContext("2d");
 const roleOrder = ["coordinator", "consolidator", "transit", "distributor", "terminal", "peripheral"];
-const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoDepth: 1, egoColumns: [], inspectionScale: 1, collisionPositions: new Map(), collisionKey: null, egoPositions: new Map(), skeleton: false, skeletonPositions: new Map(), skeletonRows: [], skeletonEdges: null, colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
+const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoDepth: 1, egoColumns: [], inspectionScale: 1, collisionPositions: new Map(), collisionKey: null, egoPositions: new Map(), skeleton: false, skeletonPositions: new Map(), skeletonRows: [], skeletonEdges: null, colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragPositions: new Map(), dragNode: null, dragging: false, moved: false, cameraFrame: null};
 const roleColours = Object.fromEntries(roleOrder.map((role) => [role, getComputedStyle(document.documentElement).getPropertyValue(`--role-${role}`).trim()]));
 const canvasColours = Object.fromEntries(["--label-background", "--text-primary", "--node-ring", "--surface-1", "--edge-focus", "--edge-muted"].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(name).trim()]));
 const cssColour = (name) => canvasColours[name];
@@ -92,7 +92,7 @@ function fitFocus() {
   if (!state.selected || !state.width || !state.height) return;
   const nodes = [...state.focus].map((id) => state.byId.get(id)).filter(Boolean);
   if (!nodes.length) return;
-  const xs = nodes.map((node) => num(node.x)), ys = nodes.map((node) => num(node.y));
+  const xs = nodes.map((node) => num(basePosition(node).x)), ys = nodes.map((node) => num(basePosition(node).y));
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
   // A minimum extent keeps isolated and tightly packed accounts at a useful size.
   const scale = Math.min(3, state.width * .8 / Math.max(100, right - left), state.height * .8 / Math.max(100, bottom - top));
@@ -147,9 +147,9 @@ function resize() {
 // Highest priority owns the original position; lower priorities move to free space.
 // The spatial hash bounds neighbour checks. The final placement has no pass limit:
 // each accepted circle is checked against every nearby accepted circle.
-function separateCircles(nodes, positions, scale, verticalOnly = false) {
+function separateCircles(nodes, positions, scale, verticalOnly = false, anchor = null) {
   const result = new Map(), grid = new Map(), cell = 36 / scale;
-  const ordered = [...nodes].sort((a, b) => num(b.priority) - num(a.priority) || a.id.localeCompare(b.id));
+  const ordered = [...nodes].sort((a, b) => Number(b.id === anchor) - Number(a.id === anchor) || num(b.priority) - num(a.priority) || a.id.localeCompare(b.id));
   function key(x, y) { return `${x},${y}`; }
   function free(p, radius) {
     const gx = Math.floor(p.x / cell), gy = Math.floor(p.y / cell);
@@ -182,7 +182,10 @@ function separateCircles(nodes, positions, scale, verticalOnly = false) {
   }
   return result;
 }
+function layoutKey() { return state.skeleton ? "skeleton" : state.ego ? `ego:${state.selected}:${state.egoDepth}` : "overview"; }
 function basePosition(node) {
+  const dragged = state.dragPositions?.get(layoutKey())?.get(node.id);
+  if (dragged) return dragged;
   return state.skeleton ? state.skeletonPositions.get(node.id) : state.ego ? state.egoPositions.get(node.id) : node;
 }
 function ensureCollisionPositions() {
@@ -401,6 +404,7 @@ async function setSkeleton() {
   } finally { button.disabled = false; }
 }
 function resetView() {
+  state.dragPositions.clear(); state.dragNode = null;
   state.inspectionScale = 1; state.collisionKey = null;
   state.selected = null; state.focus.clear(); state.ego = false; state.egoDepth = 1; state.egoPositions.clear(); state.skeleton = false;
   $("ego-hop").hidden = true;
@@ -561,12 +565,37 @@ function hitTest(x, y) {
   return best;
 }
 
-canvas.addEventListener("pointerdown", (event) => { cancelCamera(); state.dragging = true; state.moved = false; state.lastX = event.clientX; state.lastY = event.clientY; canvas.classList.add("dragging"); canvas.setPointerCapture(event.pointerId); });
+function dragNodeTo(id, x, y) {
+  ensureCollisionPositions();
+  const nodes = state.nodes.filter(visible), close = state.scale >= state.inspectionScale - 1e-9;
+  let positions = new Map(nodes.map(node => [node.id, {...(close ? state.collisionPositions.get(node.id) : basePosition(node))}]));
+  positions.set(id, {x, y});
+  // Keep the dragged account under the pointer and move its neighbours out of
+  // the way. Separate at the inspection threshold, so zooming back stays safe.
+  if (close) positions = separateCircles(nodes, positions, state.inspectionScale, state.ego, id);
+  state.dragPositions.set(layoutKey(), positions); state.collisionKey = null;
+}
+canvas.addEventListener("pointerdown", (event) => {
+  if (event.button !== 0) return;
+  cancelCamera();
+  const rect = canvas.getBoundingClientRect(), node = hitTest(event.clientX - rect.left, event.clientY - rect.top);
+  state.dragging = true; state.moved = false; state.dragNode = node?.id || null;
+  state.startX = state.lastX = event.clientX; state.startY = state.lastY = event.clientY;
+  if (node) {
+    const p = point(node);
+    state.dragStart = {x: (p.x - state.width / 2 - state.panX) / state.scale, y: (p.y - state.height / 2 - state.panY) / state.scale};
+  }
+  canvas.classList.add("dragging"); canvas.setPointerCapture(event.pointerId);
+});
 canvas.addEventListener("pointermove", (event) => {
   if (state.dragging) {
     const dx = event.clientX - state.lastX, dy = event.clientY - state.lastY;
-    if (Math.abs(dx) + Math.abs(dy) > 2) state.moved = true;
-    state.panX += dx; state.panY += dy; state.lastX = event.clientX; state.lastY = event.clientY; requestDraw(); $("tooltip").hidden = true; return;
+    const totalX = event.clientX - state.startX, totalY = event.clientY - state.startY;
+    if (Math.hypot(totalX, totalY) > 3) state.moved = true;
+    if (state.dragNode) {
+      if (state.moved) dragNodeTo(state.dragNode, state.dragStart.x + totalX / state.scale, state.dragStart.y + totalY / state.scale);
+    } else { state.panX += dx; state.panY += dy; }
+    state.lastX = event.clientX; state.lastY = event.clientY; requestDraw(); $("tooltip").hidden = true; return;
   }
   const rect = canvas.getBoundingClientRect(), node = hitTest(event.clientX - rect.left, event.clientY - rect.top), tip = $("tooltip");
   if (!node) { tip.hidden = true; return; }
@@ -575,9 +604,10 @@ canvas.addEventListener("pointermove", (event) => {
 });
 canvas.addEventListener("pointerup", (event) => {
   if (!state.dragging) return;
-  state.dragging = false; canvas.classList.remove("dragging");
+  state.dragging = false; state.dragNode = null; canvas.classList.remove("dragging");
   if (!state.moved) { const rect = canvas.getBoundingClientRect(), node = hitTest(event.clientX - rect.left, event.clientY - rect.top); if (node) selectNode(node.id); }
 });
+canvas.addEventListener("pointercancel", () => { state.dragging = false; state.dragNode = null; canvas.classList.remove("dragging"); });
 canvas.addEventListener("pointerleave", () => { $("tooltip").hidden = true; });
 canvas.addEventListener("wheel", (event) => {
   event.preventDefault();

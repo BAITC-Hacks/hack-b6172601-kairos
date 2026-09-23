@@ -26,3 +26,29 @@ assert.equal(s.egoColumns.find(c => c.column === 1).more, 5);
 assert.ok(s.egoColumns.find(c => c.column === 2).ids.includes('Y'));
 assert.equal(s.egoColumns.find(c => c.column === 1).ids.includes('X29'), false);
 console.log('Collision, hit priority, directional hops, convergence and cap checks passed.');
+// Dragging moves the active layout and connected endpoints together, retaining
+// circle separation even when the pointer moves directly over another account.
+s.dragPositions = new Map();
+for (const mode of ['overview', 'ego', 'skeleton']) {
+  s.nodes = [{id:'a', priority:.1, x:0, y:0}, {id:'b', priority:1, x:100, y:100}];
+  s.byId = new Map(s.nodes.map(n => [n.id, n]));
+  s.ego = mode === 'ego'; s.skeleton = mode === 'skeleton';
+  s.egoPositions = new Map(s.nodes.map(n => [n.id, {x:n.x,y:n.y}]));
+  s.skeletonPositions = new Map(s.egoPositions); s.selected = 'a'; s.egoDepth = 1;
+  s.inspectionScale = .5; s.scale = 2; s.panX = s.panY = 0; s.collisionKey = null;
+  context.dragNodeTo('a', 100, 100); context.ensureCollisionPositions();
+  const a = context.point(s.byId.get('a')), b = context.point(s.byId.get('b'));
+  assert.equal(a.x, s.width / 2 + 200); assert.equal(a.y, s.height / 2 + 200);
+  assert.ok(Math.hypot(a.x-b.x,a.y-b.y) > 24);
+  assert.equal(s.nodes[0].x, 0, 'Exported coordinates must stay immutable');
+  s.scale = .5;
+  const backA = context.point(s.byId.get('a')), backB = context.point(s.byId.get('b'));
+  assert.ok(Math.hypot(backA.x-backB.x,backA.y-backB.y) >= context.nodeRadius(s.nodes[0]) + context.nodeRadius(s.nodes[1]) + 7.999);
+}
+context.$ = () => ({setAttribute(){}, replaceChildren(){}});
+context.el = () => ({}); context.document = {querySelectorAll: () => []};
+context.updateVisibleCount = () => {}; context.fitOverview = () => {};
+s.focus = new Set();
+vm.runInContext(slice('function resetView(', 'async function selectNode('), context);
+context.resetView(); assert.equal(s.dragPositions.size, 0); assert.equal(s.dragNode, null);
+console.log('Dragging in every layout, zoom-back separation and Overview reset passed.');

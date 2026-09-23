@@ -29,10 +29,10 @@ make install && make pipeline && make run
 ```
 
 The virtual environment is selected automatically. Stop the foreground server
-with Ctrl+C. The measured local pipeline runtime is **45.79 seconds** for
+with Ctrl+C. The pre-extras local baseline was **45.79 seconds** for
 2,248 nodes, 3,119 directed edges and 4,840 transactions (including layout and
 counterfactual analysis). Hardware affects runtime; the acceptance limit is five
-minutes. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
+minutes. With collision removal, the Fly shared-CPU pipeline took **140.63 seconds**. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
 allowed ranges: [requirements.txt](requirements.txt).
 Remote clean-clone verification passed for Docker/Python without a key; results
 and environment details are recorded in [docs/STATE.md](docs/STATE.md).
@@ -200,6 +200,7 @@ in spreadsheets (ordinary numeric cells can lose precision).
 | `extension_requests.csv` | `gid, p_continues, taint_kzt, in_deg, in_kzt, evidence` | Cut-off accounts meeting the continuation threshold |
 | `skeleton_edges.csv` | `src, dst, sum_kzt` | Exact retained directed edges shown by the hierarchy viewer |
 | `blocking_plan.csv` | `step, gid, role, cut_share_cumulative` | Ten simulated removals with monotone cumulative cut |
+| Node dragging | Move accounts in all three layouts; connected edges follow | Background pans; Overview resets positions; close-zoom collisions remain separated |
 | Clickable graph and layered ego | Separate circles at inspection zoom; directional 1–4 hop columns, 25 accounts per column | Far-out overlap allowed; highest priority wins clicks; omitted branches are counted |
 | Hierarchy legend | Coordinator, consolidator, transit, distributor, terminal, peripheral; money-flow hint | Display order follows the chain; role rules and CSV values are unchanged |
 | `graph.json` | `nodes, edges, roles_count, generated_at`; coordinates, exact IDs, role/priority explanations | Offline directed map, role/cluster colours, full/suffix search, node details and neighbors |
@@ -254,7 +255,9 @@ with `+N more`. Shared accounts appear once (nearest displayed hop; payer side
 wins ties). Parent barycentres determine ordering, with spacing to keep circles
 clickable. Pan vertically through tall columns; omitted branches are not expanded.
 The hierarchy skeleton wraps wide levels into sub-rows. Overview restores the
-full layout.
+full layout. Drag any circle to move it in overview, ego or skeleton mode; its
+edges follow. Drag the background to pan. Close-zoom neighbors move aside to
+keep circles separate. **Overview** resets every manual position.
 
 ## Analyst assistant (experimental)
 
@@ -271,7 +274,6 @@ depend on it.
 - Known limitations: answers depend on the model choosing the right tool sequence (it sometimes needs a second call after a
   tool returns a hint); no evaluation set yet; English and Russian questions were tried manually only.
 - Tests: `tests/test_graph_tools.py` checks the tools deterministically without a key.
-
 
 ## Limitations
 
