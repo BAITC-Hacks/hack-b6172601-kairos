@@ -51,8 +51,10 @@ Counts are validation expectations for supplied data, not hardcoded output logic
 - Real dataset is immutable. Remove synthetic seeding from the case runtime.
 
 ## Scope
-Implemented milestones: docs/specs/01_PIPELINE.md, docs/specs/03_VIEWER.md, and assigned sections of docs/specs/04_FINDINGS.md,
-following 00_CONTEXT.md. The pipeline produces metrics.csv and graph.json
+Implemented milestones: docs/specs/01_PIPELINE.md, docs/specs/03_VIEWER.md, and docs/specs/04_FINDINGS.md (A-G code, H documentation only),
+following 00_CONTEXT.md. The pipeline also produces extension_requests.csv, skeleton_edges.csv and
+blocking_plan.csv for continuation, hierarchy and counterfactual analysis.
+It produces metrics.csv and graph.json
 in addition to the three required case CSVs. The read-only viewer serves these
 artifacts through the six endpoints specified in 03_VIEWER.md, preserving exact
 string identifiers, and provides offline canvas exploration. Other specs remain

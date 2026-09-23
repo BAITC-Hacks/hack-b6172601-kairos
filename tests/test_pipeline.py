@@ -30,7 +30,8 @@ ROLES = {
     "terminal",
     "peripheral",
 }
-CSV_NAMES = ("nodes_roles.csv", "clusters.csv", "top_nodes.csv", "metrics.csv")
+CSV_NAMES = ("nodes_roles.csv", "clusters.csv", "top_nodes.csv", "metrics.csv",
+             "extension_requests.csv", "skeleton_edges.csv", "blocking_plan.csv")
 
 
 def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
@@ -56,12 +57,12 @@ def pipeline_outputs(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, Pa
             cwd=ROOT,
             capture_output=True,
             text=True,
-            timeout=60,
+            timeout=300,
             check=False,
         )
         duration = time.monotonic() - start
         assert result.returncode == 0, f"Pipeline failed:\n{result.stdout}\n{result.stderr}"
-        assert duration < 60, f"Pipeline took {duration:.1f}s; required runtime is under 60s"
+        assert duration < 300, f"Pipeline took {duration:.1f}s; required runtime is under five minutes"
         for name in (*CSV_NAMES, "graph.json"):
             assert (output / name).is_file(), f"Missing pipeline output: {name}"
     return outputs
@@ -279,3 +280,34 @@ def test_loader_accepts_float_roundoff_but_rejects_real_difference(
     edges.loc[0, "sum_kzt"] += 0.01
     with pytest.raises(ValueError, match="Edges disagree with transaction sums/counts"):
         load_module.load_data("unused")
+
+
+def test_findings_artifacts_and_viewer_integration(pipeline_outputs):
+    from app.api.viewer import OutputStore
+
+    output, _ = pipeline_outputs
+    metrics = pd.read_csv(output / "metrics.csv", dtype={"gid": str})
+    flags = ["common_counterparty", "synchronous_inflow", "fast_pass", "scatter_gather",
+             "likely_legit_payouts", "seed_hub", "in_skeleton"]
+    assert all(metrics[flag].dtype == bool for flag in flags)
+    coordinators = metrics[metrics.role.eq("coordinator")]
+    assert not coordinators.is_seed.any()
+    assert (coordinators.consolidator_payers.ge(2)
+            | (coordinators.source_clusters.ge(2) & coordinators.in_deg.ge(3))).all()
+    extensions = pd.read_csv(output / "extension_requests.csv", dtype={"gid": str})
+    assert set(extensions.gid) <= set(metrics.loc[metrics.truncated, "gid"])
+    assert extensions.p_continues.ge(.5).all()
+    plan = pd.read_csv(output / "blocking_plan.csv", dtype={"gid": str})
+    assert len(plan) == plan.gid.nunique() == 10
+    assert not set(plan.gid) & set(metrics.loc[metrics.is_seed, "gid"])
+    assert plan.cut_share_cumulative.between(0, 1).all()
+    assert plan.cut_share_cumulative.is_monotonic_increasing
+    snapshot = OutputStore(output).load()
+    flagged = metrics.loc[metrics.common_counterparty, "gid"].iloc[0]
+    assert isinstance(snapshot["nodes"][flagged]["findings"], str)
+    assert snapshot["nodes"][flagged]["common_counterparty"] is True
+    graph = json.loads((output / "graph.json").read_text())
+    by_gid = metrics.set_index("gid")
+    for node in graph["nodes"]:
+        assert node["skeleton"] == bool(by_gid.loc[node["id"], "in_skeleton"])
+        assert node["level"] == int(by_gid.loc[node["id"], "hierarchy_level"])

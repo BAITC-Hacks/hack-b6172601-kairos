@@ -22,9 +22,20 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
   priority without changing roles; full caution suffix fits the evidence limit.
 - C: seed-hub flag and full evidence suffix; no role or priority changes.
   Coordinator evidence now accurately names first-pass consolidator candidates.
+- F: ten greedy non-seed removals, fixed-denominator taint recomputation,
+  deterministic tie-breaks and timed top-100 fallback; blocking_plan.csv.
+- H: README-only future analyst labels, retuning and supervised-model direction.
+- Viewer reads findings text safely and shows it on node cards; no other UI changes.
 - Existing user edit to 00_CONTEXT.md is included with A.
 
 ## Verification
+
+- Section F/H: full pytest -q passes (59 tests), including deterministic equality
+  of all seven CSVs, regenerated-artifact viewer loading, monotone blocking,
+  forced candidate fallback, cycles, dilution and all boolean flags.
+- Updated service smoke passes on port 8001; JavaScript syntax, language and
+  diff checks pass. Read-only independent review found no remaining rule errors.
+- Official test-run result: Blocking these 10 accounts would cut 14.3% of case money flow in the observed graph.
 
 - Section C: full pytest -q passes (56 tests); smoke, language and diff checks pass.
 
@@ -44,6 +55,5 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
 
 ## Next
 
-Implement F in order. Test, update this file, commit and push each
-section. Add H documentation only. End with make pipeline and report computed
-role counts, flag counts and blocking summary.
+Run final make pipeline, verify regenerated artifacts through the updated viewer,
+commit/push outputs and report computed role counts, flag counts and blocking summary.

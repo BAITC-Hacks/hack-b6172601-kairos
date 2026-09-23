@@ -4,6 +4,7 @@ import argparse
 import time
 from pathlib import Path
 
+from pipeline.blocking import blocking_plan, blocking_summary
 from pipeline.clusters import add_clusters, assign_clusters
 from pipeline.export import write_outputs
 from pipeline.continuation import add_continuation
@@ -32,6 +33,8 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     metrics, skeleton_edges = add_skeleton(metrics, edges, graph)
     Path(out).mkdir(parents=True, exist_ok=True)
     skeleton_edges.to_csv(Path(out) / "skeleton_edges.csv", index=False, float_format="%.12g")
+    plan, limited = blocking_plan(metrics, edges)
+    plan.to_csv(Path(out) / "blocking_plan.csv", index=False, float_format="%.12g")
     write_outputs(metrics, clusters, edges, projected, out)
     counts = metrics.role.value_counts()
     for role in ("coordinator", "consolidator", "distributor", "transit", "terminal", "peripheral"):
@@ -41,6 +44,9 @@ def run(data: str = "data/raw", out: str = "out") -> None:
             print(f"Warning: {role} count is outside the expected range")
     for flag in (*FINDING_TEXT, "likely_legit_payouts", "seed_hub"):
         print(f"{flag}: {int(metrics[flag].sum())}")
+    if limited:
+        print("Blocking candidate search exceeded 60 seconds; used top 100 by priority.")
+    print(blocking_summary(plan))
     print(f"Analyzed {len(nodes)} nodes, {len(edges)} edges and {len(clusters)} clusters in {time.monotonic() - started:.2f}s")
 
 

@@ -116,3 +116,51 @@ def test_seed_hub_requires_seed_and_preserves_priority():
     pd.testing.assert_series_equal(result.role, metrics.role)
     assert "above street level" in result.loc[0, "evidence"]
     assert result.loc[2, "evidence"] == metrics.loc[2, "evidence"]
+
+
+def test_blocking_prefers_downstream_impact_and_is_monotone(monkeypatch):
+    import numpy as np
+    from dataclasses import replace
+    from pipeline import blocking
+    from pipeline.taint import add_taint
+
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4], "is_seed": [True, False, False, False],
+        "in_kzt": [0, 100, 50, 50], "out_kzt": [100, 100, 0, 0],
+        "role": ["peripheral", "transit", "terminal", "terminal"],
+        "priority_score": [0, .5, 1, 1],
+    })
+    edges = pd.DataFrame({"src": [1, 2, 2], "dst": [2, 3, 4], "sum_kzt": [100., 50., 50.]})
+    simulation = blocking.TaintSimulation(metrics, edges)
+    np.testing.assert_allclose(simulation.trace(np.ones(4, dtype=bool)), add_taint(metrics, edges).taint_kzt)
+    plan, limited = blocking.blocking_plan(metrics, edges)
+    assert not limited
+    assert plan.gid.tolist() == [2, 3, 4]
+    assert plan.cut_share_cumulative.is_monotonic_increasing
+    assert plan.cut_share_cumulative.iloc[0] == 1
+    monkeypatch.setattr(blocking, "CONFIG", replace(blocking.CONFIG, blocking_max_seconds=0))
+    fallback, limited = blocking.blocking_plan(metrics, edges)
+    assert limited
+    pd.testing.assert_frame_equal(fallback, plan)
+    edges["sum_kzt"] = 0.
+    assert blocking.blocking_plan(metrics, edges)[0].cut_share_cumulative.eq(0).all()
+
+
+def test_blocking_preserves_original_dilution_and_bounds_cycles():
+    import numpy as np
+    from pipeline.blocking import TaintSimulation, blocking_plan
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4], "is_seed": [True, False, False, False],
+        "in_kzt": [0, 150, 100, 100], "out_kzt": [100, 200, 50, 0],
+        "role": ["peripheral"] * 4, "priority_score": [0, 1, .8, .7],
+    })
+    edges = pd.DataFrame({"src": [1, 2, 3, 2], "dst": [2, 3, 2, 4],
+                          "sum_kzt": [100., 100., 50., 100.]})
+    model = TaintSimulation(metrics, edges)
+    original = model.trace(np.ones(4, dtype=bool))
+    after = model.trace(np.array([True, True, False, True]))
+    assert (after <= original + 1e-9).all()
+    assert after[3] == 50.  # Removing the other branch must not increase this share.
+    plan, _ = blocking_plan(metrics, edges)
+    assert plan.cut_share_cumulative.between(0, 1).all()
+    assert plan.cut_share_cumulative.is_monotonic_increasing

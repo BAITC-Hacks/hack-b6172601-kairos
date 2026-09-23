@@ -47,6 +47,9 @@ class PipelineConfig:
     payout_priority_multiplier: float = 0.5
     seed_hub_min_in: int = 5
     seed_hub_min_out: int = 20
+    blocking_steps: int = 10
+    blocking_max_seconds: float = 60.0
+    blocking_candidate_limit: int = 100
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7

@@ -200,3 +200,11 @@ Revisit if: never, while these clauses stand.
   Levels use shortest forward seed-hop distance, not a claim of organizational
   rank; cyclic observed graphs need not form a strict hierarchy. Nodes must be
   endpoints of retained edges to be marked in_skeleton.
+- Blocking selection maximizes marginal reduction at other surviving accounts.
+  Reported cumulative cut uses the fixed original total node-taint denominator,
+  including prevented inflow to removed accounts; sums represent repeated-hop
+  exposure, not unique money. Keep original haircut denominators and fixed 20
+  passes in every scenario for comparable, monotone counterfactuals.
+- Candidate ties use priority then gid. Search restarts on the top 100 candidates
+  after 60 seconds. Full pipeline regression now enforces the spec's five-minute
+  limit, allowing that fallback plus layout/export time.

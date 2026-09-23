@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse, Response
 router = APIRouter()
 DOWNLOADS = frozenset({"nodes_roles.csv", "clusters.csv", "top_nodes.csv"})
 FILES = ("graph.json", "metrics.csv", "nodes_roles.csv", "clusters.csv", "top_nodes.csv")
-TEXT_FIELDS = {"gid", "role", "evidence", "why", "hypothesis", "top_gids", "peripheral_reason"}
+TEXT_FIELDS = {"gid", "role", "evidence", "why", "hypothesis", "top_gids", "peripheral_reason", "findings"}
 
 
 def csv_rows(raw: bytes) -> list[dict]:

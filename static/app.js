@@ -221,6 +221,10 @@ function renderCard(data) {
   card.append(badges);
   const evidence = el("section", "card-section"); evidence.append(el("h3", "", "Role evidence"), el("p", "evidence", n.evidence || "No evidence recorded.")); card.append(evidence);
   const community = el("section", "card-section"); community.append(el("h3", "", "Cluster hypothesis"), el("p", "", cluster.hypothesis || "No cluster description.")); card.append(community);
+  if (n.findings) {
+    const findings = el("section", "card-section");
+    findings.append(el("h3", "", "Findings"), el("p", "evidence", n.findings)); card.append(findings);
+  }
   const metricsSection = el("section", "card-section"), metrics = el("dl", "metrics"); metricsSection.append(el("h3", "", "Observed metrics"), metrics);
   addMetric(metrics, "Incoming payers", n.in_deg ?? "—"); addMetric(metrics, "Outgoing recipients", n.out_deg ?? "—");
   addMetric(metrics, "Incoming KZT", fullAmount(n.in_kzt)); addMetric(metrics, "Outgoing KZT", fullAmount(n.out_kzt));

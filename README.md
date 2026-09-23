@@ -74,6 +74,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings, payout and seed-hub flags and one-sentence evidence |
 | `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
 | `out/skeleton_edges.csv` | src, dst, sum_kzt from the two-sided hierarchy trace | Drops edges below 1% of recipient inflow |
+| `out/blocking_plan.csv` | step, gid, role, cut_share_cumulative for 10 greedy non-seed removals | Deterministic choices; cumulative cut never decreases |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
 
 | Viewer requirement | Implementation | Check |
@@ -86,7 +87,7 @@ Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
 cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
 `generated_at` in graph JSON is intentionally the current generation timestamp;
 CSV content is deterministic. Pipeline logs report role counts and elapsed time.
-The official batch limit is five minutes; automated regression limit is 60 seconds.
+The official batch limit is five minutes; automated regression limit is also five minutes, including counterfactual blocking.
 
 ## Analyst viewer
 
@@ -236,3 +237,23 @@ escalating; this is a pattern hypothesis, not a confirmed legitimate business.
 Known seeds with in-degree >=5 or out-degree >=20 receive a seed_hub flag and an
 evidence suffix noting that the case may reach above street level. This changes
 neither their role nor their priority score.
+
+
+Blocking impact is a counterfactual calculation, not an account-blocking action.
+At each of ten steps it removes the non-seed whose removal reduces taint reaching
+other remaining accounts the most, with priority then gid breaking ties.
+The haircut model retains original incoming/outgoing denominators and uses 20
+synchronous passes for every scenario, so missing edges cannot inflate the
+remaining accounts' shares. All candidates are considered; if that search
+exceeds 60 seconds, it restarts with the top 100 by priority. The cumulative cut
+compares total remaining node taint with the original total, including prevented
+inflow to removed accounts. This is observed transfer exposure across multiple
+hops, not unique currency, a prediction of real-world interdiction, or proof of guilt.
+
+Development potential: an analyst could mark alerts as confirmed or false
+positive, for example "legit business." As those labels accumulate, thresholds
+and priority weights could be re-tuned and evaluated on held-out labels. Later,
+a supervised model could replace the fixed weights. This feedback loop is a
+future direction only; no labeling or model-training functionality is implemented.
+
+Blocking these 10 accounts would cut 14.3% of case money flow in the observed graph.
