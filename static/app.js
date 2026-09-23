@@ -4,7 +4,7 @@ const $ = (id) => document.getElementById(id);
 const canvas = $("graph-canvas");
 const ctx = canvas.getContext("2d");
 const roleOrder = ["consolidator", "coordinator", "distributor", "transit", "terminal", "peripheral"];
-const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false};
+const state = {nodes: [], edges: [], byId: new Map(), incoming: new Map(), outgoing: new Map(), top: [], selected: null, focus: new Set(), ego: false, egoPositions: new Map(), colourBy: "role", visibleRoles: new Set(roleOrder.filter((role) => role !== "peripheral")), scale: 1, panX: 0, panY: 0, width: 0, height: 0, dirty: false, dragging: false, moved: false, cameraFrame: null};
 const roleColours = Object.fromEntries(roleOrder.map((role) => [role, getComputedStyle(document.documentElement).getPropertyValue(`--role-${role}`).trim()]));
 const canvasColours = Object.fromEntries(["--label-background", "--text-primary", "--node-ring", "--surface-1", "--edge-focus", "--edge-muted"].map((name) => [name, getComputedStyle(document.documentElement).getPropertyValue(name).trim()]));
 const cssColour = (name) => canvasColours[name];
@@ -37,17 +37,49 @@ async function getJson(url) {
   return data;
 }
 
-function fitOverview() {
+function cancelCamera() {
+  if (state.cameraFrame !== null) cancelAnimationFrame(state.cameraFrame);
+  state.cameraFrame = null;
+}
+function moveCamera(scale, panX, panY, animate = true) {
+  cancelCamera();
+  const start = {scale: state.scale, panX: state.panX, panY: state.panY};
+  if (!animate || window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+    state.scale = scale; state.panX = panX; state.panY = panY; requestDraw(); return;
+  }
+  let started = null;
+  function step(time) {
+    if (started === null) started = time;
+    const progress = Math.min(1, (time - started) / 360);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    state.scale = start.scale + (scale - start.scale) * eased;
+    state.panX = start.panX + (panX - start.panX) * eased;
+    state.panY = start.panY + (panY - start.panY) * eased;
+    requestDraw();
+    state.cameraFrame = progress < 1 ? requestAnimationFrame(step) : null;
+  }
+  state.cameraFrame = requestAnimationFrame(step);
+}
+function fitOverview(animate = false) {
   if (!state.nodes.length || !state.width || !state.height) return;
   const xs = state.nodes.map((n) => num(n.x));
   const ys = state.nodes.map((n) => num(n.y));
   const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
-  state.scale = Math.min((state.width - 90) / Math.max(1, right - left), (state.height - 110) / Math.max(1, bottom - top));
-  state.panX = -(left + right) / 2 * state.scale;
-  state.panY = -(top + bottom) / 2 * state.scale;
-  requestDraw();
+  const scale = Math.min((state.width - 90) / Math.max(1, right - left), (state.height - 110) / Math.max(1, bottom - top));
+  moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale, animate);
+}
+function fitFocus() {
+  if (!state.selected || !state.width || !state.height) return;
+  const nodes = [...state.focus].map((id) => state.byId.get(id)).filter(Boolean);
+  if (!nodes.length) return;
+  const xs = nodes.map((node) => num(node.x)), ys = nodes.map((node) => num(node.y));
+  const left = Math.min(...xs), right = Math.max(...xs), top = Math.min(...ys), bottom = Math.max(...ys);
+  // A minimum extent keeps isolated and tightly packed accounts at a useful size.
+  const scale = Math.min(3, state.width * .8 / Math.max(100, right - left), state.height * .8 / Math.max(100, bottom - top));
+  moveCamera(scale, -(left + right) / 2 * scale, -(top + bottom) / 2 * scale);
 }
 function resize() {
+  cancelCamera();
   const rect = canvas.getBoundingClientRect();
   const oldWidth = state.width;
   state.width = Math.max(1, rect.width);
@@ -162,8 +194,9 @@ function buildEgo() {
 }
 function setEgo(enabled) {
   if (!state.selected) return;
+  cancelCamera();
   state.ego = enabled;
-  if (enabled) buildEgo(); else fitOverview();
+  if (enabled) buildEgo(); else fitFocus();
   $("ego-view").textContent = enabled ? "Overview layout" : "Ego view";
   $("view-label").textContent = enabled ? "Ego view · money flows left → right · Esc for overview" : "Two-hop focus · drag to pan · wheel to zoom";
   requestDraw();
@@ -175,7 +208,7 @@ function resetView() {
   $("node-card").replaceChildren(el("div", "empty-detail", "Select an account to inspect its role and money flow."));
   document.querySelectorAll(".top-list button").forEach((button) => button.classList.remove("active"));
   updateVisibleCount();
-  fitOverview();
+  fitOverview(true);
 }
 async function selectNode(id) {
   if (!state.byId.has(id)) return;
@@ -183,9 +216,7 @@ async function selectNode(id) {
   updateVisibleCount();
   $("ego-view").disabled = false; $("ego-view").textContent = "Ego view";
   $("view-label").textContent = "Two-hop focus · drag to pan · wheel to zoom";
-  const node = state.byId.get(id);
-  state.panX = -num(node.x) * state.scale;
-  state.panY = -num(node.y) * state.scale;
+  fitFocus();
   document.querySelectorAll(".top-list button").forEach((button) => button.classList.toggle("active", button.dataset.gid === id));
   requestDraw();
   $("node-card").replaceChildren(el("p", "subtle", "Loading account…"));
@@ -292,7 +323,7 @@ function hitTest(x, y) {
   return best;
 }
 
-canvas.addEventListener("pointerdown", (event) => { state.dragging = true; state.moved = false; state.lastX = event.clientX; state.lastY = event.clientY; canvas.classList.add("dragging"); canvas.setPointerCapture(event.pointerId); });
+canvas.addEventListener("pointerdown", (event) => { cancelCamera(); state.dragging = true; state.moved = false; state.lastX = event.clientX; state.lastY = event.clientY; canvas.classList.add("dragging"); canvas.setPointerCapture(event.pointerId); });
 canvas.addEventListener("pointermove", (event) => {
   if (state.dragging) {
     const dx = event.clientX - state.lastX, dy = event.clientY - state.lastY;
@@ -312,6 +343,7 @@ canvas.addEventListener("pointerup", (event) => {
 canvas.addEventListener("pointerleave", () => { $("tooltip").hidden = true; });
 canvas.addEventListener("wheel", (event) => {
   event.preventDefault();
+  cancelCamera();
   const rect = canvas.getBoundingClientRect(), x = event.clientX - rect.left - state.width / 2, y = event.clientY - rect.top - state.height / 2;
   const next = Math.max(.03, Math.min(15, state.scale * Math.exp(-event.deltaY * .001)));
   const factor = next / state.scale; state.panX = x - (x - state.panX) * factor; state.panY = y - (y - state.panY) * factor; state.scale = next; requestDraw();

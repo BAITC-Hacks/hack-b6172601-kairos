@@ -1,10 +1,16 @@
 # Current handoff
 
 Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b items 4 and 6 are implemented; remaining viewer polish is in progress with a
+Spec 03b items 4, 6 and 1 are implemented; remaining viewer polish is in progress with a
 16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
 
 ## Viewer polish: items 4 and 6
+
+- Item 1 camera animation is integrated as a prerequisite for item 7's
+  click-to-focus-and-zoom lists. All selection routes fit two-hop bounds to 80%
+  of the canvas; Overview fits back. Drag/wheel/reselection cancel the animation.
+  Reduced-motion preference is respected. Browser selection and Node VM camera
+  checks pass, including cancellation and isolated-account bounds.
 
 - Default overview hides peripheral nodes (440 visible accounts); the checkbox
   restores them. Searching/selecting a peripheral account still reveals it.
