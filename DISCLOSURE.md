@@ -1,72 +1,91 @@
 # Disclosure of pre-existing material
 
-The hackathon rules require participants to disclose any previously created
-code, third-party libraries, open models, templates and datasets used in the
-project. This file is that disclosure.
+## Before the competition
 
-## Organiser clarification
+A generic FastAPI/Docker application scaffold was prepared before the event and
+imported in **`b92291c` — H1: import pre-built scaffold (see DISCLOSURE.md)**.
+It contained no Money Graph case analysis. The source boundary is visible in the
+repository history; the earlier `44ca746` is the repository's initial commit.
 
-Clause 5.4.4.2 of the regulations allows pre-prepared technical components, own
-libraries, templates and infrastructure, provided they are not a finished product
-and not the main part of the solution, and provided the functionality answering
-the task is developed during the competitive part. This disclosure is made under
-clause 5.4.4.
-
-<!-- TODO on the day: paste the date of the organiser's answer and, if the chat
-     provides one, a link to the message. -->
-
-## Pre-existing code authored by the team before the competition
-
-A generic application scaffold was prepared before the competition start and
-imported into this repository in a single commit at the beginning of the
-competitive session. It contains **no case-specific business logic**: the case
-was not published before the start.
-
-The scaffold consists of:
-
-| Path | What it is |
+| Pre-built material | Current use |
 |---|---|
-| `app/main.py`, `app/api/routes.py` | FastAPI application wiring, three generic endpoints |
-| `app/agent/` | Generic tool-calling agent loop, OpenAI client wrapper, execution trace |
-| `app/core/` | Settings, structured logging, error types and handlers |
-| `app/data/store.py` | Generic in-memory dataset accessor |
-| `app/tools/finance.py` | Placeholder example tools over synthetic data |
-| `static/index.html` | UI page with no build step |
-| `static/ui.js` | Rendering helpers: table, KPI row, bar chart, key-value card, states |
-| `static/styles.css` | Stylesheet, light and dark |
-| `app/core/ratelimit.py` | Per-IP request limiter for the public deployment |
-| `deploy/` | Deployment configuration for Render, Fly.io and Railway |
-| `Dockerfile`, `docker-compose.yml`, `Makefile` | Runtime and developer commands |
-| `scripts/` | Data seeding, smoke test, language guard, commit helper |
-| `tests/` | Tests for the scaffold |
+| FastAPI application wiring, health/tools/ask endpoints | Retained infrastructure; viewer API added during the event |
+| Generic tool registry, agent loop, API-client wrapper and execution traces | Retained and tested; no case-aware analyst tools or runtime model required |
+| Configuration, logging, errors and rate limiter | Retained application infrastructure |
+| HTML/CSS page and generic rendering helpers | Page/styles replaced for the case viewer; unused UI helpers removed |
+| Docker, Compose, Makefile, deployment configuration | Adapted to compute official Parquet artifacts and serve the graph |
+| Smoke/language checks, developer helpers and scaffold tests | Retained where applicable; obsolete synthetic-data tests removed |
+| Synthetic financial examples, seeder and JSON accessor | Removed; not part of the case runtime or submitted dataset |
 
-Everything committed after that first commit was written during the competitive
-session. The commit history in this repository shows the boundary.
+This disclosure records pre-prepared technical components under the competition's
+third-party/pre-existing-material disclosure requirement. The scaffold was an
+infrastructure starting point, not a finished case solution.
 
-<!-- TODO on the day: name the first commit hash here once it exists. -->
+## Built during the competitive session
 
-## Third-party dependencies
+All case-specific computation was implemented after the case was supplied:
 
-All dependencies are listed in `requirements.txt` as version ranges, and the
-exact resolved versions of the environment used for the submission are recorded
-in `requirements.lock.txt`. They are standard open-source packages installed
-from PyPI: FastAPI, Uvicorn, Pydantic, pydantic-settings, httpx, the OpenAI
-Python SDK, pytest and pytest-asyncio.
+- Official Parquet loading and consistency validation; all-node directed graph.
+- Flow/centrality/timing features, haircut taint and seed-source measures.
+- Ordered explainable role rules, priority weights, communities and hypotheses.
+- Convergence/timing findings, payout and seed-hub flags, continuation estimates,
+  extension requests, hierarchy skeleton and simulated blocking plan.
+- Required CSV exports, metrics and graph JSON, deterministic verification.
+- Read-only graph APIs, canvas viewer, exact-gid/suffix search, ego networks,
+  node evidence, role/priority breakdowns, filters and method display.
+- Case documentation, runnable jury scenario and deployment verification.
 
-## Models
+The organiser's supplied brief, dataset documentation and starter example informed
+the work. The starter is not a vendored runtime dependency; implementation and
+case-specific changes are reviewable in the competition commit history.
 
-<!-- TODO: fill in on the day -->
-OpenAI models accessed through the API; the exact model is configured by the
-`OPENAI_MODEL` environment variable and recorded in the README.
+## AI tools
 
-## Datasets
+OpenAI Codex was used for implementation, testing, documentation and coordination.
+Claude / Claude Code use for code generation/review is recorded in the original
+scaffold disclosure. Human direction selected the case, constraints and thresholds; generated
+work was checked against executed tests and supplied data.
 
-<!-- TODO: replace on the day if the organisers provide data -->
-Synthetic data generated by `scripts/seed_data.py`. No real personal or
-financial data is used.
+No model is trained or used by the role assignment, scoring, findings, pipeline
+or viewer. The retained generic OpenAI-compatible client is not a case-aware AI
+analyst. No model API key is needed to reproduce the submitted main scenario.
 
-## AI tools used during development
+## Data
 
-<!-- TODO: confirm on the day -->
-OpenAI Codex and Claude Code were used to generate and review code, which the
-rules expressly permit.
+The three files in `data/raw/` are the organiser-supplied anonymised hackathon
+dataset: July 2026 account nodes, aggregated directed edges and transactions.
+They contain 2,248 accounts (81 seeds), 3,119 edges and 4,840 transactions. Use is
+for the hackathon task; no broader data licence is asserted here.
+
+Raw inputs are immutable and committed so judges can reproduce the computation.
+No external datasets, enrichment, names or invented customer attributes are used.
+`out/` contains computed artifacts, not pre-recorded answers substituted for a
+live run. Docker excludes those artifacts and recomputes them from raw inputs.
+
+## Open-source dependencies and licences
+
+The table records licence metadata from the installed locked packages. Version
+ranges are in `requirements.txt`; exact direct and transitive versions are in
+`requirements.lock.txt`. Package distributions retain their own licence texts
+and notices; this summary does not replace them.
+
+| Library / component | Purpose | Licence |
+|---|---|---|
+| pandas | Tabular metrics and CSVs | BSD-3-Clause |
+| PyArrow | Parquet I/O | Apache-2.0 |
+| NetworkX | Graph algorithms and Louvain communities | BSD-3-Clause |
+| NumPy | Numeric computation and layout | BSD-3-Clause; distribution also includes 0BSD, MIT, Zlib and CC0-1.0 components |
+| FastAPI | HTTP application | MIT |
+| Uvicorn | ASGI server | BSD-3-Clause |
+| Pydantic, pydantic-settings | Validation and settings | MIT |
+| HTTPX | HTTP client infrastructure/tests | BSD-3-Clause |
+| OpenAI Python SDK | Retained generic optional client | Apache-2.0 |
+| pytest | Test runner | MIT |
+| pytest-asyncio | Async tests | Apache-2.0 |
+| CPython 3.11 | Docker runtime | Python Software Foundation licence |
+
+The frontend is project HTML/CSS/vanilla JavaScript Canvas; no third-party graph
+bundle or CDN is loaded. Docker uses the official `python:3.11-slim` image, whose
+OS/runtime components carry their respective upstream licences. Fly.io is a
+hosting service, not an analysis dependency. No external model weights are
+bundled with the project.

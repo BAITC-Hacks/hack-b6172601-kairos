@@ -24,6 +24,15 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
   (5 matches, correct top-1 first), measured role/priority evidence and ego view
   with 10 accounts. No URL is advertised until deployment verification passes.
 
+- B complete: replaced disclosure TODOs and synthetic-data claims with the H1 commit
+  boundary, case-specific work, AI tools, organiser-only anonymised data and
+  direct library licences checked against installed package metadata.
+  Full tests: 65 pass; language and diff guards pass.
+- GitHub rendered README HTML retrieved through authenticated API and visually
+  checked: headings, five-step list and six tables render correctly. The browser
+  is signed out of the private repository; GitHub live Mermaid rendering remains
+  unverified (both Mermaid sources are identical).
+
 ## Current analysis and viewer
 
 - 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Role counts:
@@ -48,6 +57,6 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
 
 ## Remaining work
 
-B disclosure, D Docker completion checks,
+D Docker completion checks,
 E remote clean clone with Docker and a fresh Python venv, F bounded Fly deploy.
 Record failures honestly; keep the public URL out of README unless verified.
