@@ -58,16 +58,12 @@ No other specs implemented. No Fly changes. Deadline: 18:00 Asia/Almaty.
 ## Next session
 
 Ready for handoff. Await the next assigned spec; do not implement others automatically.
-User-created untracked 03b_VIEWER_POLISH.md and 05_README_DEPLOY.md were left untouched.
+User-created untracked 03b_VIEWER_POLISH.md, 04b_TUNING.md and
+05_README_DEPLOY.md were left untouched.
 
-## Publication pending explicit approval
+## Artifact publication
 
-Code and README section commits are pushed through 4513875. The final regenerated
-out/*.csv and out/graph.json remain local and uncommitted: automatic approval
-review rejected their commit-and-push twice, citing newly derived sensitive
-transaction-graph data and insufficient specific authorization to publish it.
-The second review was given evidence that origin/main already contains the raw
-data and previous outputs, but still rejected publication. Ask the user explicitly
-to approve publishing these artifacts to
-https://github.com/BAITC-Hacks/hack-b6172601-kairos before another artifact push.
-The outputs are complete and byte-identical to the tested CSV fixtures.
+The user explicitly approved publishing the verified regenerated out/*.csv and
+out/graph.json artifacts to the existing repository after the automatic review
+rejection. This artifact commit records that approval and includes all seven CSVs
+and graph JSON. No code changed after the 59-test suite and final pipeline run.
