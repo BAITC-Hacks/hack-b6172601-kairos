@@ -189,8 +189,9 @@ Revisit if: never, while these clauses stand.
 - Coordinator inputs are first-pass consolidator candidates (in-degree >=5),
   including candidates later promoted to coordinator. This avoids circular role
   dependencies. Source communities are computed independently before roles.
-- Scatter/gather requires two simple 2-3-hop paths with distinct first
-  intermediaries from one source to a target. A lone path or cycle is insufficient.
+- Scatter/gather requires at least three simple 2-3-hop branches with distinct
+  first intermediaries from one source to a target, every edge >=50,000 KZT
+  (spec 04b). A lone path or cycle is insufficient.
 - Finding bonuses apply before existing seed/cut-off multipliers and global
   maximum normalization, so those uncertainty discounts still apply.
 - Continuation uses visible depth 1-3 quartile boundaries and empirical cell
@@ -208,3 +209,13 @@ Revisit if: never, while these clauses stand.
 - Candidate ties use priority then gid. Search restarts on the top 100 candidates
   after 60 seconds. Full pipeline regression now enforces the spec's five-minute
   limit, allowing that fallback plus layout/export time.
+
+## Threshold tuning (spec 04b)
+
+- Remove the source-community coordinator alternative. Two consolidator-candidate
+  payers still yield 94 coordinators; the prescribed fallback of three yields 29,
+  while 38 nodes retain consolidator roles. Candidates still have in-degree >=5.
+- Three scatter/gather branches with every edge >=50,000 KZT yield 25 targets;
+  the 100,000 KZT fallback is unnecessary. Amounts are aggregate edge totals.
+- These thresholds are tuned on the supplied graph for reviewable hypotheses,
+  not validated against role labels. Revisit with labelled analyst feedback.

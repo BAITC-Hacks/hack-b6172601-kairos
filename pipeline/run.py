@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pipeline.blocking import blocking_plan, blocking_summary
 from pipeline.clusters import add_clusters, assign_clusters
+from pipeline.config import CONFIG
 from pipeline.export import write_outputs
 from pipeline.continuation import add_continuation
 from pipeline.features import compute_features
@@ -19,6 +20,9 @@ from pipeline.skeleton import add_skeleton
 
 def run(data: str = "data/raw", out: str = "out") -> None:
     started = time.monotonic()
+    print(f"Coordinator threshold: >= {CONFIG.coordinator_min_consolidators} consolidator candidates")
+    print(f"Scatter/gather thresholds: >= {CONFIG.scatter_gather_min_branches} distinct first intermediaries; "
+          f"every branch edge >= {CONFIG.scatter_gather_min_edge_kzt:,} KZT; 2-3 hops")
     nodes, edges, transactions = load_data(data)
     metrics, graph = compute_features(nodes, edges, transactions)
     metrics = add_taint(metrics, edges)

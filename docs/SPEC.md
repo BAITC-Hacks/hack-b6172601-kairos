@@ -52,7 +52,11 @@ Counts are validation expectations for supplied data, not hardcoded output logic
 
 ## Scope
 Implemented milestones: docs/specs/01_PIPELINE.md, docs/specs/03_VIEWER.md, and docs/specs/04_FINDINGS.md (A-G code, H documentation only),
-following 00_CONTEXT.md. The pipeline also produces extension_requests.csv, skeleton_edges.csv and
+with threshold tuning in docs/specs/04b_TUNING.md, following 00_CONTEXT.md.
+Coordinators are non-seeds receiving from >=3 first-pass consolidator candidates
+(in-degree >=5); source clusters do not qualify. Scatter/gather requires >=3
+distinct first intermediaries on simple 2-3-hop paths from one source to a target,
+with every path edge >=50,000 KZT. The pipeline also produces extension_requests.csv, skeleton_edges.csv and
 blocking_plan.csv for continuation, hierarchy and counterfactual analysis.
 It produces metrics.csv and graph.json
 in addition to the three required case CSVs. The read-only viewer serves these

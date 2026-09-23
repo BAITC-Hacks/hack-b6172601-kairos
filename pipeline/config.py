@@ -7,9 +7,7 @@ from dataclasses import dataclass
 class PipelineConfig:
     expected_nodes: int = 2248
     aggregation_tolerance_kzt: float = 1e-6
-    coordinator_min_consolidators: int = 2
-    coordinator_min_clusters: int = 2
-    coordinator_min_in: int = 3
+    coordinator_min_consolidators: int = 3
     consolidator_min_in: int = 5
     distributor_min_out: int = 10
     distributor_min_ratio: int = 2
@@ -30,7 +28,8 @@ class PipelineConfig:
     synchronous_inflow_min_payers: int = 3
     fast_pass_min_share: float = 0.8
     fast_pass_min_kzt: int = 100_000
-    scatter_gather_min_branches: int = 2
+    scatter_gather_min_branches: int = 3
+    scatter_gather_min_edge_kzt: int = 50_000
     finding_priority_bonus: float = 0.05
     finding_priority_cap: float = 0.15
     continuation_min_depth: int = 1
@@ -75,7 +74,7 @@ ROLE_WEIGHTS = {
 def role_rules_markdown(config: PipelineConfig = CONFIG) -> str:
     """Render the README role thresholds from the runtime configuration."""
     rows = [
-        ("Coordinator", f"Non-seed; receives from >= {config.coordinator_min_consolidators} consolidator candidates OR >= {config.coordinator_min_clusters} source clusters with in-degree >= {config.coordinator_min_in}; betweenness breaks score ties"),
+        ("Coordinator", f"Non-seed; receives from >= {config.coordinator_min_consolidators} consolidator candidates (in-degree >= {config.consolidator_min_in}); betweenness breaks score ties"),
         ("Consolidator", f"In-degree >= {config.consolidator_min_in}"),
         ("Distributor", f"Out-degree >= {config.distributor_min_out} and >= {config.distributor_min_ratio} x in-degree (minimum denominator 1)"),
         ("Transit", f"Non-seed; in/out-degree >= 1; observed out/in ratio {config.transit_min_ratio:.1f}-{config.transit_max_ratio:.1f}"),

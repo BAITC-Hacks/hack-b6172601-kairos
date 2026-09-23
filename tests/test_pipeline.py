@@ -16,6 +16,7 @@ import pandas as pd
 import pytest
 
 from pipeline import load as load_module
+from pipeline.config import CONFIG
 from pipeline.features import _fast_pass_share
 from pipeline.taint import add_taint
 
@@ -291,9 +292,17 @@ def test_findings_artifacts_and_viewer_integration(pipeline_outputs):
              "likely_legit_payouts", "seed_hub", "in_skeleton"]
     assert all(metrics[flag].dtype == bool for flag in flags)
     coordinators = metrics[metrics.role.eq("coordinator")]
+    consolidators = metrics[metrics.role.eq("consolidator")]
+    assert 5 <= len(coordinators) <= 30
+    assert len(consolidators) >= 30
+    assert metrics.scatter_gather.sum() < 100
+    assert CONFIG.coordinator_min_consolidators == 3
+    assert CONFIG.scatter_gather_min_branches == 3
+    assert CONFIG.scatter_gather_min_edge_kzt == 50_000
     assert not coordinators.is_seed.any()
-    assert (coordinators.consolidator_payers.ge(2)
-            | (coordinators.source_clusters.ge(2) & coordinators.in_deg.ge(3))).all()
+    assert coordinators.consolidator_payers.ge(CONFIG.coordinator_min_consolidators).all()
+    assert metrics.loc[~metrics.is_seed & metrics.consolidator_payers.ge(
+        CONFIG.coordinator_min_consolidators), "role"].eq("coordinator").all()
     extensions = pd.read_csv(output / "extension_requests.csv", dtype={"gid": str})
     assert set(extensions.gid) <= set(metrics.loc[metrics.truncated, "gid"])
     assert extensions.p_continues.ge(.5).all()

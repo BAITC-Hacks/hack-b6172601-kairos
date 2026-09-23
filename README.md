@@ -71,7 +71,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/nodes_roles.csv` | gid, role, role_score, cluster_id, priority_score, evidence | Every one of 2,248 nodes exactly once; evidence <=200 chars |
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
-| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings, payout and seed-hub flags and one-sentence evidence |
+| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; tuned coordinator and scatter/gather rules meet spec 04b count targets; boolean findings and evidence |
 | `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
 | `out/skeleton_edges.csv` | src, dst, sum_kzt from the two-sided hierarchy trace | Drops edges below 1% of recipient inflow |
 | `out/blocking_plan.csv` | step, gid, role, cut_share_cumulative for 10 greedy non-seed removals | Deterministic choices; cumulative cut never decreases |
@@ -110,7 +110,7 @@ The existing `/api/ask` endpoint retains its original configuration requirements
 <!-- ROLE_RULES_START -->
 | Role | First-matching rule |
 | --- | --- |
-| Coordinator | Non-seed; receives from >=2 consolidator candidates OR >=2 source clusters with in-degree >=3; betweenness breaks score ties |
+| Coordinator | Non-seed; receives from >=3 consolidator candidates (in-degree >=5); betweenness breaks score ties |
 | Consolidator | In-degree >= 5 |
 | Distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) |
 | Transit | Non-seed; in/out-degree >= 1; observed out/in ratio 0.8-1.2 |
@@ -195,16 +195,25 @@ implemented specifications are `docs/specs/00_CONTEXT.md`, `01_PIPELINE.md` and
 `03_VIEWER.md`.
 The next session should read `docs/STATE.md` for verified status and scope boundaries.
 
-Coordinator roles use two passes: consolidator candidates meet the in-degree rule before coordinator precedence is applied. Source clusters are assigned before roles; cluster summaries use final roles and priorities.
+Coordinator roles use two passes: consolidator candidates meet the in-degree rule before coordinator precedence is applied. Source clusters do not qualify a coordinator. Clusters are assigned before roles; cluster summaries use final roles and priorities.
 
 
 Findings add 0.05 each (capped at 0.15) to raw priority before seed/cut-off
 multipliers and normalization: direct inflow from >=2 seeds, >=3 distinct payers
 on one calendar date, fast-pass share >=0.8 with outgoing >=100,000 KZT, and
 scatter/gather. The latter requires simple paths of 2-3 hops from the same source
-through at least two distinct first intermediaries; cycles and a lone chain do
-not qualify. Each fired finding is explained in metrics and top-node reasons.
+through at least three distinct first intermediaries, with every branch edge
+>=50,000 KZT; cycles and a lone chain do not qualify. Each fired finding is explained in metrics and top-node reasons.
 Fast-pass is timing correlation, not proof that the same money was forwarded.
+
+After spec 04b tuning, roles are coordinator 29, consolidator 38, distributor 42,
+transit 67, terminal 264 and peripheral 1,808. Finding counts are
+common_counterparty 24, synchronous_inflow 38, fast_pass 89, scatter_gather 25,
+likely_legit_payouts 2 and seed_hub 9. Two consolidator payers produced 94
+coordinators, so the configured threshold is three. The 50,000 KZT branch floor
+already meets the scatter/gather target; no increase to 100,000 was needed.
+The refreshed pipeline completed in 42.20 seconds on the development machine.
+These thresholds were tuned on this dataset, without ground-truth labels.
 
 
 Hop-4 continuation estimates use only depth 1-3 nodes, where outgoing transfers

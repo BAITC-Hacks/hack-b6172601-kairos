@@ -13,6 +13,11 @@ FINDING_TEXT = {
 
 
 def scatter_gather_targets(graph: nx.DiGraph) -> set[int]:
+    # Every edge of a qualifying branch must meet the amount threshold.
+    original = graph
+    graph = nx.subgraph_view(
+        original, filter_edge=lambda src, dst: original[src][dst].get("sum_kzt", 0)
+        >= CONFIG.scatter_gather_min_edge_kzt)
     targets = set()
     for source in graph:
         branches: dict[int, set[int]] = {}

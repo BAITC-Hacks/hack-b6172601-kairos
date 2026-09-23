@@ -33,18 +33,12 @@ def add_roles(metrics: pd.DataFrame, edges: pd.DataFrame) -> pd.DataFrame:
     for index, row in enumerate(result.itertuples(index=False)):
         reason = ""
         ratio = float(row.pass_through)
-        if (not row.is_seed and (
-                row.consolidator_payers >= CONFIG.coordinator_min_consolidators or
-                (row.source_clusters >= CONFIG.coordinator_min_clusters and row.in_deg >= CONFIG.coordinator_min_in))):
+        if not row.is_seed and row.consolidator_payers >= CONFIG.coordinator_min_consolidators:
             role = "coordinator"
-            support = max(row.consolidator_payers / CONFIG.coordinator_min_consolidators,
-                          row.source_clusters / CONFIG.coordinator_min_clusters if row.in_deg >= CONFIG.coordinator_min_in else 0)
+            support = row.consolidator_payers / CONFIG.coordinator_min_consolidators
             score = min(0.99, 0.5 + 0.1 * (support - 1)) + 0.01 * betweenness_pct[index]
-            if row.consolidator_payers >= CONFIG.coordinator_min_consolidators:
-                suffixes = ", ".join("..." + str(gid)[-4:] for gid in collectors[row.gid][:3])
-                source = f"{row.consolidator_payers} consolidator candidates ({suffixes})"
-            else:
-                source = f"{row.source_clusters} source clusters via {row.in_deg} payers"
+            suffixes = ", ".join("..." + str(gid)[-4:] for gid in collectors[row.gid][:3])
+            source = f"{row.consolidator_payers} consolidator candidates ({suffixes})"
             explanation = f"Signs of coordination: receives from {source}, {_amount(row.in_kzt)} KZT in."
         elif row.in_deg >= CONFIG.consolidator_min_in:
             role = "consolidator"
