@@ -1,10 +1,17 @@
 # Current handoff
 
 Updated: 2026-09-23. Specs 01, 03, assigned 04 and 04b tuning are implemented.
-Spec 03b items 4, 6 and 1 are implemented; remaining viewer polish is in progress with a
+Spec 03b items 4, 6, 1 and 7 are implemented; remaining viewer polish is in progress with a
 16:20 Asia/Almaty hard stop for this task. Spec 05 is not implemented. No Fly changes.
 
-## Viewer polish: items 4 and 6
+## Viewer polish
+
+- Item 7: role-name buttons and five Flagged lists show short gids, priority
+  and first finding using validated filters over cached pipeline metrics.
+  Browser verified 29 coordinators and 10 extension requests, including
+  selecting a normally hidden peripheral account and opening the correct card.
+- Full pytest -q passes after browsing/zoom integration; smoke, diff and
+  language guards pass. API tests cover all role/flag counts and ordering.
 
 - Item 1 camera animation is integrated as a prerequisite for item 7's
   click-to-focus-and-zoom lists. All selection routes fit two-hop bounds to 80%
@@ -48,6 +55,7 @@ Spec 03b items 4, 6 and 1 are implemented; remaining viewer polish is in progres
 
 ## Next steps
 
-User confirmed the new addendum immediately after item 4: finish items 7 and 8, then return to items 1, 5, 3, 2. Item 1 camera patch is prepared in
-/tmp/kairos-item1-camera.patch for later integration. Commit and push each finished
-item, and commit/push working progress by 16:20. Do not start spec 05 automatically.
+User confirmed the new addendum immediately after item 4: finish item 8,
+then items 5, 3, 2. Item 1 is integrated as the item 7 zoom dependency.
+Commit and push each finished item, and working progress by 16:20.
+Do not start spec 05 automatically.

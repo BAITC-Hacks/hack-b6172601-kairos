@@ -11,10 +11,14 @@ from threading import RLock
 from fastapi import APIRouter
 from fastapi.responses import JSONResponse, Response
 
+from pipeline.config import CONFIG, ROLE_WEIGHTS
+
 router = APIRouter()
 DOWNLOADS = frozenset({"nodes_roles.csv", "clusters.csv", "top_nodes.csv"})
 FILES = ("graph.json", "metrics.csv", "nodes_roles.csv", "clusters.csv", "top_nodes.csv")
 TEXT_FIELDS = {"gid", "role", "evidence", "why", "hypothesis", "top_gids", "peripheral_reason", "findings"}
+ACCOUNT_FLAGS = frozenset({"common_counterparty", "synchronous_inflow", "scatter_gather",
+                           "likely_legit_payouts", "extension_requests"})
 
 
 def csv_rows(raw: bytes) -> list[dict]:
@@ -126,6 +130,30 @@ def top():
 def clusters():
     data = snapshot()
     return data if isinstance(data, Response) else data["clusters"]
+
+
+@router.get("/accounts")
+def accounts(role: str | None = None, flag: str | None = None):
+    if (role is None) == (flag is None):
+        return JSONResponse(status_code=400, content={"error": "Choose exactly one role or flag filter"})
+    if role is not None and role not in ROLE_WEIGHTS:
+        return JSONResponse(status_code=400, content={"error": "Unknown role filter"})
+    if flag is not None and flag not in ACCOUNT_FLAGS:
+        return JSONResponse(status_code=400, content={"error": "Unknown flag filter"})
+    data = snapshot()
+    if isinstance(data, Response):
+        return data
+    rows = data["nodes"].values()
+    if role is not None:
+        matched = (row for row in rows if row["role"] == role)
+    elif flag == "extension_requests":
+        matched = (row for row in rows if row["truncated"] and row.get("p_continues") is not None
+                   and row["p_continues"] >= CONFIG.extension_min_probability)
+    else:
+        matched = (row for row in rows if row.get(flag) is True)
+    return [{"gid": row["gid"], "role": row["role"], "priority_score": row["priority_score"],
+             "findings": row.get("findings", "")} for row in
+            sorted(matched, key=lambda row: (-row["priority_score"], row["gid"]))]
 
 
 @router.get("/download/{name}")

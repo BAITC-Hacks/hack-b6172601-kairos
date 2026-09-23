@@ -85,6 +85,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
 | Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
 | Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |
+| Discover accounts without a gid | Click a role name or a Flagged filter for a priority-ordered account list | Each row shows short gid, priority and first finding; click focuses and zooms |
 
 Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
 cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
@@ -114,6 +115,13 @@ The API serves `/api/graph`, `/api/node/{gid}`, `/api/search?q=...`, `/api/top`,
 startup and refresh when file modification times change. Missing or incomplete
 artifacts return HTTP 503 with the message "Run `make pipeline` first".
 The existing `/api/ask` endpoint retains its original configuration requirements.
+
+Click a role name to list accounts; its checkbox controls map visibility independently.
+**Flagged** lists common counterparties, synchronous inflow, scatter/gather, likely
+legitimate payouts and extension requests (cut-off with continuation probability
+>=0.5). Lists sort by priority descending then gid; selecting a hidden account
+reveals it. `/api/accounts?role=...` or `/api/accounts?flag=...` serves these lists.
+Exactly one supported filter is required; invalid filters return HTTP 400.
 
 ## Role rules
 

@@ -296,14 +296,46 @@ function renderCard(data) {
 function renderFilters(counts) {
   const parent = $("role-filters"); parent.replaceChildren();
   for (const role of roleOrder) {
-    const label = el("label", "role-filter"), input = el("input"), swatch = el("span", "swatch");
+    const label = el("div", "role-filter"), input = el("input"), swatch = el("span", "swatch"), browse = el("button", "role-browse", role);
     input.type = "checkbox"; input.checked = state.visibleRoles.has(role); input.dataset.role = role; swatch.style.background = roleColours[role];
+    input.setAttribute("aria-label", `Show ${role} accounts`);
+    browse.type = "button"; browse.title = `List ${role} accounts by priority`;
+    browse.addEventListener("click", () => browseAccounts("role", role, role));
     input.addEventListener("change", () => { if (input.checked) state.visibleRoles.add(role); else state.visibleRoles.delete(role); updateVisibleCount(); requestDraw(); });
-    label.append(input, swatch, el("span", "", role), el("span", "role-count", counts[role] || 0)); parent.append(label);
+    label.append(input, swatch, browse, el("span", "role-count", counts[role] || 0)); parent.append(label);
   }
   updateVisibleCount();
 }
 function updateVisibleCount() { $("visible-count").textContent = `(${state.nodes.filter(visible).length.toLocaleString("en-US")} shown)`; }
+let browseRequest = 0;
+async function browseAccounts(kind, value, title) {
+  const request = ++browseRequest, list = $("browse-list"), status = $("browse-status");
+  $("browse-section").hidden = false;
+  $("browse-title").textContent = title;
+  list.replaceChildren(); status.textContent = "Loading accounts…";
+  $("browse-section").scrollIntoView({block: "nearest"});
+  try {
+    const rows = await getJson(`/api/accounts?${kind}=${encodeURIComponent(value)}`);
+    if (request !== browseRequest) return;
+    status.textContent = `${rows.length} accounts · highest priority first`;
+    for (const row of rows) {
+      const li = el("li"), button = el("button", "browse-account"), main = el("span", "top-main");
+      button.type = "button"; button.dataset.gid = row.gid; button.title = row.gid;
+      main.append(el("span", "short-gid", shortId(row.gid)), el("span", "role-chip", row.role));
+      const finding = (row.findings || "").split(/(?<=\.)\s+/)[0];
+      main.append(el("span", "first-finding", finding || "No additional finding recorded."));
+      button.append(main, el("span", "score", percent(row.priority_score)));
+      button.addEventListener("click", () => selectNode(row.gid)); li.append(button); list.append(li);
+    }
+  } catch (error) { if (request === browseRequest) status.textContent = error.message; }
+}
+function renderFindingFilters() {
+  const filters = [["common_counterparty", "Common counterparty"], ["synchronous_inflow", "Synchronous inflow"], ["scatter_gather", "Scatter / gather"], ["likely_legit_payouts", "Likely legitimate payouts"], ["extension_requests", "Extension requests"]];
+  for (const [flag, label] of filters) {
+    const button = el("button", "", label); button.type = "button";
+    button.addEventListener("click", () => browseAccounts("flag", flag, label)); $("finding-filters").append(button);
+  }
+}
 function renderTop(rows) {
   state.top = rows; const list = $("top-list"); list.replaceChildren();
   for (const row of rows) {
@@ -372,7 +404,7 @@ async function start() {
       if (!state.incoming.has(edge.target)) state.incoming.set(edge.target, []);
       state.outgoing.get(edge.source).push(edge); state.incoming.get(edge.target).push(edge);
     }
-    renderFilters(graph.roles_count || {}); renderTop(top);
+    renderFilters(graph.roles_count || {}); renderTop(top); renderFindingFilters();
     $("graph-status").textContent = `${state.nodes.length.toLocaleString("en-US")} accounts · ${state.edges.length.toLocaleString("en-US")} directed links`;
     fitOverview();
   } catch (error) { $("graph-status").textContent = "Graph unavailable"; $("map-error").textContent = error.message; $("map-error").hidden = false; }

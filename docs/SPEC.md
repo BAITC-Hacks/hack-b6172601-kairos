@@ -65,7 +65,10 @@ string identifiers, and provides offline canvas exploration. Spec 03b item 4 add
 pipeline-generated role_explanation (ordered failed rules through the match) and
 priority_explanation (weighted components, bonus, multipliers, normalization and
 score) to graph nodes and JSON-valued metrics.csv columns. Node details expose
-these as structured JSON; the browser only displays them. Other specs remain
+these as structured JSON; the browser only displays them. Spec 03b item 7 adds
+GET /api/accounts with exactly one validated role or flag filter, returning
+gid, role, priority_score and findings in priority-descending/gid-ascending order.
+Extension requests require truncated and p_continues >= the configured threshold. Other specs remain
 out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,
