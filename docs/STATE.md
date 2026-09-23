@@ -1,8 +1,8 @@
 # Current handoff
 
-Updated: 2026-09-23, 17:18 Asia/Almaty (UTC+05). Specs 01, 03, 03b,
+Updated: 2026-09-23, 17:27 Asia/Almaty (UTC+05). Specs 01, 03, 03b,
 assigned 04, 04b, 05 and 06 are implemented. The separately authorized
-experimental analyst assistant is integrated. Hard stop: 17:35.
+experimental analyst assistant is integrated. Current documentation/verification hard stop: 17:45.
 
 ## Completed spec 06 and integration
 
@@ -18,6 +18,18 @@ Each completed block was committed and pushed, with pytest passing before each
 push. Root alone edited spec 06 and committed/pushed; the cheaper subagent only
 verified. Claude authored the assistant files; the user authorized their separate
 integration. No unfinished assistant files remain.
+
+## Public assistant enabled
+
+The owner configured a spend-capped LLM_API_KEY and a limit of 5 assistant
+requests per minute per client IP; the running Fly machine confirms the limit is 5.
+On 2026-09-23, public health reports
+llm_configured=true (OpenAI, gpt-4.1-mini). One browser question, "Why is
+...284100 ranked first?", returned a substantive answer and a get_account trace
+for 100000003115284100. No additional model questions were sent. README now
+links the public assistant and describes its limits and experimental status.
+This is a smoke check, not a model evaluation. All 76 pytest tests, the public
+HTTP smoke checks and the language guard pass.
 
 ## Verification
 
@@ -35,8 +47,9 @@ integration. No unfinished assistant files remain.
   no-key 503 checks pass. Initial/final clone status clean; its Compose stack is down.
 - Fly deployed 933a2e3 after item 1b, then 75514e8 after all extras/assistant.
   Public smoke, exact JS/HTML hashes, twin CSV/filter/card, all-circle spacing
-  and honest no-key assistant checks pass. Browser four-hop ego and twin
-  navigation pass; the assistant page visibly reports the missing key.
+  and the then-unconfigured assistant's honest no-key checks passed. Browser four-hop ego and twin
+  navigation passed; the earlier assistant page visibly reported the missing key.
+  The later successful configured-model check is recorded above.
   Final image: deployment-01M372TSBYS6BBA3E7JCTSJY91; pipeline 150.62s.
   Existing app kairos-astana, machine 7812345cd19d58, fra, shared 1 CPU / 1 GiB.
   Keep 1 GiB: the earlier 512 MiB Fly machine OOMed. No fly launch was used.
@@ -69,7 +82,8 @@ integration. No unfinished assistant files remain.
   circle are skipped. Overview clears manual positions.
 - Missing flows remain unknown; no ground-truth labels or proof of common control.
   The assistant is experimental, needs a model/key, and has no evaluation set.
-  Public LLM remains unconfigured; the main pipeline/viewer needs no key.
+  Public LLM is now configured as recorded above; the main pipeline/viewer
+  still needs no key.
   Minor legacy wording: its no-key error refers to README "Setup"; see
   "Quick start" and "Analyst assistant (experimental)" instead.
 

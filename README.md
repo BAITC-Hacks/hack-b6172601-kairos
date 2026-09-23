@@ -244,7 +244,7 @@ paid analysis API.
 | `APP_NAME` | `kairos`; health response label |
 | `APP_ENV` | `local` in Python, `docker` in Compose; health response label |
 | `LOG_LEVEL` | `INFO`; server logging |
-| `RATE_LIMIT_PER_MINUTE` | `0` locally; applies only to the experimental `/api/ask` endpoint, not viewer reads |
+| `RATE_LIMIT_PER_MINUTE` | `0` locally; public demo: `5` requests per minute per client IP; applies only to `/api/ask`, not viewer reads |
 | `TRUST_PROXY_HEADERS` | `false` locally; caller identification for the assistant endpoint |
 | `CLIENT_IP_HEADER` | Empty locally; `fly-client-ip` in Fly configuration |
 
@@ -271,16 +271,23 @@ keep circles separate. **Overview** resets every manual position.
 
 ## Analyst assistant (experimental)
 
-A natural-language entry point at `/assistant.html` (link back to the viewer in its header). It is a foundation for
-further development, **not a finished or fully evaluated feature**; the core pipeline, roles, exports and viewer do not
-depend on it.
+The [public analyst assistant](https://kairos-astana.fly.dev/assistant.html) is available
+on the live demo, with a link back to the viewer in its header. It remains
+**experimental, not a finished or fully evaluated feature**; the core pipeline,
+roles, exports and viewer do not depend on it.
 
 - Five read-only tools compute and retrieve facts from the same pipeline outputs the viewer uses
   (`app/tools/graph.py`): `get_account` (full card, accepts the last digits of a gid), `top_accounts` (optionally by role),
   `who_collects_from` (accounts downstream of at least two given accounts), `money_paths` (directed paths up to 4 hops with
   amounts) and `cluster_summary`. The answer view exposes the tool-call trace, including when no tool was called.
-- Requires `LLM_API_KEY` in `.env` (see `.env.example`); without a key the page says so and everything else keeps working.
-  The public demo runs without a key, so the assistant is available only locally.
+- The public demo uses a spend-capped API key and limits assistant requests to
+  **5 per minute per client IP** (`RATE_LIMIT_PER_MINUTE=5`). Visitors do not need
+  their own key. Availability is subject to the rate limit and the key's spending cap.
+- For local use, configure `LLM_API_KEY` in `.env` (see `.env.example`). Without a
+  key, the page says so; the pipeline and viewer still work.
+- Public verification on 2026-09-23: health reported `llm_configured: true`;
+  "Why is ...284100 ranked first?" returned an answer backed by `get_account`.
+  This one-question smoke check is not a model evaluation.
 - Known limitations: answers depend on the model choosing the right tool sequence (it sometimes needs a second call after a
   tool returns a hint); no evaluation set yet; English and Russian questions were tried manually only.
 - Tests: `tests/test_graph_tools.py` checks the tools deterministically without a key.
