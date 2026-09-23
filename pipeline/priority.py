@@ -3,6 +3,7 @@
 import pandas as pd
 
 from pipeline.config import CONFIG, ROLE_WEIGHTS
+from pipeline.findings import FINDING_TEXT
 
 
 def _percentile(series: pd.Series) -> pd.Series:
@@ -29,6 +30,9 @@ def add_priority(metrics: pd.DataFrame) -> pd.DataFrame:
         "role": CONFIG.role_priority_weight * result.role.map(ROLE_WEIGHTS),
     }
     raw = sum(components.values())
+    flags = [flag for flag in FINDING_TEXT if flag in result]
+    if flags:
+        raw += (result[flags].sum(axis=1) * CONFIG.finding_priority_bonus).clip(upper=CONFIG.finding_priority_cap)
     raw *= result.is_seed.map({True: CONFIG.seed_priority_multiplier, False: 1.0})
     raw *= result.truncated.map({True: CONFIG.truncated_priority_multiplier, False: 1.0})
     result["priority_score"] = raw / raw.max() if raw.max() > 0 else 0.0
@@ -42,6 +46,6 @@ def add_priority(metrics: pd.DataFrame) -> pd.DataFrame:
     why = []
     for i, row in enumerate(result.itertuples(index=False)):
         strongest = sorted(components, key=lambda key: (-float(components[key].iloc[i]), key))[:2]
-        why.append(row.evidence + " Priority drivers: " + ", ".join(descriptions[key](row) for key in strongest) + ".")
+        why.append(row.evidence + (" Findings: " + row.findings if getattr(row, "findings", "") else "") + " Priority drivers: " + ", ".join(descriptions[key](row) for key in strongest) + ".")
     result["why"] = why
     return result

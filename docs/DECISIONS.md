@@ -183,3 +183,13 @@ be checkable without the participants' personal accounts, which is why the publi
 deployment carries a working key rather than being a nice-to-have.
 
 Revisit if: never, while these clauses stand.
+
+## Findings refinement clarifications (spec 04)
+
+- Coordinator inputs are first-pass consolidator candidates (in-degree >=5),
+  including candidates later promoted to coordinator. This avoids circular role
+  dependencies. Source communities are computed independently before roles.
+- Scatter/gather requires two simple 2-3-hop paths with distinct first
+  intermediaries from one source to a target. A lone path or cycle is insufficient.
+- Finding bonuses apply before existing seed/cut-off multipliers and global
+  maximum normalization, so those uncertainty discounts still apply.

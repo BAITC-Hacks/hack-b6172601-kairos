@@ -71,7 +71,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/nodes_roles.csv` | gid, role, role_score, cluster_id, priority_score, evidence | Every one of 2,248 nodes exactly once; evidence <=200 chars |
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
-| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations |
+| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings and one-sentence evidence |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
 
 | Viewer requirement | Implementation | Check |
@@ -193,3 +193,12 @@ implemented specifications are `docs/specs/00_CONTEXT.md`, `01_PIPELINE.md` and
 The next session should read `docs/STATE.md` for verified status and scope boundaries.
 
 Coordinator roles use two passes: consolidator candidates meet the in-degree rule before coordinator precedence is applied. Source clusters are assigned before roles; cluster summaries use final roles and priorities.
+
+
+Findings add 0.05 each (capped at 0.15) to raw priority before seed/cut-off
+multipliers and normalization: direct inflow from >=2 seeds, >=3 distinct payers
+on one calendar date, fast-pass share >=0.8 with outgoing >=100,000 KZT, and
+scatter/gather. The latter requires simple paths of 2-3 hops from the same source
+through at least two distinct first intermediaries; cycles and a lone chain do
+not qualify. Each fired finding is explained in metrics and top-node reasons.
+Fast-pass is timing correlation, not proof that the same money was forwarded.

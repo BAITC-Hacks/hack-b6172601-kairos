@@ -26,6 +26,13 @@ class PipelineConfig:
     louvain_resolution: float = 1.0
     layout_seed: int = 42
     layout_iterations: int = 100
+    common_counterparty_min_seeds: int = 2
+    synchronous_inflow_min_payers: int = 3
+    fast_pass_min_share: float = 0.8
+    fast_pass_min_kzt: int = 100_000
+    scatter_gather_min_branches: int = 2
+    finding_priority_bonus: float = 0.05
+    finding_priority_cap: float = 0.15
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7
