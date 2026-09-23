@@ -32,6 +32,8 @@ with Ctrl+C. The measured local pipeline runtime is **45.79 seconds** for
 counterfactual analysis). Hardware affects runtime; the acceptance limit is five
 minutes. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
 allowed ranges: [requirements.txt](requirements.txt).
+Remote clean-clone verification passed for Docker/Python without a key; results
+and environment details are recorded in [docs/STATE.md](docs/STATE.md).
 
 ## How to verify the main scenario
 

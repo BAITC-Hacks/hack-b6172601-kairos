@@ -43,6 +43,25 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
   regeneration in 42.77s and restores all eight outputs. HTTP smoke passes
   before and after regeneration.
 
+## E: remote clean-clone gate - PASS
+
+Verified remote commit e3d4eef in /tmp/clean-check, initially clean with no .env
+or .venv. Raw Parquet files remain unchanged.
+
+- Docker: `docker compose up --build -d` succeeds. Entrypoint pipeline: 41.83s.
+  `/api/health`: ok=true, env=docker, llm_configured=false. `/api/graph`: 2,248
+  nodes, 3,119 edges; all node and endpoint IDs are strings. Required CSVs exist
+  inside the container with 2248 / 88 / 30 rows. No /app/.env. HTTP smoke and
+  language checks pass. `docker compose down` removes container and network.
+- Fresh Python 3.14 venv: `make install`, `make pipeline`, `make run` succeed.
+  Pipeline: 67.62s under concurrent verification load; pip check reports no
+  broken requirements. All 65 pytest tests pass. HTTP smoke passes; health
+  reports llm_configured=false. Required CSV counts: 2248 / 88 / 30.
+  Verification server stopped after checks.
+- Docker uses Python 3.11 and resolves the committed lock without fallback.
+  Network access is needed only for builds/install; offline execution was
+  separately verified in D. Sandbox-local curl required network escalation.
+
 ## Current analysis and viewer
 
 - 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Role counts:
@@ -67,5 +86,5 @@ at each completed section. Deploy is authorized only after the clean-clone gate.
 
 ## Remaining work
 
-E remote clean clone with Docker and a fresh Python venv, F bounded Fly deploy.
+F: bounded Fly deployment is now authorized by the passing clean-clone gate.
 Record failures honestly; keep the public URL out of README unless verified.
