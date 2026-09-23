@@ -73,6 +73,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
 | `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings and one-sentence evidence |
 | `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
+| `out/skeleton_edges.csv` | src, dst, sum_kzt from the two-sided hierarchy trace | Drops edges below 1% of recipient inflow |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
 
 | Viewer requirement | Implementation | Check |
@@ -211,3 +212,14 @@ and incoming-value quartiles learned from that visible subset. Tied quartile
 boundaries collapse; empty cells use the overall visible-node forwarding rate.
 Only truncated nodes receive p_continues; without training data it stays unknown.
 These are observed peer frequencies, not validated individual predictions.
+
+
+The hierarchy skeleton intersects forward traces from seeds (up to four hops,
+positive taint, with seeds retained as origins) and backward traces from the top
+taint quartile of coordinator/consolidator candidates (up to four hops).
+Only intersecting edges carrying at least 1% of their recipient's observed inflow
+survive, reducing incidental small payments. Skeleton membership means an endpoint
+of a retained edge. Levels are shortest forward seed-hop distances (seed = 0);
+cycles can produce same-level or backward edges, so levels are observational
+distance, not a proven organizational rank. Nonmembers have level -1.
+CSV edges and graph JSON skeleton/level fields are exported; the viewer is unchanged.

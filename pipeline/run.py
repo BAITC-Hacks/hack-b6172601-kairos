@@ -2,6 +2,7 @@
 
 import argparse
 import time
+from pathlib import Path
 
 from pipeline.clusters import add_clusters, assign_clusters
 from pipeline.export import write_outputs
@@ -12,6 +13,7 @@ from pipeline.load import load_data
 from pipeline.priority import add_priority
 from pipeline.roles import add_roles
 from pipeline.taint import add_taint
+from pipeline.skeleton import add_skeleton
 
 
 def run(data: str = "data/raw", out: str = "out") -> None:
@@ -25,6 +27,9 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     metrics = add_continuation(metrics)
     metrics = add_priority(metrics)
     metrics, clusters, projected = add_clusters(metrics, edges, graph)
+    metrics, skeleton_edges = add_skeleton(metrics, edges, graph)
+    Path(out).mkdir(parents=True, exist_ok=True)
+    skeleton_edges.to_csv(Path(out) / "skeleton_edges.csv", index=False, float_format="%.12g")
     write_outputs(metrics, clusters, edges, projected, out)
     counts = metrics.role.value_counts()
     for role in ("coordinator", "consolidator", "distributor", "transit", "terminal", "peripheral"):

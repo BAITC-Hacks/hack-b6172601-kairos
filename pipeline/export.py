@@ -55,6 +55,7 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
         nodes.append({
             "id": str(int(row.gid)), "role": row.role, "cluster": int(row.cluster_id),
             "priority": float(row.priority_score), "seed": bool(row.is_seed),
+            "skeleton": bool(row.in_skeleton), "level": int(row.hierarchy_level),
             "depth": int(row.depth), "truncated": bool(row.truncated),
             "x": x, "y": y, "evidence": row.evidence,
             "in_kzt": float(row.in_kzt), "out_kzt": float(row.out_kzt),

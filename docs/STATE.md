@@ -16,9 +16,13 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
   findings; one-sentence explanations and capped pre-normalization priority bonus.
 - E: empirical visible-peer continuation estimates, cut-off evidence and
   extension_requests.csv sorted by taint; empty-bin fallback is documented.
+- G: two-sided hierarchy trace, small-edge filter, skeleton_edges.csv and
+  boolean membership / shortest seed-hop levels in metrics and graph JSON.
 - Existing user edit to 00_CONTEXT.md is included with A.
 
 ## Verification
+
+- Section G: full pytest -q passes (54 tests); smoke, language and diff checks pass.
 
 - Section E: full pytest -q passes (53 tests); smoke, language and diff checks pass.
 
@@ -31,6 +35,6 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
 
 ## Next
 
-Implement G, B, C, F in order. Test, update this file, commit and push each
+Implement B, C, F in order. Test, update this file, commit and push each
 section. Add H documentation only. End with make pipeline and report computed
 role counts, flag counts and blocking summary.

@@ -36,6 +36,9 @@ class PipelineConfig:
     continuation_min_depth: int = 1
     continuation_degree_edges: tuple[int, ...] = (2, 3, 5)
     extension_min_probability: float = 0.5
+    skeleton_max_hops: int = 4
+    skeleton_top_quantile: float = 0.75
+    skeleton_min_inflow_share: float = 0.01
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7

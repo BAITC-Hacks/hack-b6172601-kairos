@@ -55,3 +55,22 @@ def test_continuation_uses_visible_peers_and_exports_only_cutoffs():
     assert extension_requests(result).gid.tolist() == [4]
     assert "67%" in result.loc[3, "evidence"]
     assert add_continuation(metrics.iloc[[3]]).p_continues.isna().all()
+
+
+def test_skeleton_intersection_small_edges_and_levels():
+    import networkx as nx
+    from pipeline.skeleton import add_skeleton
+    edges = pd.DataFrame({"src": [1, 2, 1, 6], "dst": [2, 3, 4, 3],
+                          "sum_kzt": [100, 100, .1, 100]})
+    graph = nx.from_pandas_edgelist(edges, "src", "dst", create_using=nx.DiGraph)
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4, 6], "is_seed": [True, False, False, False, False],
+        "role": ["peripheral", "transit", "coordinator", "coordinator", "peripheral"],
+        "taint_kzt": [0, 100, 100, 100, 0], "in_kzt": [0, 100, 200, 100, 0],
+    })
+    result, selected = add_skeleton(metrics, edges, graph)
+    assert list(zip(selected.src, selected.dst)) == [(1, 2), (2, 3)]
+    assert result.hierarchy_level.tolist() == [0, 1, 2, -1, -1]
+    assert result.in_skeleton.dtype == bool
+    metrics["role"] = "peripheral"
+    assert add_skeleton(metrics, edges, graph)[1].empty

@@ -196,3 +196,7 @@ Revisit if: never, while these clauses stand.
 - Continuation uses visible depth 1-3 quartile boundaries and empirical cell
   means. Duplicate boundaries collapse; empty cells fall back to the visible
   population mean. Missing training data yields unknown, never a fabricated rate.
+- Skeleton top quartile is measured within coordinator/consolidator candidates.
+  Levels use shortest forward seed-hop distance, not a claim of organizational
+  rank; cyclic observed graphs need not form a strict hierarchy. Nodes must be
+  endpoints of retained edges to be marked in_skeleton.
