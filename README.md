@@ -17,7 +17,7 @@ docker compose up --build
 Open [localhost:8000](http://localhost:8000) after the pipeline finishes and the
 server starts. Keep port 8000 free; run Docker or Python, not both at once.
 The image installs locked dependencies and computes outputs from official inputs.
-If any of the eight output artifacts is missing or empty, startup regenerates the
+If any of the nine output artifacts is missing or empty, startup regenerates the
 complete set. Health checks allow up to five minutes for the initial computation.
 No `.env`, API key, personal account or GPU is required. Building/installing needs
 internet access; analysis and the viewer work offline afterward, with no CDN.
@@ -29,7 +29,7 @@ make install && make pipeline && make run
 ```
 
 The virtual environment is selected automatically. Stop the foreground server
-with Ctrl+C. The pre-extras local baseline was **45.79 seconds** for
+with Ctrl+C. The latest local pipeline run took **47.84 seconds** for
 2,248 nodes, 3,119 directed edges and 4,840 transactions (including layout and
 counterfactual analysis). Hardware affects runtime; the acceptance limit is five
 minutes. With collision removal, the Fly shared-CPU pipeline took **140.63 seconds**. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
@@ -81,7 +81,7 @@ flowchart TD
   M --> R["Ordered role rules"]
   R --> C["Louvain communities and summaries"]
   C --> F["Priority, findings and hierarchy skeleton"]
-  F --> O["Seven CSV exports and graph.json"]
+  F --> O["Eight CSV exports and graph.json"]
   O --> A["Read-only FastAPI viewer API"]
   A --> U["Offline JavaScript canvas viewer"]
 ```
@@ -161,11 +161,19 @@ uses unweighted directed paths, never transfer amounts as path distances.
 | Synchronous inflow | >=3 distinct payers on one date | 38 |
 | Fast pass | >=80% of outgoing value occurs within 2 days after some incoming transfer; >=100,000 KZT outgoing | 89 |
 | Scatter/gather | >=3 distinct first intermediaries on simple 2-3-hop paths from one source; every edge >=50,000 KZT | 25 |
+| Shared-source twins | >=3 shared distinct payers and payer-set Jaccard >=0.5 | 37 (45 pairs, 9 groups) |
 | Possible regular payouts | >=10 recipients, >=50% of outgoing transaction count on the busiest 2 dates, amount CV <=0.5, taint share <0.2 | 2 |
 | Seed hub | Seed with >=5 payers or >=20 recipients | 9 |
 
-Only the first four findings add the capped priority bonus. Payout resemblance
+The first five findings, including twins, add the capped priority bonus. Payout resemblance
 halves priority after normalization; it does not establish legitimacy.
+
+**Shared-source twins** link accounts with similar observed payer sets. The
+accounts ending **284100** and **963100** share four payers (payer-set sizes eight and four,
+Jaccard 0.5). A node card links its direct twin matches and reports each pair's
+shared-payer count. `twin_group` joins qualifying pairs transitively: membership
+does not mean every pair qualifies or prove a common controller. Review the
+pattern alongside other evidence. Group sizes are 2–19 on the supplied data.
 
 **Continuation** uses observed depth-1..3 accounts grouped by incoming-amount
 quartiles and payer-count bins (boundaries 2, 3, 5). Each bin's fraction with
@@ -196,13 +204,14 @@ in spreadsheets (ordinary numeric cells can lose precision).
 | `nodes_roles.csv` | `gid, role, role_score, cluster_id, priority_score, evidence` | Exactly 2,248 unique nodes, finite scores in [0,1], evidence <=200 characters |
 | `clusters.csv` | `cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis, n_consolidator, n_distributor, n_transit, taint_kzt` | All nodes assigned; 88 explained communities; top gids separated by semicolons |
 | `top_nodes.csv` | `rank, gid, role, priority_score, why` | 30 unique accounts, descending priority, deterministic gid ties |
-| `metrics.csv` | Per-node flow, degree, centrality, timing, findings, continuation, skeleton and score metrics; JSON `role_explanation` and `priority_explanation` columns | Reproducible numerical basis for every node card |
+| `metrics.csv` | Per-node flow, degree, centrality, timing, findings, continuation, skeleton and score metrics; JSON `role_explanation`, `priority_explanation`, `twin_gids` (string IDs) and `twin_shared_payers` (ID-to-count map); text `twin_group` | Reproducible numerical basis for every node card |
 | `extension_requests.csv` | `gid, p_continues, taint_kzt, in_deg, in_kzt, evidence` | Cut-off accounts meeting the continuation threshold |
 | `skeleton_edges.csv` | `src, dst, sum_kzt` | Exact retained directed edges shown by the hierarchy viewer |
+| `twin_groups.csv` | `group_id, gids, shared_payers, total_in_kzt, hypothesis`; IDs in JSON arrays | 9 transitive review groups; shared payers is the union supporting qualifying pairs, not an all-member intersection |
 | `blocking_plan.csv` | `step, gid, role, cut_share_cumulative` | Ten simulated removals with monotone cumulative cut |
 | Node dragging | Move accounts in all three layouts; connected edges follow | Background pans; Overview resets positions; close-zoom collisions remain separated |
 | Clickable graph and layered ego | Separate circles at inspection zoom; directional 1–4 hop columns, 25 accounts per column | Far-out overlap allowed; highest priority wins clicks; omitted branches are counted |
-| Hierarchy legend | Coordinator, consolidator, transit, distributor, terminal, peripheral; money-flow hint | Display order follows the chain; role rules and CSV values are unchanged |
+| Hierarchy legend | Coordinator, consolidator, transit, distributor, terminal, peripheral; money-flow hint | Display order follows the chain; role assignment and stored role labels are unchanged |
 | `graph.json` | `nodes, edges, roles_count, generated_at`; coordinates, exact IDs, role/priority explanations | Offline directed map, role/cluster colours, full/suffix search, node details and neighbors |
 
 Louvain uses an undirected projection that **sums both directional amounts**,

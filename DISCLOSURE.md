@@ -10,7 +10,7 @@ repository history; the earlier `44ca746` is the repository's initial commit.
 | Pre-built material | Current use |
 |---|---|
 | FastAPI application wiring, health/tools/ask endpoints | Retained infrastructure; viewer API added during the event |
-| Generic tool registry, agent loop, API-client wrapper and execution traces | Retained and tested; no case-aware analyst tools or runtime model required |
+| Generic tool registry, agent loop, API-client wrapper and execution traces | Retained and tested; experimental graph tools added during the event; no model required for the main scenario |
 | Configuration, logging, errors and rate limiter | Retained application infrastructure |
 | HTML/CSS page and generic rendering helpers | Page/styles replaced for the case viewer; unused UI helpers removed |
 | Docker, Compose, Makefile, deployment configuration | Adapted to compute official Parquet artifacts and serve the graph |
@@ -29,10 +29,12 @@ All case-specific computation was implemented after the case was supplied:
 - Flow/centrality/timing features, haircut taint and seed-source measures.
 - Ordered explainable role rules, priority weights, communities and hypotheses.
 - Convergence/timing findings, payout and seed-hub flags, continuation estimates,
-  extension requests, hierarchy skeleton and simulated blocking plan.
+  extension requests, shared-source twins, hierarchy skeleton and simulated blocking plan.
 - Required CSV exports, metrics and graph JSON, deterministic verification.
 - Read-only graph APIs, canvas viewer, exact-gid/suffix search, ego networks,
-  node evidence, role/priority breakdowns, filters and method display.
+  node evidence, role/priority breakdowns, filters, layered ego layouts, node dragging and method display.
+- Experimental analyst assistant with five read-only case graph tools, authored
+  by Claude and integrated after deterministic tests.
 - Case documentation, runnable jury scenario and deployment verification.
 
 The organiser's supplied brief, dataset documentation and starter example informed
@@ -42,13 +44,14 @@ case-specific changes are reviewable in the competition commit history.
 ## AI tools
 
 OpenAI Codex was used for implementation, testing, documentation and coordination.
-Claude / Claude Code use for code generation/review is recorded in the original
-scaffold disclosure. Human direction selected the case, constraints and thresholds; generated
+Claude / Claude Code was also used for the experimental analyst assistant and
+for code generation/review recorded in the original scaffold disclosure. Human direction selected the case, constraints and thresholds; generated
 work was checked against executed tests and supplied data.
 
 No model is trained or used by the role assignment, scoring, findings, pipeline
-or viewer. The retained generic OpenAI-compatible client is not a case-aware AI
-analyst. No model API key is needed to reproduce the submitted main scenario.
+or viewer. The optional experimental analyst page uses the retained OpenAI-compatible
+client and new read-only graph tools when a key is configured. No model API key
+is needed to reproduce the submitted main scenario.
 
 ## Data
 

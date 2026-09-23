@@ -14,7 +14,7 @@ from app.main import app
 
 OUTPUT = Path(__file__).resolve().parents[1] / "out"
 CLIENT = TestClient(app)
-DOWNLOADS = ("nodes_roles.csv", "clusters.csv", "top_nodes.csv")
+DOWNLOADS = ("nodes_roles.csv", "clusters.csv", "top_nodes.csv", "twin_groups.csv")
 
 
 def top_gid() -> str:
@@ -154,3 +154,14 @@ def test_output_store_reloads_when_file_mtime_changes(tmp_path, monkeypatch):
     assert after.status_code == 200
     assert after.json()[0]["why"] == "Updated investigation reason."
     assert after.json()[0]["why"] != original
+
+
+def test_twins_are_clickable_exact_ids_with_observed_pair_counts():
+    detail = CLIENT.get("/api/node/100000003115284100").json()["node"]
+    twin = "100000006889963100"
+    assert detail["shared_sources_twin"] is True
+    assert twin in detail["twin_gids"]
+    assert detail["twin_shared_payers"][twin] == 4
+    peer = CLIENT.get(f"/api/node/{twin}")
+    assert peer.status_code == 200
+    assert peer.json()["node"]["twin_group"] == detail["twin_group"]

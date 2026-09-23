@@ -8,7 +8,7 @@ for file in nodes edges transactions; do
   fi
 done
 # A partial export must not start a viewer with broken skeleton or download paths.
-for file in nodes_roles.csv clusters.csv top_nodes.csv metrics.csv graph.json extension_requests.csv skeleton_edges.csv blocking_plan.csv; do
+for file in nodes_roles.csv clusters.csv top_nodes.csv metrics.csv graph.json extension_requests.csv skeleton_edges.csv blocking_plan.csv twin_groups.csv; do
   if [ ! -s "out/${file}" ]; then
     python -m pipeline.run --data data/raw --out out
     break

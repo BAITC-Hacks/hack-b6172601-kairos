@@ -13,7 +13,7 @@ from pipeline.config import CONFIG, ROLE_WEIGHTS
 OUTPUT = Path(__file__).resolve().parents[1] / "out"
 CLIENT = TestClient(app)
 FLAGS = ("common_counterparty", "synchronous_inflow", "scatter_gather",
-         "likely_legit_payouts", "extension_requests")
+         "likely_legit_payouts", "extension_requests", "shared_sources_twin")
 
 
 def metric_rows():

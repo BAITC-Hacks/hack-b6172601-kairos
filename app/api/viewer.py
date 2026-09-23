@@ -14,11 +14,11 @@ from fastapi.responses import JSONResponse, Response
 from pipeline.config import CONFIG, ROLE_WEIGHTS, method_description
 
 router = APIRouter()
-DOWNLOADS = frozenset({"nodes_roles.csv", "clusters.csv", "top_nodes.csv"})
-FILES = ("graph.json", "metrics.csv", "nodes_roles.csv", "clusters.csv", "top_nodes.csv")
-TEXT_FIELDS = {"gid", "role", "evidence", "why", "hypothesis", "top_gids", "peripheral_reason", "findings"}
+DOWNLOADS = frozenset({"nodes_roles.csv", "clusters.csv", "top_nodes.csv", "twin_groups.csv"})
+FILES = ("graph.json", "metrics.csv", "nodes_roles.csv", "clusters.csv", "top_nodes.csv", "twin_groups.csv")
+TEXT_FIELDS = {"gid", "role", "evidence", "why", "hypothesis", "top_gids", "peripheral_reason", "findings", "twin_group"}
 ACCOUNT_FLAGS = frozenset({"common_counterparty", "synchronous_inflow", "scatter_gather",
-                           "likely_legit_payouts", "extension_requests"})
+                           "likely_legit_payouts", "extension_requests", "shared_sources_twin"})
 
 
 def csv_rows(raw: bytes) -> list[dict]:
@@ -27,7 +27,7 @@ def csv_rows(raw: bytes) -> list[dict]:
     for row in csv.DictReader(io.StringIO(raw.decode("utf-8"))):
         parsed = {}
         for key, value in row.items():
-            if key in {"role_explanation", "priority_explanation"}:
+            if key in {"role_explanation", "priority_explanation", "twin_gids", "twin_shared_payers"}:
                 parsed[key] = json.loads(value) if value else None
             elif key in TEXT_FIELDS:
                 parsed[key] = value

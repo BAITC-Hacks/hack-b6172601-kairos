@@ -30,6 +30,8 @@ class PipelineConfig:
     fast_pass_min_kzt: int = 100_000
     scatter_gather_min_branches: int = 3
     scatter_gather_min_edge_kzt: int = 50_000
+    twin_min_shared_payers: int = 3
+    twin_min_jaccard: float = 0.5
     finding_priority_bonus: float = 0.05
     finding_priority_cap: float = 0.15
     continuation_min_depth: int = 1

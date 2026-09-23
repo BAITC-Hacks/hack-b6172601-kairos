@@ -483,6 +483,18 @@ function renderCard(data) {
   const badges = el("div", "card-badges");
   for (const text of [`${n.role || "unknown"} · role support ${percent(n.role_score)}`, `Priority ${percent(n.priority_score)}`, ...(state.top.find((item) => String(item.gid) === gid) ? [`Rank #${state.top.find((item) => String(item.gid) === gid).rank}`] : []), `Cluster ${n.cluster_id ?? "—"}`, ...(String(n.is_seed).toLowerCase() === "true" ? ["Seed"] : []), ...(String(n.truncated).toLowerCase() === "true" ? ["Traversal cut-off"] : [])]) badges.append(el("span", "badge", text));
   card.append(badges);
+  if (Array.isArray(n.twin_gids) && n.twin_gids.length) {
+    const twins = el("section", "card-section");
+    twins.append(el("h3", "", "Twin accounts"));
+    for (const other of n.twin_gids) {
+      const button = el("button", "gid-link", `${shortId(other)} (${num(n.twin_shared_payers?.[other])} shared payers)`);
+      button.type = "button"; button.title = String(other);
+      button.addEventListener("click", () => selectNode(String(other)));
+      twins.append(el("p", "", "")); twins.lastChild.append(button);
+    }
+    twins.append(el("p", "subtle", `Review group ${n.twin_group}. Shared payers suggest possible common control, not proven identity. Listed accounts are direct pair matches; groups can connect transitively.`));
+    card.append(twins);
+  }
   const evidence = el("section", "card-section"); evidence.append(el("h3", "", "Role evidence"), el("p", "evidence", n.evidence || "No evidence recorded.")); card.append(evidence);
   card.append(...explanationSections(n));
   const community = el("section", "card-section"); community.append(el("h3", "", "Cluster hypothesis"), el("p", "", cluster.hypothesis || "No cluster description.")); card.append(community);
@@ -539,7 +551,7 @@ async function browseAccounts(kind, value, title) {
   } catch (error) { if (request === browseRequest) status.textContent = error.message; }
 }
 function renderFindingFilters() {
-  const filters = [["common_counterparty", "Common counterparty"], ["synchronous_inflow", "Synchronous inflow"], ["scatter_gather", "Scatter / gather"], ["likely_legit_payouts", "Likely legitimate payouts"], ["extension_requests", "Extension requests"]];
+  const filters = [["shared_sources_twin", "Shared-source twins"], ["common_counterparty", "Common counterparty"], ["synchronous_inflow", "Synchronous inflow"], ["scatter_gather", "Scatter / gather"], ["likely_legit_payouts", "Likely legitimate payouts"], ["extension_requests", "Extension requests"]];
   for (const [flag, label] of filters) {
     const button = el("button", "", label); button.type = "button";
     button.addEventListener("click", () => browseAccounts("flag", flag, label)); $("finding-filters").append(button);

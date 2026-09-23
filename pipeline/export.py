@@ -46,7 +46,7 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
     ordered[ROLE_COLUMNS].to_csv(directory / "nodes_roles.csv", index=False, float_format="%.12g")
     clusters[CLUSTER_COLUMNS].to_csv(directory / "clusters.csv", index=False, float_format="%.12g")
     csv_metrics = ordered.copy()
-    for column in ("role_explanation", "priority_explanation"):
+    for column in ("role_explanation", "priority_explanation", "twin_gids", "twin_shared_payers"):
         csv_metrics[column] = csv_metrics[column].map(lambda value: json.dumps(value, separators=(",", ":")))
     csv_metrics.to_csv(directory / "metrics.csv", index=False, float_format="%.12g")
     top = metrics.sort_values(["priority_score", "gid"], ascending=[False, True]).head(CONFIG.top_count).copy()

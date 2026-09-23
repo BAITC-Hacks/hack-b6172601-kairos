@@ -32,7 +32,7 @@ ROLES = {
     "peripheral",
 }
 CSV_NAMES = ("nodes_roles.csv", "clusters.csv", "top_nodes.csv", "metrics.csv",
-             "extension_requests.csv", "skeleton_edges.csv", "blocking_plan.csv")
+             "extension_requests.csv", "skeleton_edges.csv", "blocking_plan.csv", "twin_groups.csv")
 
 
 def read_csv(path: Path) -> tuple[list[str], list[dict[str, str]]]:
@@ -320,3 +320,22 @@ def test_findings_artifacts_and_viewer_integration(pipeline_outputs):
     for node in graph["nodes"]:
         assert node["skeleton"] == bool(by_gid.loc[node["id"], "in_skeleton"])
         assert node["level"] == int(by_gid.loc[node["id"], "hierarchy_level"])
+
+
+def test_official_twins_are_symmetric_and_groups_retain_exact_ids(pipeline_outputs):
+    output, _ = pipeline_outputs
+    header, groups = read_csv(output / "twin_groups.csv")
+    assert header == ["group_id", "gids", "shared_payers", "total_in_kzt", "hypothesis"]
+    _, metrics = read_csv(output / "metrics.csv")
+    flagged = {row["gid"]: row for row in metrics if row["shared_sources_twin"] == "True"}
+    assert len(flagged) == 37 and len(groups) == 9
+    assert sum(len(json.loads(row["twin_gids"])) for row in flagged.values()) == 90
+    for gid, row in flagged.items():
+        for twin in json.loads(row["twin_gids"]):
+            assert isinstance(twin, str) and gid in json.loads(flagged[twin]["twin_gids"])
+            assert json.loads(row["twin_shared_payers"])[twin] >= 3
+            assert flagged[twin]["twin_group"] == row["twin_group"]
+    a, b = "100000003115284100", "100000006889963100"
+    assert json.loads(flagged[a]["twin_shared_payers"])[b] == 4
+    exported = {gid for group in groups for gid in json.loads(group["gids"])}
+    assert exported == set(flagged)

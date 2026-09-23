@@ -7,7 +7,7 @@ flowchart TD
   M --> R["Ordered role rules"]
   R --> C["Louvain communities and summaries"]
   C --> F["Priority, findings and hierarchy skeleton"]
-  F --> O["Seven CSV exports and graph.json"]
+  F --> O["Eight CSV exports and graph.json"]
   O --> A["Read-only FastAPI viewer API"]
   A --> U["Offline JavaScript canvas viewer"]
 ```

@@ -66,7 +66,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000000655469100,peripheral,0.9,20,0.199382222745,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000000656682100,transit,0.683098591549,0,0.349909899322,Pass-through hypothesis: forwards 113% of 71K KZT received; 0% forwarded within 2 days.
 100000000661131100,peripheral,0.9,1,0.150238962667,Single inflow of 16K KZT; 0 further outgoing transfers observed.
-100000000661912100,coordinator,0.543199881376,3,0.788968543111,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...3100, ...0100), 393K KZT in."
+100000000661912100,coordinator,0.543199881376,3,0.832980765464,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...3100, ...0100), 393K KZT in."
 100000000667713100,peripheral,0.6,4,0.592212167509,"Limited role evidence: 2 payers, 6 recipients, 119K KZT received in observed graph."
 100000000673868100,terminal,1,29,0.524918713519,Possible holding point: receives 2.0M KZT from 1 payers; observed onward flow is 19%.
 100000000673915100,peripheral,0.9,34,0.0945755474596,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
@@ -157,7 +157,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000001110358100,terminal,0.5,0,0.308148235202,Money stops here in the observed graph: receives 32K KZT from 2 payers; no outgoing transfers were traced.
 100000001111763100,peripheral,0.9,1,0.411550515141,Single inflow of 17K KZT; 0 further outgoing transfers observed.
 100000001114385100,peripheral,0.9,2,0.335542758648,Single inflow of 30K KZT; 0 further outgoing transfers observed.
-100000001126374100,coordinator,0.508881227758,0,0.693216985936,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...0100), 182K KZT in."
+100000001126374100,coordinator,0.508881227758,0,0.737229208289,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...0100), 182K KZT in."
 100000001130176100,peripheral,0.9,0,0.378673561327,Single inflow of 25K KZT; 0 further outgoing transfers observed.
 100000001130553100,peripheral,0.9,5,0.193047753359,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000001131403100,peripheral,0.9,56,0.1990531594,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
@@ -222,7 +222,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000001325618100,peripheral,0.9,7,0.103994985701,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000001329153100,peripheral,0.9,0,0.231476475888,Single inflow of 151K KZT; 0 further outgoing transfers observed.
 100000001330595100,peripheral,0.6,23,0.498429114271,"Limited role evidence: 3 payers, 1 recipients, 87K KZT received in observed graph."
-100000001330685100,coordinator,0.508100533808,5,0.804951619853,"Signs of coordination: receives from 3 consolidator candidates (...9100, ...3100, ...0100), 2.4M KZT in."
+100000001330685100,coordinator,0.508100533808,5,0.848963842206,"Signs of coordination: receives from 3 consolidator candidates (...9100, ...3100, ...0100), 2.4M KZT in."
 100000001339466100,peripheral,0.9,2,0.417632310887,Single inflow of 30K KZT; 0 further outgoing transfers observed.
 100000001346560100,peripheral,0.6,3,0.584338151761,"Limited role evidence: 2 payers, 1 recipients, 10K KZT received in observed graph."
 100000001362940100,peripheral,0.9,2,0.52827986054,Single inflow of 81K KZT; 0 further outgoing transfers observed.
@@ -276,7 +276,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000001598625100,peripheral,0.9,3,0.208534297019,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000001600934100,peripheral,0.6,3,0.432675206644,"Limited role evidence: 1 payers, 1 recipients, 180K KZT received in observed graph."
 100000001601320100,transit,0.844827586207,6,0.663254593176,Pass-through hypothesis: forwards 106% of 44K KZT received; 0% forwarded within 2 days.
-100000001609499100,coordinator,0.509541814947,0,0.792964312297,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...9100), 263K KZT in."
+100000001609499100,coordinator,0.509541814947,0,0.83697653465,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...9100), 263K KZT in."
 100000001611488100,terminal,1,5,0.465393504916,Money stops here in the observed graph: receives 779K KZT from 2 payers; no outgoing transfers were traced.
 100000001616816100,consolidator,0.5,6,0.49286872723,"Signs of consolidation: seed receives from 5 payers, 176K KZT observed in and 181K KZT observed out. Known seed acting as a hub — case may reach above street level."
 100000001632325100,peripheral,0.9,1,0.220840678497,Single inflow of 86K KZT; 0 further outgoing transfers observed.
@@ -433,13 +433,13 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000002324543100,peripheral,0.9,8,0.428326869589,Single inflow of 30K KZT; 0 further outgoing transfers observed.
 100000002335358100,peripheral,0.9,4,0.564300544521,Single inflow of 140K KZT; 0 further outgoing transfers observed.
 100000002340562100,peripheral,0.9,6,0.524049046108,Single inflow of 37K KZT; 0 further outgoing transfers observed.
-100000002343825100,peripheral,0.6,9,0.370593880989,"Limited role evidence: 3 payers, 2 recipients, 350K KZT received in observed graph."
+100000002343825100,peripheral,0.6,9,0.414606103342,"Limited role evidence: 3 payers, 2 recipients, 350K KZT received in observed graph."
 100000002346166100,peripheral,0.9,1,0.135225447565,Single inflow of 6K KZT; 0 further outgoing transfers observed.
 100000002356167100,terminal,0.5,5,0.387769812356,Possible holding point: receives 300K KZT from 1 payers; observed onward flow is 10%.
 100000002369443100,peripheral,0.9,1,0.196219688957,Single inflow of 50K KZT; 0 further outgoing transfers observed.
 100000002369454100,peripheral,0.9,3,0.208534297019,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000002369510100,peripheral,0.9,1,0.184320523367,Single inflow of 37K KZT; 0 further outgoing transfers observed.
-100000002369874100,terminal,1,8,0.428021310769,Money stops here in the observed graph: receives 600K KZT from 4 payers; no outgoing transfers were traced.
+100000002369874100,terminal,1,8,0.472033533122,Money stops here in the observed graph: receives 600K KZT from 4 payers; no outgoing transfers were traced.
 100000002371751100,peripheral,0.6,60,0.648799310534,"Limited role evidence: 1 payers, 1 recipients, 200K KZT received in observed graph."
 100000002371892100,peripheral,0.9,50,0.164131311944,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000002373144100,peripheral,0.6,0,0.291471774983,"Limited role evidence: 1 payers, 1 recipients, 46K KZT received in observed graph."
@@ -500,7 +500,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000002540033100,peripheral,0.9,17,0.201603400321,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000002540623100,peripheral,0.9,7,0.426681552866,Single inflow of 100K KZT; 0 further outgoing transfers observed.
 100000002546921100,peripheral,0.9,14,0.181823167626,Single inflow of 20K KZT; 0 further outgoing transfers observed.
-100000002547110100,consolidator,0.6,9,0.565757825048,"Signs of consolidation: receives from 6 payers (0 seeds within 2 hops), 1.5M KZT in, forwards 0%."
+100000002547110100,consolidator,0.6,9,0.609770047401,"Signs of consolidation: receives from 6 payers (0 seeds within 2 hops), 1.5M KZT in, forwards 0%."
 100000002548759100,terminal,0.625,8,0.34669565558,Money stops here in the observed graph: receives 375K KZT from 2 payers; no outgoing transfers were traced.
 100000002550141100,peripheral,0.9,3,0.262678732323,Single inflow of 101K KZT; 0 further outgoing transfers observed.
 100000002554175100,peripheral,0.9,7,0.245226622792,Single inflow of 25K KZT; 0 further outgoing transfers observed.
@@ -557,7 +557,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000002635780100,peripheral,0.9,6,0.552078191719,Single inflow of 163K KZT; 0 further outgoing transfers observed.
 100000002644285100,terminal,0.833333333333,13,0.315317115211,Money stops here in the observed graph: receives 500K KZT from 1 payers; no outgoing transfers were traced.
 100000002645046100,peripheral,0.9,7,0.107984878756,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
-100000002645609100,terminal,1,0,0.563054804717,Money stops here in the observed graph: receives 547K KZT from 4 payers; no outgoing transfers were traced.
+100000002645609100,terminal,1,0,0.607067027069,Money stops here in the observed graph: receives 547K KZT from 4 payers; no outgoing transfers were traced.
 100000002645993100,peripheral,0.6,0,0.275547459553,"Limited role evidence: 2 payers, 5 recipients, 50K KZT received in observed graph."
 100000002646745100,peripheral,0.9,1,0.144686018725,Single inflow of 12K KZT; 0 further outgoing transfers observed.
 100000002646887100,peripheral,0.9,9,0.221839620794,Single inflow of 24K KZT; 0 further outgoing transfers observed.
@@ -612,7 +612,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000002727288100,peripheral,0.9,15,0.306044580248,Single inflow of 16K KZT; 0 further outgoing transfers observed.
 100000002728246100,peripheral,0.9,5,0.176676851961,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000002729875100,peripheral,0.9,7,0.189880518667,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
-100000002731501100,peripheral,0.6,23,0.585689661927,"Limited role evidence: 3 payers, 7 recipients, 570K KZT received in observed graph."
+100000002731501100,peripheral,0.6,23,0.629701884279,"Limited role evidence: 3 payers, 7 recipients, 570K KZT received in observed graph."
 100000002733083100,peripheral,0.9,7,0.134022015905,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000002733905100,peripheral,0.6,1,0.517350256591,"Limited role evidence: 3 payers, 2 recipients, 100K KZT received in observed graph."
 100000002734815100,peripheral,0.9,8,0.131718572492,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
@@ -679,7 +679,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000002844897100,peripheral,0.9,8,0.387017667568,Single inflow of 11K KZT; 0 further outgoing transfers observed.
 100000002845605100,peripheral,0.9,0,0.475159634896,Single inflow of 58K KZT; 0 further outgoing transfers observed.
 100000002847207100,peripheral,0.9,2,0.500603282799,Single inflow of 46K KZT; 0 further outgoing transfers observed.
-100000002849158100,peripheral,0.6,8,0.442194539115,"Limited role evidence: 3 payers, 1 recipients, 723K KZT received in observed graph."
+100000002849158100,peripheral,0.6,8,0.486206761468,"Limited role evidence: 3 payers, 1 recipients, 723K KZT received in observed graph."
 100000002852402100,peripheral,0.9,15,0.455885924707,Single inflow of 55K KZT; 0 further outgoing transfers observed.
 100000002858835100,peripheral,0.9,1,0.43102988992,Single inflow of 24K KZT; 0 further outgoing transfers observed.
 100000002860934100,peripheral,0.9,27,0.253348611274,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
@@ -768,7 +768,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000003001564100,peripheral,0.6,4,0.473808124731,"Limited role evidence: 1 payers, 1 recipients, 24K KZT received in observed graph."
 100000003001661100,peripheral,0.6,27,0.441136835508,"Limited role evidence: 1 payers, 5 recipients, 110K KZT received in observed graph."
 100000003003821100,peripheral,0.9,2,0.518114153641,Single inflow of 40K KZT; 0 further outgoing transfers observed.
-100000003004487100,peripheral,0.6,30,0.631405962314,"Limited role evidence: 4 payers, 2 recipients, 184K KZT received in observed graph."
+100000003004487100,peripheral,0.6,30,0.675418184667,"Limited role evidence: 4 payers, 2 recipients, 184K KZT received in observed graph."
 100000003005167100,peripheral,0.9,7,0.0993058330395,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000003006633100,peripheral,0.9,33,0.19480941748,Single inflow of 10K KZT; 0 further outgoing transfers observed.
 100000003009900100,peripheral,0.9,7,0.221957143417,Single inflow of 16K KZT; 0 further outgoing transfers observed.
@@ -830,7 +830,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000003105089100,peripheral,0.9,20,0.173077721628,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000003105929100,peripheral,0.6,5,0.343886864888,"Limited role evidence: 1 payers, 1 recipients, 430K KZT received in observed graph."
 100000003109805100,peripheral,0.9,16,0.211791436518,Single inflow of 37K KZT; 0 further outgoing transfers observed.
-100000003111305100,terminal,1,26,0.419853488463,Money stops here in the observed graph: receives 509K KZT from 4 payers; no outgoing transfers were traced.
+100000003111305100,terminal,1,26,0.463865710816,Money stops here in the observed graph: receives 509K KZT from 4 payers; no outgoing transfers were traced.
 100000003112436100,peripheral,0.9,4,0.49196537,Single inflow of 100K KZT; 0 further outgoing transfers observed.
 100000003112578100,peripheral,0.9,13,0.184349904023,Single inflow of 101K KZT; 0 further outgoing transfers observed.
 100000003115284100,coordinator,0.642759489917,11,1,"Signs of coordination: receives from 7 consolidator candidates (...9100, ...5100, ...6100), 2.2M KZT in."
@@ -949,7 +949,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000003497735100,peripheral,0.9,18,0.309276452384,Single inflow of 125K KZT; 0 further outgoing transfers observed.
 100000003500764100,peripheral,0.9,16,0.189510322404,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000003509750100,transit,0.881820391299,6,0.66871939515,Pass-through hypothesis: forwards 95% of 82K KZT received; 74% forwarded within 2 days.
-100000003528285100,peripheral,0.6,2,0.422979590238,"Limited role evidence: 4 payers, 4 recipients, 119K KZT received in observed graph."
+100000003528285100,peripheral,0.6,2,0.466991812591,"Limited role evidence: 4 payers, 4 recipients, 119K KZT received in observed graph."
 100000003557488100,peripheral,0.6,30,0.495432287382,"Limited role evidence: 1 payers, 2 recipients, 665K KZT received in observed graph."
 100000003561031100,peripheral,0.6,3,0.253276922474,"Limited role evidence: 1 payers, 1 recipients, 13K KZT received in observed graph."
 100000003567087100,peripheral,0.9,1,0.479978062444,Single inflow of 62K KZT; 0 further outgoing transfers observed.
@@ -961,7 +961,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000003594472100,peripheral,0.9,30,0.221487052924,Single inflow of 20K KZT; 0 further outgoing transfers observed.
 100000003603979100,peripheral,0.9,23,0.503071257884,Single inflow of 165K KZT; 0 further outgoing transfers observed.
 100000003610172100,peripheral,0.9,5,0.191460022721,Single inflow of 70K KZT; 0 further outgoing transfers observed.
-100000003616818100,peripheral,0.6,23,0.555133779919,"Limited role evidence: 3 payers, 3 recipients, 78K KZT received in observed graph."
+100000003616818100,peripheral,0.6,23,0.599146002272,"Limited role evidence: 3 payers, 3 recipients, 78K KZT received in observed graph."
 100000003617552100,peripheral,0.9,28,0.50483409723,Single inflow of 25K KZT; 0 further outgoing transfers observed.
 100000003622955100,peripheral,0.9,11,0.289175382928,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000003626268100,peripheral,0.9,3,0.187248011909,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
@@ -1070,7 +1070,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000004064431100,peripheral,0.6,23,0.253159399851,"Limited role evidence: 1 payers, 1 recipients, 26K KZT received in observed graph."
 100000004066370100,peripheral,0.9,35,0.28181259059,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
 100000004066647100,peripheral,0.9,18,0.266263172327,Single inflow of 51K KZT; 0 further outgoing transfers observed.
-100000004070318100,coordinator,0.509915480427,0,0.741665687311,"Signs of coordination: receives from 3 consolidator candidates (...6100, ...5100, ...3100), 207K KZT in."
+100000004070318100,coordinator,0.509915480427,0,0.785677909664,"Signs of coordination: receives from 3 consolidator candidates (...6100, ...5100, ...3100), 207K KZT in."
 100000004070530100,peripheral,0.9,37,0.0945344145415,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000004071070100,terminal,0.5,0,0.561644533239,Possible holding point: receives 41K KZT from 2 payers; observed onward flow is 15%.
 100000004071080100,coordinator,0.542034400949,0,0.788733497865,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...3100, ...0100), 239K KZT in."
@@ -1253,7 +1253,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000004674799100,peripheral,0.9,0,0.580929995691,Single inflow of 140K KZT; 0 further outgoing transfers observed.
 100000004676985100,transit,0.600278983261,0,0.312743369765,Pass-through hypothesis: forwards 84% of 32K KZT received; 0% forwarded within 2 days.
 100000004677680100,peripheral,0.6,11,0.704916363067,"Limited role evidence: 2 payers, 1 recipients, 63K KZT received in observed graph."
-100000004679953100,coordinator,0.509706405694,3,0.737787440749,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...9100), 344K KZT in."
+100000004679953100,coordinator,0.509706405694,3,0.781799663102,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...3100, ...9100), 344K KZT in."
 100000004687099100,peripheral,0.9,6,0.470047400791,Single inflow of 30K KZT; 0 further outgoing transfers observed.
 100000004687282100,peripheral,0.9,4,0.475159634896,Single inflow of 20K KZT; 0 further outgoing transfers observed.
 100000004689658100,terminal,0.760166666667,3,0.448058918008,Possible holding point: receives 456K KZT from 1 payers; observed onward flow is 2%.
@@ -1281,7 +1281,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000004750321100,terminal,0.5,7,0.31449445685,Money stops here in the observed graph: receives 50K KZT from 2 payers; no outgoing transfers were traced.
 100000004750897100,peripheral,0.9,15,0.313095937635,Single inflow of 10K KZT; 0 further outgoing transfers observed.
 100000004756901100,peripheral,0.9,4,0.514059623144,Single inflow of 153K KZT; 0 further outgoing transfers observed.
-100000004759121100,coordinator,0.575879300119,0,0.838621851373,"Signs of coordination: receives from 5 consolidator candidates (...9100, ...6100, ...5100), 710K KZT in."
+100000004759121100,coordinator,0.575879300119,0,0.882634073726,"Signs of coordination: receives from 5 consolidator candidates (...9100, ...6100, ...5100), 710K KZT in."
 100000004765639100,peripheral,0.6,0,0.447424295844,"Limited role evidence: 1 payers, 2 recipients, 5K KZT received in observed graph."
 100000004770073100,transit,0.99790842853,0,0.287240960552,Pass-through hypothesis: forwards 100% of 5K KZT received; 100% forwarded within 2 days.
 100000004777215100,peripheral,0.9,20,0.235126728562,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
@@ -1305,7 +1305,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000004825069100,peripheral,0.9,1,0.359341089826,Single inflow of 30K KZT; 0 further outgoing transfers observed.
 100000004840086100,peripheral,0.9,0,0.241008735848,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
 100000004841728100,peripheral,0.9,1,0.47304422768,Single inflow of 52K KZT; 0 further outgoing transfers observed.
-100000004847758100,coordinator,0.543204329775,2,0.694127786266,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...1100, ...3100), 115K KZT in."
+100000004847758100,coordinator,0.543204329775,2,0.738140008618,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...1100, ...3100), 115K KZT in."
 100000004848236100,peripheral,0.9,0,0.154794139539,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000004850609100,peripheral,0.9,0,0.135132604693,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000004856746100,peripheral,0.9,32,0.182147530066,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
@@ -1339,7 +1339,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000004991593100,peripheral,0.9,3,0.166599287029,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000004991812100,peripheral,0.9,21,0.307748658283,Single inflow of 10K KZT; 0 further outgoing transfers observed.
 100000004993576100,peripheral,0.9,15,0.441136835508,Single inflow of 167K KZT; 0 further outgoing transfers observed.
-100000004997515100,terminal,1,8,0.471387158695,Possible holding point: receives 395K KZT from 4 payers; observed onward flow is 14%.
+100000004997515100,terminal,1,8,0.515399381048,Possible holding point: receives 395K KZT from 4 payers; observed onward flow is 14%.
 100000005008589100,peripheral,0.9,0,0.217138715869,Single inflow of 43K KZT; 0 further outgoing transfers observed.
 100000005010159100,peripheral,0.9,3,0.182229795902,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000005017150100,peripheral,0.9,75,0.0719156187566,Known seed with 0 observed transfers in this graph.
@@ -1483,7 +1483,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000005589319100,peripheral,0.9,2,0.136983586007,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000005602999100,peripheral,0.6,11,0.458706467662,"Limited role evidence: 1 payers, 2 recipients, 5K KZT received in observed graph."
 100000005608515100,peripheral,0.9,6,0.398123555451,Single inflow of 64K KZT; 0 further outgoing transfers observed.
-100000005610717100,coordinator,0.541433867141,0,0.614153641243,"Signs of coordination: receives from 4 consolidator candidates (...9100, ...6100, ...5100), 484K KZT in."
+100000005610717100,coordinator,0.541433867141,0,0.658165863595,"Signs of coordination: receives from 4 consolidator candidates (...9100, ...6100, ...5100), 484K KZT in."
 100000005612411100,peripheral,0.6,2,0.623120617386,"Limited role evidence: 3 payers, 8 recipients, 116K KZT received in observed graph."
 100000005614315100,terminal,0.758333333333,4,0.625753124143,Money stops here in the observed graph: receives 455K KZT from 1 payers; no outgoing transfers were traced.
 100000005616568100,peripheral,0.9,5,0.22204646061,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
@@ -1524,7 +1524,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000005809252100,peripheral,0.9,5,0.46281975947,Single inflow of 25K KZT; 0 further outgoing transfers observed.
 100000005815602100,peripheral,0.6,4,0.447571199122,"Limited role evidence: 1 payers, 1 recipients, 20K KZT received in observed graph."
 100000005820746100,terminal,1,22,0.529854663689,Possible holding point: receives 2.0M KZT from 1 payers; observed onward flow is 3%.
-100000005830339100,coordinator,0.541131376038,2,0.568026011674,"Signs of coordination: receives from 4 consolidator candidates (...6100, ...5100, ...0100), 476K KZT in."
+100000005830339100,coordinator,0.541131376038,2,0.612038234027,"Signs of coordination: receives from 4 consolidator candidates (...6100, ...5100, ...0100), 476K KZT in."
 100000005834479100,peripheral,0.6,3,0.327433697653,"Limited role evidence: 1 payers, 2 recipients, 8K KZT received in observed graph."
 100000005844459100,terminal,0.5,0,0.580095585067,Money stops here in the observed graph: receives 243K KZT from 2 payers; no outgoing transfers were traced.
 100000005847078100,peripheral,0.9,1,0.151707995456,Single inflow of 16K KZT; 0 further outgoing transfers observed.
@@ -1542,7 +1542,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000005897462100,peripheral,0.9,11,0.529866415952,Single inflow of 98K KZT; 0 further outgoing transfers observed.
 100000005901606100,peripheral,0.9,1,0.450891213225,Single inflow of 36K KZT; 0 further outgoing transfers observed.
 100000005904580100,terminal,0.5,10,0.5400791319,Money stops here in the observed graph: receives 72K KZT from 2 payers; no outgoing transfers were traced.
-100000005910114100,coordinator,0.509986654804,0,0.60005092647,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...7100, ...0100), 326K KZT in."
+100000005910114100,coordinator,0.509986654804,0,0.644063148823,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...7100, ...0100), 326K KZT in."
 100000005910895100,peripheral,0.9,11,0.236360716105,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000005911352100,peripheral,0.6,36,0.550785442864,"Limited role evidence: 2 payers, 3 recipients, 15K KZT received in observed graph."
 100000005931985100,peripheral,0.9,13,0.40147295021,Single inflow of 76K KZT; 0 further outgoing transfers observed.
@@ -1635,7 +1635,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000006707582100,distributor,0.7,7,0.740913542524,Fan-out hypothesis: sends 961K KZT to 14 recipients after receiving from 2 payers.
 100000006710485100,peripheral,0.9,1,0.159993340385,Single inflow of 20K KZT; 0 further outgoing transfers observed.
 100000006714366100,peripheral,0.6,12,0.268554863478,"Limited role evidence: 1 payers, 1 recipients, 10K KZT received in observed graph."
-100000006734214100,coordinator,0.542452550415,5,0.605398205821,"Signs of coordination: receives from 4 consolidator candidates (...9100, ...8100, ...5100), 610K KZT in."
+100000006734214100,coordinator,0.542452550415,5,0.649410428174,"Signs of coordination: receives from 4 consolidator candidates (...9100, ...8100, ...5100), 610K KZT in."
 100000006734554100,peripheral,0.6,28,0.507448975594,"Limited role evidence: 1 payers, 1 recipients, 16K KZT received in observed graph."
 100000006735545100,peripheral,0.9,3,0.114319348141,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
 100000006745291100,peripheral,0.9,11,0.521228503154,Single inflow of 83K KZT; 0 further outgoing transfers observed.
@@ -1643,7 +1643,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000006755850100,terminal,0.739126333333,5,0.656955380577,Money stops here in the observed graph: receives 443K KZT from 1 payers; no outgoing transfers were traced.
 100000006756956100,peripheral,0.9,0,0.193171152113,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
 100000006787636100,peripheral,0.9,53,0.462232146355,Single inflow of 20K KZT; 0 further outgoing transfers observed.
-100000006788200100,peripheral,0.6,6,0.593916245544,"Limited role evidence: 4 payers, 3 recipients, 272K KZT received in observed graph."
+100000006788200100,peripheral,0.6,6,0.637928467897,"Limited role evidence: 4 payers, 3 recipients, 272K KZT received in observed graph."
 100000006789108100,peripheral,0.9,11,0.483386218514,Single inflow of 38K KZT; 0 further outgoing transfers observed.
 100000006831291100,peripheral,0.6,52,0.0719156187566,"Limited role evidence: 0 payers, 1 recipients, 0 KZT received in observed graph."
 100000006844004100,peripheral,0.9,0,0.351467074078,Single inflow of 21K KZT; 0 further outgoing transfers observed.
@@ -1721,7 +1721,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000007539296100,peripheral,0.9,5,0.21151643358,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000007544358100,transit,0.786821705426,4,0.685201943041,Pass-through hypothesis: forwards 109% of 322K KZT received; 29% forwarded within 2 days.
 100000007591246100,peripheral,0.6,12,0.304693070083,"Limited role evidence: 1 payers, 1 recipients, 12K KZT received in observed graph."
-100000007593823100,coordinator,0.509786476868,0,0.46983586007,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...7100, ...0100), 25K KZT in."
+100000007593823100,coordinator,0.509786476868,0,0.513848082423,"Signs of coordination: receives from 3 consolidator candidates (...5100, ...7100, ...0100), 25K KZT in."
 100000007594394100,coordinator,0.542074436536,18,0.690484584949,"Signs of coordination: receives from 4 consolidator candidates (...6100, ...5100, ...1100), 395K KZT in."
 100000007597382100,peripheral,0.9,5,0.153852783327,Single inflow of 16K KZT; 0 further outgoing transfers observed.
 100000007617808100,terminal,0.75,4,0.616351314295,Money stops here in the observed graph: receives 450K KZT from 1 payers; no outgoing transfers were traced.
@@ -1729,7 +1729,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000007629096100,peripheral,0.6,0,0.636341912485,"Limited role evidence: 4 payers, 1 recipients, 1.1M KZT received in observed graph."
 100000007629121100,peripheral,0.9,2,0.503658870999,Single inflow of 29K KZT; 0 further outgoing transfers observed.
 100000007631637100,peripheral,0.9,1,0.406115093822,Single inflow of 15K KZT; 0 further outgoing transfers observed.
-100000007639767100,coordinator,0.543271055753,0,0.698241078074,"Signs of coordination: receives from 4 consolidator candidates (...6100, ...3100, ...0100), 91K KZT in."
+100000007639767100,coordinator,0.543271055753,0,0.742253300427,"Signs of coordination: receives from 4 consolidator candidates (...6100, ...3100, ...0100), 91K KZT in."
 100000007641183100,peripheral,0.9,4,0.424742429584,Single inflow of 28K KZT; 0 further outgoing transfers observed.
 100000007641801100,peripheral,0.9,6,0.495990519842,Single inflow of 200K KZT; 0 further outgoing transfers observed.
 100000007647294100,terminal,0.641666666667,33,0.424789438634,Money stops here in the observed graph: receives 385K KZT from 1 payers; no outgoing transfers were traced.
@@ -1755,7 +1755,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000007865484100,peripheral,0.9,38,0.150927645238,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
 100000007867364100,peripheral,0.9,18,0.224473302777,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000007898453100,peripheral,0.6,2,0.584867003565,"Limited role evidence: 1 payers, 2 recipients, 25K KZT received in observed graph."
-100000007908818100,coordinator,0.542866251483,3,0.925960747444,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...9100, ...9100), 727K KZT in."
+100000007908818100,coordinator,0.542866251483,3,0.969972969797,"Signs of coordination: receives from 4 consolidator candidates (...5100, ...9100, ...9100), 727K KZT in."
 100000007930878100,peripheral,0.9,41,0.46393622439,Single inflow of 5K KZT; 0 further outgoing transfers observed.
 100000007938486100,peripheral,0.9,1,0.45711991225,Single inflow of 40K KZT; 0 further outgoing transfers observed.
 100000007939160100,terminal,1,41,0.682252125201,Possible holding point: receives 795K KZT from 1 payers; observed onward flow is 2%.
@@ -1804,7 +1804,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000008141170100,peripheral,0.9,4,0.477392564735,Single inflow of 11K KZT; 0 further outgoing transfers observed.
 100000008144528100,consolidator,0.5,4,0.684514435696,"Signs of consolidation: receives from 5 payers (1 seeds within 2 hops), 1.1M KZT in, forwards 0%."
 100000008151098100,peripheral,0.9,25,0.140315352372,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
-100000008165763100,consolidator,1,2,0.882735926666,"Signs of consolidation: receives from 15 payers (3 seeds within 2 hops), 1.2M KZT in, forwards 109%."
+100000008165763100,consolidator,1,2,0.926748149019,"Signs of consolidation: receives from 15 payers (3 seeds within 2 hops), 1.2M KZT in, forwards 109%."
 100000008168850100,peripheral,0.9,5,0.220030947624,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
 100000008169544100,peripheral,0.6,4,0.572997218631,"Limited role evidence: 1 payers, 4 recipients, 137K KZT received in observed graph."
 100000008172352100,peripheral,0.6,31,0.589039056685,"Limited role evidence: 3 payers, 7 recipients, 90K KZT received in observed graph."
@@ -1848,7 +1848,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000008295429100,terminal,0.586666666667,5,0.328068319818,Money stops here in the observed graph: receives 352K KZT from 1 payers; no outgoing transfers were traced.
 100000008297199100,peripheral,0.9,0,0.279719512673,Single inflow of 42K KZT; 0 further outgoing transfers observed.
 100000008304115100,peripheral,0.9,10,0.466286676852,Single inflow of 51K KZT; 0 further outgoing transfers observed.
-100000008304139100,distributor,1,2,0.659059035531,Fan-out hypothesis: sends 1.7M KZT to 24 recipients after receiving from 4 payers.
+100000008304139100,distributor,1,2,0.703071257884,Fan-out hypothesis: sends 1.7M KZT to 24 recipients after receiving from 4 payers.
 100000008306857100,peripheral,0.9,13,0.195103224037,Single inflow of 125K KZT; 0 further outgoing transfers observed.
 100000008308418100,peripheral,0.9,0,0.184821169742,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 23% of cases - extend the export from this account.
 100000008309514100,peripheral,0.9,1,0.153735260704,Single inflow of 17K KZT; 0 further outgoing transfers observed.
@@ -1941,7 +1941,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000008546855100,consolidator,0.6,18,0.727087005915,"Signs of consolidation: receives from 6 payers (1 seeds within 2 hops), 72K KZT in, forwards 14%."
 100000008547295100,peripheral,0.9,6,0.370682022956,Single inflow of 15K KZT; 0 further outgoing transfers observed.
 100000008547844100,distributor,0.95,9,0.603588357425,Fan-out hypothesis: sends 2.0M KZT to 19 recipients after receiving from 3 payers.
-100000008547948100,consolidator,0.6,8,0.729055509852,"Signs of consolidation: receives from 6 payers (1 seeds within 2 hops), 213K KZT in, forwards 2438%."
+100000008547948100,consolidator,0.6,8,0.773067732205,"Signs of consolidation: receives from 6 payers (1 seeds within 2 hops), 213K KZT in, forwards 2438%."
 100000008548853100,peripheral,0.9,1,0.147653464959,Single inflow of 14K KZT; 0 further outgoing transfers observed.
 100000008551752100,peripheral,0.9,38,0.145662631723,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 37% of cases - extend the export from this account.
 100000008554390100,peripheral,0.9,7,0.110987581776,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 30% of cases - extend the export from this account.
@@ -1950,7 +1950,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000008556318100,terminal,0.5,2,0.648082422533,Money stops here in the observed graph: receives 180K KZT from 2 payers; no outgoing transfers were traced.
 100000008557672100,peripheral,0.9,1,0.383374466251,Single inflow of 49K KZT; 0 further outgoing transfers observed.
 100000008560263100,peripheral,0.9,5,0.166887217456,Outgoing not observed (cut-off at hop 4); similar visible nodes forward money in 29% of cases - extend the export from this account.
-100000008560717100,coordinator,0.608100533808,5,0.718278685314,"Signs of coordination: receives from 6 consolidator candidates (...9100, ...6100, ...5100), 529K KZT in."
+100000008560717100,coordinator,0.608100533808,5,0.762290907666,"Signs of coordination: receives from 6 consolidator candidates (...9100, ...6100, ...5100), 529K KZT in."
 100000008561016100,transit,0.930555555556,8,0.448952089944,Pass-through hypothesis: forwards 103% of 180K KZT received; 100% forwarded within 2 days.
 100000008566737100,terminal,0.5,0,0.615293610687,Money stops here in the observed graph: receives 230K KZT from 2 payers; no outgoing transfers were traced.
 100000008568512100,peripheral,0.9,5,0.244521487053,Single inflow of 200K KZT; 0 further outgoing transfers observed.
@@ -2049,7 +2049,7 @@ gid,role,role_score,cluster_id,priority_score,evidence
 100000008686214100,peripheral,0.9,3,0.263266345438,Single inflow of 25K KZT; 0 further outgoing transfers observed.
 100000008686234100,peripheral,0.9,0,0.454299369295,Single inflow of 40K KZT; 0 further outgoing transfers observed.
 100000008686247100,peripheral,0.6,22,0.310980530419,"Limited role evidence: 1 payers, 1 recipients, 22K KZT received in observed graph."
-100000008686313100,coordinator,0.576564353499,0,0.881047518314,"Signs of coordination: receives from 5 consolidator candidates (...9100, ...6100, ...5100), 1.9M KZT in."
+100000008686313100,coordinator,0.576564353499,0,0.925059740667,"Signs of coordination: receives from 5 consolidator candidates (...9100, ...6100, ...5100), 1.9M KZT in."
 100000008686494100,peripheral,0.9,1,0.150650291848,Single inflow of 16K KZT; 0 further outgoing transfers observed.
 100000008687492100,peripheral,0.9,1,0.322850315352,Single inflow of 15K KZT; 0 further outgoing transfers observed.
 100000008687617100,peripheral,0.9,1,0.190754886982,Single inflow of 43K KZT; 0 further outgoing transfers observed.

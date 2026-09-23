@@ -1,12 +1,21 @@
 # Current handoff
 
-Updated: 2026-09-23, 17:04 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
+Updated: 2026-09-23, 17:11 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
 and 05 are implemented. The separately authorized experimental assistant is
 integrated; the public deployment remains key-free. Spec 06 runs in order
 0, 1 + 1b, 2, 3, with a 17:35 Asia/Almaty hard stop (UTC+05). Root writes
 spec 06 and commits/pushes; optional subagents verify read-only.
 
 ## Spec 06 progress
+
+- Item 3: shared-source twins, direct-match card links, priority bonus and
+  twin_groups.csv implemented. Independent raw-data calculation: 45 pairs,
+  37 accounts, 9 groups (sizes 2–19); accounts ending 284100/963100 share 4 payers, Jaccard 0.5.
+  Official regeneration passes in 47.84s, matching those counts; browser twin
+  click-through passes. Priority changes move 818100 to rank 2 and 963100 to
+  rank 3; role counts and blocking cut remain unchanged. All 76 pytest tests,
+  JS layout/drag checks, HTTP smoke, twin download and language guard pass.
+  Final clean-clone Docker check and Fly deployment follow this commit.
 
 - Experimental assistant from Claude integrated separately in c9902d1 after
   all 70 tests passed. Five read-only tools; public LLM remains unconfigured.

@@ -16,6 +16,7 @@ from pipeline.priority import add_priority
 from pipeline.roles import add_roles
 from pipeline.taint import add_taint
 from pipeline.skeleton import add_skeleton
+from pipeline.twins import twin_groups
 
 
 def run(data: str = "data/raw", out: str = "out") -> None:
@@ -39,6 +40,7 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     skeleton_edges.to_csv(Path(out) / "skeleton_edges.csv", index=False, float_format="%.12g")
     plan, limited = blocking_plan(metrics, edges)
     plan.to_csv(Path(out) / "blocking_plan.csv", index=False, float_format="%.12g")
+    twin_groups(metrics, graph).to_csv(Path(out) / "twin_groups.csv", index=False, float_format="%.12g")
     write_outputs(metrics, clusters, edges, projected, out)
     counts = metrics.role.value_counts()
     for role in ("coordinator", "consolidator", "distributor", "transit", "terminal", "peripheral"):

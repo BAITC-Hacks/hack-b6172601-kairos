@@ -96,3 +96,16 @@ Highest-priority circles are drawn last and selected first. Ego view supports
 Dragging moves accounts and their connected edges in overview, ego and skeleton
 layouts. Close-zoom neighbors move aside while the dragged node follows the
 pointer. Background drag pans; Overview clears all manual positions.
+
+### Shared-source twins
+
+Distinct observed payer sets qualify when intersection size is at least 3 and
+Jaccard similarity is at least 0.5 (inclusive). `shared_sources_twin` adds the
+same 0.05 finding bonus under the existing 0.15 cap. Metrics include JSON lists
+of exact string IDs in `twin_gids`, JSON ID-to-count `twin_shared_payers`, and
+text `twin_group` (empty for unflagged accounts). Direct matches are symmetric;
+transitive group members need not all qualify pairwise. `twin_groups.csv` has
+`group_id,gids,shared_payers,total_in_kzt,hypothesis`: both ID collections are
+JSON arrays of strings; shared payers is the union supporting qualifying pairs.
+The viewer lists/clicks direct twins and exports the groups. These are review
+hypotheses, never proof of shared identity or criminal control.

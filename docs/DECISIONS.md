@@ -276,3 +276,12 @@ picking use the same priority and gid tie-break. Ego columns use incoming-only
 and outgoing-only traversal; nearest displayed hop wins, then payer side.
 Columns cap at 25 by flow, expand only displayed parents, and pack around parent
 barycentres. Long columns remain pannable to preserve screen-size click targets.
+
+## Spec 06 shared-source evidence
+
+Twins use distinct payer sets, not transaction counts or amounts: at least three
+shared payers and Jaccard >=0.5. An inverted payer index generates candidate
+pairs. Direct matches remain separate from transitive review groups to avoid
+implying an unobserved pair relationship. Group IDs are deterministic by minimum
+gid; the export's shared-payer list is the union of supporting pair intersections.
+The existing finding bonus/cap applies; no role rules or raw inputs change.

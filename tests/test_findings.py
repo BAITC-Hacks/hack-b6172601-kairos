@@ -62,7 +62,8 @@ def test_findings_dates_boundaries_and_distinct_branches():
                                               "2026-07-01 03:00", "2026-07-02 01:00"])})
     result = add_findings(metrics, tx, graph)
     assert all(result[flag].dtype == bool for flag in FINDING_TEXT)
-    assert result.loc[0, list(FINDING_TEXT)].all()
+    assert result.loc[0, [flag for flag in FINDING_TEXT if flag != "shared_sources_twin"]].all()
+    assert not result.loc[0, "shared_sources_twin"]
     assert not result.loc[1, list(FINDING_TEXT)].any()
     assert "converge" in result.loc[0, "findings"]
 

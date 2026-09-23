@@ -3,12 +3,14 @@ import networkx as nx
 import pandas as pd
 
 from pipeline.config import CONFIG
+from pipeline.twins import add_shared_sources
 
 FINDING_TEXT = {
     "common_counterparty": "Receives directly from multiple known seeds.",
     "synchronous_inflow": "Receives from multiple distinct payers on the same date.",
     "fast_pass": "Most outgoing value follows an inflow within two days.",
     "scatter_gather": "Multiple short branches from one source converge here.",
+    "shared_sources_twin": "Shares a substantial payer set with another account; review possible common control.",
 }
 
 
@@ -45,6 +47,7 @@ def add_findings(metrics: pd.DataFrame, transactions: pd.DataFrame, graph: nx.Di
     result["synchronous_inflow"] = result.max_daily_payers.ge(CONFIG.synchronous_inflow_min_payers)
     result["fast_pass"] = result.fast_pass_share.ge(CONFIG.fast_pass_min_share) & result.out_kzt.ge(CONFIG.fast_pass_min_kzt)
     result["scatter_gather"] = result.gid.isin(scatter_gather_targets(graph))
+    result = add_shared_sources(result, graph)
     result["findings"] = result.apply(
         lambda row: " ".join(text for flag, text in FINDING_TEXT.items() if row[flag]), axis=1)
     return result
