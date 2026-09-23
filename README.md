@@ -32,7 +32,8 @@ The virtual environment is selected automatically. Stop the foreground server
 with Ctrl+C. The latest local pipeline run took **47.84 seconds** for
 2,248 nodes, 3,119 directed edges and 4,840 transactions (including layout and
 counterfactual analysis). Hardware affects runtime; the acceptance limit is five
-minutes. With collision removal, the Fly shared-CPU pipeline took **140.63 seconds**. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
+minutes. Final clean-clone Docker runtime was **66.02 seconds**; Fly shared-CPU
+runtime was **150.62 seconds**. Exact dependencies: [requirements.lock.txt](requirements.lock.txt);
 allowed ranges: [requirements.txt](requirements.txt).
 Remote clean-clone verification passed for Docker/Python without a key; results
 and environment details are recorded in [docs/STATE.md](docs/STATE.md).
@@ -112,7 +113,7 @@ Role scores in [0,1] express heuristic support for the matched rule, not a
 calibrated probability. The node card shows failed earlier predicates through
 the matching rule. The complete scoring implementation is
 [pipeline/roles.py](pipeline/roles.py). Supplied-data counts: **29 coordinators,
-38 consolidators, 42 distributors, 67 transit, 264 terminal, 1,808 peripheral**.
+38 consolidators, 67 transit, 42 distributors, 264 terminal, 1,808 peripheral**.
 No LLM assigns pipeline roles or rankings; viewer-card explanations are generated deterministically.
 
 ## How data caveats are handled
@@ -145,7 +146,7 @@ priority = raw / max(raw) * (0.5 if likely_legit_payouts else 1)
 ```
 
 If the maximum is zero, priorities are zero. Role weights are coordinator 1.0,
-consolidator 0.9, distributor 0.7, transit 0.6, terminal 0.4, peripheral 0.1.
+consolidator 0.9, transit 0.6, distributor 0.7, terminal 0.4, peripheral 0.1.
 Ties sort by ascending exact gid. Scores rank review effort, not guilt.
 
 **Haircut taint** starts seed shares at 1. Each account receives the sum of

@@ -1,116 +1,81 @@
 # Current handoff
 
-Updated: 2026-09-23, 17:11 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
-and 05 are implemented. The separately authorized experimental assistant is
-integrated; the public deployment remains key-free. Spec 06 runs in order
-0, 1 + 1b, 2, 3, with a 17:35 Asia/Almaty hard stop (UTC+05). Root writes
-spec 06 and commits/pushes; optional subagents verify read-only.
+Updated: 2026-09-23, 17:18 Asia/Almaty (UTC+05). Specs 01, 03, 03b,
+assigned 04, 04b, 05 and 06 are implemented. The separately authorized
+experimental analyst assistant is integrated. Hard stop: 17:35.
 
-## Spec 06 progress
+## Completed spec 06 and integration
 
-- Item 3: shared-source twins, direct-match card links, priority bonus and
-  twin_groups.csv implemented. Independent raw-data calculation: 45 pairs,
-  37 accounts, 9 groups (sizes 2–19); accounts ending 284100/963100 share 4 payers, Jaccard 0.5.
-  Official regeneration passes in 47.84s, matching those counts; browser twin
-  click-through passes. Priority changes move 818100 to rank 2 and 963100 to
-  rank 3; role counts and blocking cut remain unchanged. All 76 pytest tests,
-  JS layout/drag checks, HTTP smoke, twin download and language guard pass.
-  Final clean-clone Docker check and Fly deployment follow this commit.
-
-- Experimental assistant from Claude integrated separately in c9902d1 after
-  all 70 tests passed. Five read-only tools; public LLM remains unconfigured.
-
-- Item 2: node dragging in overview, ego and skeleton, background pan and
-  Overview reset implemented. Browser dragging and JS geometry/reset checks pass;
-  all 70 pytest tests, smoke and language guard pass.
-
-- Items 1 + 1b: pipeline circle separation, fixed-size collision-safe inspection
-  layouts, priority picking, skeleton sub-rows and directional ego depths 1–4
-  implemented. Full pytest suite, official/synthetic JS geometry checks, browser
-  interaction, local smoke and language guard pass. Fly deployment of 933a2e3
-  succeeded; pipeline 140.63s on shared CPU / 1 GiB. Public health/viewer/download/tool smoke checks pass; all 2,248 exported
-  circles have at least 2.0005 layout units of clearance at zoom 1.
-
-- Item 0: hierarchy legend order and upward-flow hint implemented. README role
-  table follows display order while explicitly preserving actual rule precedence.
-  Spec 06 is included in this first commit. Verified: all 65 pytest tests, local smoke test and language guard pass.
-
-## Spec 05 delivered
-
-Completed in the requested order, with a commit and push after each section:
-
-| Section | Result | Commit |
+| Work | Commit | Result |
 |---|---|---|
-| C cleanup | Removed unused synthetic seeder, JSON accessor, UI helpers and obsolete tests; make run selects its venv | 8d09b11 |
-| A README | Required section order, configured role table, measured examples, caveats, schemas, five-step jury path and matching docs/diagram.md | a44831a |
-| B disclosure | H1 scaffold boundary b92291c, case work, AI tools, organiser-only data and installed library licences | b6a74e7 |
-| D Docker | Locked install without silent fallback, all eight artifacts required, 300-second local health grace | e3d4eef |
-| E clean clone | Remote Docker and fresh Python paths pass without a key or .env | e272dc5 |
-| F Fly | Public viewer deployed and verified; 1 GiB VM resolves observed 512 MiB OOM | Final H5 commit |
+| 0 | 77703e1 | Hierarchy legend/filter order and money-flow hint; spec 06 included |
+| 1 + 1b | 933a2e3 | Collision-safe inspection, priority picking, skeleton sub-rows, directional ego depths 1–4 |
+| Assistant | c9902d1 | Five read-only graph tools and experimental assistant page; exact requested H5 message |
+| 2 | 3033a62 | Drag nodes in all layouts; edges follow; background pans; Overview resets |
+| 3 | 75514e8 | Shared-source twins, direct-match links, priority bonus and twin_groups.csv |
 
-## E: remote clean-clone gate - PASS
+Each completed block was committed and pushed, with pytest passing before each
+push. Root alone edited spec 06 and committed/pushed; the cheaper subagent only
+verified. Claude authored the assistant files; the user authorized their separate
+integration. No unfinished assistant files remain.
 
-Verified remote commit e3d4eef in /tmp/clean-check, initially clean with no .env
-or .venv. Raw Parquet files remain unchanged.
+## Verification
 
-- Docker: `docker compose up --build -d` succeeds. Entrypoint pipeline: 41.83s.
-  `/api/health`: ok=true, env=docker, llm_configured=false. `/api/graph`: 2,248
-  nodes, 3,119 edges; all node and endpoint IDs are strings. Required CSVs exist
-  inside the container with 2248 / 88 / 30 rows. No /app/.env. HTTP smoke and
-  language checks pass. `docker compose down` removes container and network.
-- Fresh Python 3.14 venv: `make install`, `make pipeline`, `make run` succeed.
-  Pipeline: 67.62s under concurrent verification load; pip check reports no
-  broken requirements. All 65 pytest tests pass. HTTP smoke passes; health
-  reports llm_configured=false. Required CSV counts: 2248 / 88 / 30.
-  Verification server stopped after checks.
-- Docker uses Python 3.11 and resolves the committed lock without fallback.
-  Builds/install need network; execution was separately verified with network
-  disabled, 512 MiB and 1 CPU: 54.72s, 421,220 KiB peak RSS. This container limit
-  did not include Fly VM overhead, so it was insufficient evidence for Fly sizing.
-- D also verified missing official input refusal, image .env/out exclusions and
-  regeneration of all exports after deleting only skeleton_edges.csv (42.77s).
-  HTTP smoke passed before and after regeneration.
+- All 76 pytest tests pass, including two official-data pipeline regenerations,
+  deterministic CSVs, twin thresholds/transitivity/IDs/bonus and viewer APIs.
+- Both Node checks pass: largest-component fitting plus official/synthetic
+  collision, hit priority, ego depths/caps/cycles, dragging and reset contracts.
+- Browser checks pass for ego depth selection, node dragging with following edges,
+  skeleton dragging and twin-account click-through. Local HTTP smoke and language
+  guard pass. Exported circles have >=2 units clearance at zoom 1; the viewer
+  retains >=8 screen pixels between circles at inspection fit and further zoom.
+- Latest local pipeline: 47.84s. Final remote clean clone `/tmp/kairos-extras-final`
+  at 75514e8: Docker build/start passed without .env, key or host Python;
+  pipeline 66.02s. Smoke, language, twin CSV/filter/card, assistant HTML and honest
+  no-key 503 checks pass. Initial/final clone status clean; its Compose stack is down.
+- Fly deployed 933a2e3 after item 1b, then 75514e8 after all extras/assistant.
+  Public smoke, exact JS/HTML hashes, twin CSV/filter/card, all-circle spacing
+  and honest no-key assistant checks pass. Browser four-hop ego and twin
+  navigation pass; the assistant page visibly reports the missing key.
+  Final image: deployment-01M372TSBYS6BBA3E7JCTSJY91; pipeline 150.62s.
+  Existing app kairos-astana, machine 7812345cd19d58, fra, shared 1 CPU / 1 GiB.
+  Keep 1 GiB: the earlier 512 MiB Fly machine OOMed. No fly launch was used.
+- README describes nine outputs (eight CSVs plus graph.json), actual startup,
+  measured limitations, hierarchy order, inspection controls, twins and the
+  experimental assistant. Diagram sources match. GitHub Mermaid rendering itself
+  was not verified in the signed-out browser; authenticated rendered README HTML
+  was previously checked. DISCLOSURE records scaffold and assistant provenance.
 
-## F: public deployment - PASS
+## Verified data and boundaries
 
-- `fly deploy -a kairos-astana` succeeded after E. No fly launch was run.
-- First 512 MiB attempt OOM-killed the computation near 399 MiB anonymous RSS.
-  Retried with 1 GiB / 1 shared CPU; Fly pipeline completed in 47.59s. Fly caps
-  HTTP startup grace at 60s; both config copies use that supported value.
-- Verified https://kairos-astana.fly.dev: health ok=true, production,
-  llm_configured=false; graph 2248 nodes / 3119 edges with exact string IDs;
-  public CSV downloads 2248 / 88 / 30 rows; full HTTP smoke passes.
-- Browser loads the directed viewer; suffix 284100 returns five matches with
-  the correct top-1 account first, showing measured role/priority explanations.
-- Image: deployment-01M370YZ10JER0MP62G3ZR8C5P. Machine: 7812345cd19d58, fra.
-  Build/deploy/retry/public verification completed within the 15-minute budget.
-- Live URL added to README only after the public checks passed. Final pytest:
-  65 pass; language, diff and matching Fly-config checks pass.
-
-## Current analysis and limits
-
-- 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Roles:
-  coordinator 29; consolidator 38; distributor 42; transit 67; terminal 264;
-  peripheral 1,808. All 19 isolates remain. 35 weak components = 16 with edges
-  plus 19 isolates; overview fits the largest, with 1,877 nodes.
+- 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities, 81 seeds.
+  Roles: coordinator 29; consolidator 38; transit 67; distributor 42;
+  terminal 264; peripheral 1,808. Role precedence remains coordinator,
+  consolidator, distributor, transit, terminal, peripheral.
+- 19 isolates; 35 weak components (16 nontrivial); largest component 1,877.
+  Raw Parquet data remains unchanged.
 - Findings: common counterparty 24; synchronous inflow 38; fast pass 89;
-  scatter/gather 25; possible regular payouts 2; seed hubs 9.
-- Continuation covers 444 cut-off accounts, with 10 extension requests.
-  Skeleton: 174 accounts, exactly 446 retained directed edges. Rows show measured
-  seed-hop distances, not organizational authority. Ego defaults to one hop.
-- Blocking 10 accounts cuts 14.3094% of modeled repeated-hop exposure, not unique
-  currency. No real blocking, external enrichment or enforcement is implemented.
-- Raw data, analysis thresholds and rankings are unchanged by spec 05. Missing
-  flows remain unknown; there are no ground-truth labels. Dense layout does not
-  support a million-node graph; README describes that as future architecture.
-- GitHub-rendered README HTML was retrieved via the authenticated API and checked
-  visually: headings, ordered scenario and six tables render. The browser is
-  signed out of the private repository, so live GitHub Mermaid rendering remains
-  unverified; both diagram sources match and GitHub recognizes the Mermaid block.
+  scatter/gather 25; shared-source twins 37 accounts / 45 pairs / 9 groups
+  (sizes 2–19); possible regular payouts 2; seed hubs 9.
+- Accounts ending 284100 and 963100 share four payers, Jaccard 0.5. Twin bonus
+  moves 818100 to rank 2 and 963100 to rank 3; 284100 remains rank 1.
+  Direct twin matches and transitive group membership are explicitly distinct.
+- 444 cut-off accounts; 10 extension requests. Skeleton: 174 accounts and exactly
+  446 retained directed edges. Blocking 10 accounts cuts 14.3094% of modeled
+  repeated-hop exposure; no real enforcement is performed.
+- Close zoom guarantees separate circles; far-out overlap is allowed and clicks
+  pick highest priority. Ego columns cap at 25 by flow, expand displayed parents
+  only, and count omitted nodes. Long columns require pan; labels covering a
+  circle are skipped. Overview clears manual positions.
+- Missing flows remain unknown; no ground-truth labels or proof of common control.
+  The assistant is experimental, needs a model/key, and has no evaluation set.
+  Public LLM remains unconfigured; the main pipeline/viewer needs no key.
+  Minor legacy wording: its no-key error refers to README "Setup"; see
+  "Quick start" and "Analyst assistant (experimental)" instead.
 
 ## Next session
 
-Spec 06 work is in progress. Keep the verified
-public instance and clean local startup working; do not start another spec
-without user direction. The temporary clean clone remains in /tmp/clean-check;
-its Docker/Python verification services have been stopped.
+No spec 06 work remains. Keep the verified public instance and clean startup
+working; do not start another spec without user direction. Local verification
+servers and temporary Compose services are stopped. Earlier spec 05 clean-clone
+Docker/Python verification remains recorded in commits e272dc5 and e3901fe.
