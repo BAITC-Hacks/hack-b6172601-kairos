@@ -12,9 +12,9 @@ connections in a directed graph. Rankings are investigation priorities, never
 claims of guilt. No external enrichment or invented customer attributes.
 
 ## Inputs
-- data/edges.parquet: src, dst, sum_kzt, n_tx, depth; expected 3,119 rows.
-- data/nodes.parquet: gid, depth, is_seed; expected 2,248 rows, 81 seeds.
-- data/transactions.parquet: src, dst, date, sum_kzt; expected 4,840 rows.
+- data/raw/edges.parquet: src, dst, sum_kzt, n_tx, depth; expected 3,119 rows.
+- data/raw/nodes.parquet: gid, depth, is_seed; expected 2,248 rows, 81 seeds.
+- data/raw/transactions.parquet: src, dst, date, sum_kzt; expected 4,840 rows.
 - Period: July 2026; transfers >= 5,000 KZT; outgoing traversal to depth 4.
 Counts are validation expectations for supplied data, not hardcoded output logic.
 
@@ -51,6 +51,10 @@ Counts are validation expectations for supplied data, not hardcoded output logic
 - Real dataset is immutable. Remove synthetic seeding from the case runtime.
 
 ## Scope
+Current milestone: only docs/specs/01_PIPELINE.md, following 00_CONTEXT.md.
+It defines the implemented analysis contract, including metrics.csv and graph.json
+in addition to the three required case CSVs. The viewer remains future work.
+
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,
 interactive viewer, documentation and meaningful tests. Reuse FastAPI and Docker.
 Optional only after core passes: temporal indicators and an LLM analyst assistant.

@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from app.agent.core import run_agent
-from app.agent.registry import REGISTRY
+from app.agent.registry import REGISTRY, tool
 from app.core.errors import AppError
 
 
@@ -26,6 +26,21 @@ def _tool_call(call_id: str, name: str, arguments: dict):
         id=call_id,
         function=SimpleNamespace(name=name, arguments=json.dumps(arguments)),
     )
+
+
+@pytest.fixture(autouse=True)
+def isolated_tools():
+    """Exercise dispatch with test-only tools, independent of removed examples."""
+    original = REGISTRY.tools.copy()
+    @tool("list_accounts", "Test account lookup", {"type": "object", "properties": {"customer_id": {"type": "string"}}})
+    def list_accounts(customer_id):
+        return {"customer_id": customer_id, "accounts": []}
+    @tool("search_transactions", "Test failing tool", {"type": "object", "properties": {"customer_id": {"type": "string"}, "date_from": {"type": "string"}}})
+    def search_transactions(customer_id, date_from):
+        raise ValueError("Invalid test date")
+    yield
+    REGISTRY.tools.clear()
+    REGISTRY.tools.update(original)
 
 
 @pytest.fixture
@@ -46,7 +61,7 @@ def scripted(monkeypatch):
 
 def test_tools_are_registered():
     assert "list_accounts" in REGISTRY.names()
-    assert "spending_summary" in REGISTRY.names()
+    assert "search_transactions" in REGISTRY.names()
 
 
 @pytest.mark.asyncio

@@ -21,9 +21,9 @@ EXCLUDE_ANYWHERE = {
     ".traces", "node_modules", ".DS_Store", ".env", ".hackathon_start",
 }
 # Excluded only at the project root, so app/data survives.
-EXCLUDE_AT_ROOT = {"data"}
+EXCLUDE_AT_ROOT = {"out"}
 # Must exist in the copy, or the copy is not usable.
-REQUIRED = ("app/main.py", "app/data/store.py", "requirements.txt", "scripts/seed_data.py")
+REQUIRED = ("app/main.py", "pipeline/run.py", "requirements.txt", "data/raw/nodes.parquet")
 
 
 def main() -> int:

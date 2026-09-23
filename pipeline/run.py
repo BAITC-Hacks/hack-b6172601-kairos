@@ -1,0 +1,42 @@
+"""Command-line entry point for a complete offline pipeline run."""
+
+import argparse
+import time
+
+from pipeline.clusters import add_clusters
+from pipeline.export import write_outputs
+from pipeline.features import compute_features
+from pipeline.load import load_data
+from pipeline.priority import add_priority
+from pipeline.roles import add_roles
+from pipeline.taint import add_taint
+
+
+def run(data: str = "data/raw", out: str = "out") -> None:
+    started = time.monotonic()
+    nodes, edges, transactions = load_data(data)
+    metrics, graph = compute_features(nodes, edges, transactions)
+    metrics = add_taint(metrics, edges)
+    metrics = add_roles(metrics)
+    metrics = add_priority(metrics)
+    metrics, clusters, projected = add_clusters(metrics, edges, graph)
+    write_outputs(metrics, clusters, edges, projected, out)
+    counts = metrics.role.value_counts()
+    for role in ("coordinator", "consolidator", "distributor", "transit", "terminal", "peripheral"):
+        count = int(counts.get(role, 0))
+        print(f"{role}: {count}")
+        if count == 0 or count > 500:
+            print(f"Warning: {role} count is outside the expected range")
+    print(f"Analyzed {len(nodes)} nodes, {len(edges)} edges and {len(clusters)} clusters in {time.monotonic() - started:.2f}s")
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description="Analyze the supplied money-transfer graph")
+    parser.add_argument("--data", default="data/raw", help="Directory containing three case Parquet files")
+    parser.add_argument("--out", default="out", help="Output directory for CSV tables and graph JSON")
+    arguments = parser.parse_args()
+    run(arguments.data, arguments.out)
+
+
+if __name__ == "__main__":
+    main()

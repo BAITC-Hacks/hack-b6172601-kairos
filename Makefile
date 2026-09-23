@@ -1,4 +1,6 @@
-.PHONY: install key seed run docker test smoke check commit lock
+.PHONY: install key pipeline run docker test smoke check commit lock
+
+PYTHON ?= $(if $(wildcard .venv/bin/python),.venv/bin/python,python3)
 
 install:
 	python3 -m venv .venv
@@ -15,8 +17,8 @@ lock:
 key:
 	bash scripts/setup_key.sh
 
-seed:
-	python3 scripts/seed_data.py
+pipeline:
+	$(PYTHON) -m pipeline.run --data data/raw --out out
 
 run:
 	uvicorn app.main:app --reload --port 8000

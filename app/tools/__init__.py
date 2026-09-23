@@ -5,4 +5,4 @@ app/tools/refunds.py alone does nothing - the tool simply never appears in
 REGISTRY, in /api/tools or in the schemas sent to the model, and the only
 symptom is that the agent never calls it. Add the import below.
 """
-from app.tools import finance  # noqa: F401
+# Case-specific LLM tools are intentionally not implemented in pipeline spec 01.

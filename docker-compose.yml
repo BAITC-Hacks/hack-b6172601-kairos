@@ -2,8 +2,8 @@
 #
 #   docker compose up --build
 #
-# No Python on the host is needed: the container seeds the sample dataset when
-# data/ is empty. No .env file is needed either: the service starts without a
+# No Python on the host is needed: the container computes official Parquet
+# inputs into out/ on first start. No .env is needed: the service starts without a
 # key and reports llm_configured=false on /api/health. To use a model, either
 # create .env from .env.example or export LLM_API_KEY before running.
 services:

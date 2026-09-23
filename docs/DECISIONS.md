@@ -15,6 +15,18 @@ This section supersedes conflicting pre-competition decisions below.
 - Limited new dependencies are justified by Parquet, graph computation and viewing;
   retain a simple stack. Bundle browser dependencies locally for offline operation.
 
+## Pipeline implementation clarifications (spec 01)
+
+- Compare aggregate KZT sums with 1e-6 absolute tolerance and zero relative
+  tolerance; exact float equality rejects two valid official edge sums. Counts
+  remain exact. Revisit if input switches to exact decimal arithmetic.
+- Keep the prescribed dependency set: weighted PageRank uses NumPy power
+  iteration; spring layout falls back to NetworkX's dense NumPy force routine
+  when its public path requires SciPy. Fixed layout seed and iterations remain
+  unchanged. Revisit the private fallback when upgrading NetworkX.
+- Lock dependencies against both Python 3.11 (Docker) and local Python 3.14;
+  initial local-only NumPy/NetworkX pins did not resolve in the image.
+
 ## Historical scaffold rationale (context only)
 
 # Decisions

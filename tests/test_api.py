@@ -11,14 +11,14 @@ def test_health_reports_registered_tools():
     assert response.status_code == 200
     body = response.json()
     assert body["ok"] is True
-    assert "list_accounts" in body["tools"]
+    assert body["tools"] == []
 
 
 def test_tools_endpoint_returns_schemas():
     response = client.get("/api/tools")
     assert response.status_code == 200
     names = [t["function"]["name"] for t in response.json()["tools"]]
-    assert "search_transactions" in names
+    assert names == []
 
 
 def test_empty_question_is_rejected():
