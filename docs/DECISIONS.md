@@ -255,3 +255,11 @@ Revisit if: never, while these clauses stand.
 - Startup checks all eight artifacts, including the hierarchy/continuation and
   counterfactual exports. Any missing/empty artifact triggers recomputation.
   The health start period covers the case's five-minute pipeline budget.
+
+- Fly deployment is authorized after spec 05 E passes, superseding the earlier
+  no-Fly deferral. Use 1 GiB / 1 shared CPU: the 512 MiB Docker check passed
+  (411 MiB peak RSS, 54.72s), but the Fly VM OOM-killed the computation near
+  399 MiB anonymous RSS once VM/runtime overhead was included.
+  Fly's validator caps HTTP startup grace at 60 seconds, so configure that
+  supported value; Docker retains its 300-second local startup grace. No
+  application secrets are required for the case scenario.

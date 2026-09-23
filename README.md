@@ -4,6 +4,8 @@ Which of the **2,248 accounts** should an analyst review first, and why?
 Money Graph turns the organiser's transaction graph into reproducible role hypotheses,
 ranked evidence and a directed viewer. These are investigation leads, never findings of guilt.
 
+[Live demo](https://kairos-astana.fly.dev) — public viewer, no login or API key required.
+
 ## Quick start
 
 From the repository root, with Docker Engine and Compose available:
@@ -216,7 +218,9 @@ of criminal groups. Source datasets remain immutable.
 
 Python 3.11 in Docker; pandas, PyArrow, NetworkX and NumPy for analysis;
 FastAPI/Uvicorn for HTTP; Docker Compose for local startup; Fly.io configuration
-for the public deployment. No database, GPU, learned model or paid analysis API.
+for the public deployment. Fly is configured with a 1 GiB machine for computation plus VM
+overhead; 512 MiB failed during deployment. No database, GPU, learned model or
+paid analysis API.
 
 | Environment parameter | Default / effect |
 |---|---|

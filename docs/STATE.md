@@ -1,47 +1,21 @@
 # Current handoff
 
-Updated: 2026-09-23. Specs 01, 03, 03b, assigned 04 and 04b are implemented.
-Spec 04 H remains documentation only. Spec 05 is in progress in the user-requested
-order C -> A -> B -> D -> E -> F. Hard stop: 17:30 Asia/Almaty; commit and push
-at each completed section. Deploy is authorized only after the clean-clone gate.
+Updated: 2026-09-23, 16:42 Asia/Almaty. Specs 01, 03, 03b, assigned 04, 04b
+and 05 are implemented. Spec 04 H remains documentation only; no case-aware
+LLM assistant is implemented. This task finishes before the 17:30 hard stop.
 
-## Spec 05 progress
+## Spec 05 delivered
 
-- C complete, committed/pushed as 8d09b11: removed unused synthetic seeder,
-  JSON store, legacy UI helpers and obsolete tests. Make run uses the venv.
-  Stale key-required deployment instructions replaced. 65 tests pass; language
-  check passes. No case-aware LLM assistant is implemented.
-- A complete: README rewritten in the required 13-section order, with diagram mirrored
-  in docs/diagram.md, configured role rules, observed examples, complete output
-  schemas, caveats, priorities, findings and an executable five-step jury path.
-  Full pytest rerun: 65 pass; language and diff guards pass; role table and
-  mirrored diagram match runtime configuration and each other.
-- Docker quick-start executed: recomputation took 45.91 seconds; all viewer HTTP
-  smoke checks passed. Required CSV row counts: 2248 / 88 / 30.
-- Exact Python quick start also passes without activation: make install && make
-  pipeline && make run; HTTP smoke passes. Rerun under concurrent tests: 50.93s.
-- Local pipeline: 45.79 seconds. Browser verified top-1 selection, suffix 284100
-  (5 matches, correct top-1 first), measured role/priority evidence and ego view
-  with 10 accounts. No URL is advertised until deployment verification passes.
+Completed in the requested order, with a commit and push after each section:
 
-- B complete: replaced disclosure TODOs and synthetic-data claims with the H1 commit
-  boundary, case-specific work, AI tools, organiser-only anonymised data and
-  direct library licences checked against installed package metadata.
-  Full tests: 65 pass; language and diff guards pass.
-- GitHub rendered README HTML retrieved through authenticated API and visually
-  checked: headings, five-step list and six tables render correctly. The browser
-  is signed out of the private repository; GitHub live Mermaid rendering remains
-  unverified (both Mermaid sources are identical).
-
-- D complete: startup checks all eight exports, Docker uses the exact lock
-  without a silent fallback, and health checks allow the five-minute pipeline
-  budget. Full tests: 65 pass; language, diff and deploy-config guards pass.
-  Missing official nodes file fails clearly; image contains neither .env nor out/.
-  Offline disposable container (network none, 512 MiB, 1 CPU) completes in
-  54.72s at 421,220 KiB peak RSS, with expected counts.
-  New image is healthy; deleting only skeleton_edges.csv triggers full
-  regeneration in 42.77s and restores all eight outputs. HTTP smoke passes
-  before and after regeneration.
+| Section | Result | Commit |
+|---|---|---|
+| C cleanup | Removed unused synthetic seeder, JSON accessor, UI helpers and obsolete tests; make run selects its venv | 8d09b11 |
+| A README | Required section order, configured role table, measured examples, caveats, schemas, five-step jury path and matching docs/diagram.md | a44831a |
+| B disclosure | H1 scaffold boundary b92291c, case work, AI tools, organiser-only data and installed library licences | b6a74e7 |
+| D Docker | Locked install without silent fallback, all eight artifacts required, 300-second local health grace | e3d4eef |
+| E clean clone | Remote Docker and fresh Python paths pass without a key or .env | e272dc5 |
+| F Fly | Public viewer deployed and verified; 1 GiB VM resolves observed 512 MiB OOM | Final H5 commit |
 
 ## E: remote clean-clone gate - PASS
 
@@ -59,32 +33,53 @@ or .venv. Raw Parquet files remain unchanged.
   reports llm_configured=false. Required CSV counts: 2248 / 88 / 30.
   Verification server stopped after checks.
 - Docker uses Python 3.11 and resolves the committed lock without fallback.
-  Network access is needed only for builds/install; offline execution was
-  separately verified in D. Sandbox-local curl required network escalation.
+  Builds/install need network; execution was separately verified with network
+  disabled, 512 MiB and 1 CPU: 54.72s, 421,220 KiB peak RSS. This container limit
+  did not include Fly VM overhead, so it was insufficient evidence for Fly sizing.
+- D also verified missing official input refusal, image .env/out exclusions and
+  regeneration of all exports after deleting only skeleton_edges.csv (42.77s).
+  HTTP smoke passed before and after regeneration.
 
-## Current analysis and viewer
+## F: public deployment - PASS
 
-- 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Role counts:
+- `fly deploy -a kairos-astana` succeeded after E. No fly launch was run.
+- First 512 MiB attempt OOM-killed the computation near 399 MiB anonymous RSS.
+  Retried with 1 GiB / 1 shared CPU; Fly pipeline completed in 47.59s. Fly caps
+  HTTP startup grace at 60s; both config copies use that supported value.
+- Verified https://kairos-astana.fly.dev: health ok=true, production,
+  llm_configured=false; graph 2248 nodes / 3119 edges with exact string IDs;
+  public CSV downloads 2248 / 88 / 30 rows; full HTTP smoke passes.
+- Browser loads the directed viewer; suffix 284100 returns five matches with
+  the correct top-1 account first, showing measured role/priority explanations.
+- Image: deployment-01M370YZ10JER0MP62G3ZR8C5P. Machine: 7812345cd19d58, fra.
+  Build/deploy/retry/public verification completed within the 15-minute budget.
+- Live URL added to README only after the public checks passed. Final pytest:
+  65 pass; language, diff and matching Fly-config checks pass.
+
+## Current analysis and limits
+
+- 2,248 nodes, 3,119 edges, 4,840 transactions, 88 communities. Roles:
   coordinator 29; consolidator 38; distributor 42; transit 67; terminal 264;
-  peripheral 1,808. All original nodes, including 19 isolates, are retained.
-- 35 weak components = 16 components with edges + 19 isolates. Overview fits
-  the largest (1,877 nodes), while all components remain searchable.
+  peripheral 1,808. All 19 isolates remain. 35 weak components = 16 with edges
+  plus 19 isolates; overview fits the largest, with 1,877 nodes.
 - Findings: common counterparty 24; synchronous inflow 38; fast pass 89;
   scatter/gather 25; possible regular payouts 2; seed hubs 9.
-- Continuation covers 444 cut-off accounts; 10 extension requests. Hop-4 nodes
-  cannot match terminal rules but can match earlier observed-inflow rules.
-- Skeleton has 174 accounts and exactly 446 retained edges. Rows show observed
-  seed-hop distances, not organizational authority. Selecting a member preserves
-  the layout. Ego defaults to one hop, with optional second hop and amount order.
-- Pipeline-generated role/priority explanations appear in graph JSON and metrics
-  CSV. APIs serve the artifacts; browser does not recompute analysis.
+- Continuation covers 444 cut-off accounts, with 10 extension requests.
+  Skeleton: 174 accounts, exactly 446 retained directed edges. Rows show measured
+  seed-hop distances, not organizational authority. Ego defaults to one hop.
 - Blocking 10 accounts cuts 14.3094% of modeled repeated-hop exposure, not unique
-  currency. No actual blocking or other external enforcement is implemented.
-- Raw data is immutable. Gids stay exact strings in UI/JSON. Thresholds and role
-  rankings unchanged by spec 05. No ground-truth validation; missing flows remain
-  unknown. Dense layout is unsuitable for a million-node graph.
+  currency. No real blocking, external enrichment or enforcement is implemented.
+- Raw data, analysis thresholds and rankings are unchanged by spec 05. Missing
+  flows remain unknown; there are no ground-truth labels. Dense layout does not
+  support a million-node graph; README describes that as future architecture.
+- GitHub-rendered README HTML was retrieved via the authenticated API and checked
+  visually: headings, ordered scenario and six tables render. The browser is
+  signed out of the private repository, so live GitHub Mermaid rendering remains
+  unverified; both diagram sources match and GitHub recognizes the Mermaid block.
 
-## Remaining work
+## Next session
 
-F: bounded Fly deployment is now authorized by the passing clean-clone gate.
-Record failures honestly; keep the public URL out of README unless verified.
+Ready for handoff. No remaining implementation in spec 05. Keep the verified
+public instance and clean local startup working; do not start another spec
+without user direction. The temporary clean clone remains in /tmp/clean-check;
+its Docker/Python verification services have been stopped.
