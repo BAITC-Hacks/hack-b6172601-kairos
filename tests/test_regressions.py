@@ -149,30 +149,6 @@ def test_language_guard_passes_on_clean_tree(tmp_path):
     assert result.returncode == 0, result.stdout
 
 
-# --- the seeder must not destroy an existing dataset -----------------------
-
-def test_seeder_keeps_existing_data(tmp_path):
-    (tmp_path / "accounts.json").write_text('[{"sentinel": "retain-me"}]', encoding="utf-8")
-    (tmp_path / "transactions.json").write_text("[]", encoding="utf-8")
-    subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "seed_data.py"), "--out", str(tmp_path)],
-        capture_output=True, text=True, check=True,
-    )
-    kept = json.loads((tmp_path / "accounts.json").read_text())
-    assert kept[0]["sentinel"] == "retain-me"
-
-
-def test_seeder_regenerates_with_force(tmp_path):
-    (tmp_path / "accounts.json").write_text('[{"sentinel": "retain-me"}]', encoding="utf-8")
-    (tmp_path / "transactions.json").write_text("[]", encoding="utf-8")
-    subprocess.run(
-        [sys.executable, str(ROOT / "scripts" / "seed_data.py"), "--out", str(tmp_path), "--force"],
-        capture_output=True, text=True, check=True,
-    )
-    regenerated = json.loads((tmp_path / "accounts.json").read_text())
-    assert "sentinel" not in regenerated[0]
-
-
 # --- the Docker build context must not carry secrets -----------------------
 
 def test_dockerignore_patterns_match_nested_paths():

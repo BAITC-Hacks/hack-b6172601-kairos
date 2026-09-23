@@ -21,7 +21,7 @@ pipeline:
 	$(PYTHON) -m pipeline.run --data data/raw --out out
 
 run:
-	uvicorn app.main:app --reload --port 8000
+	$(PYTHON) -m uvicorn app.main:app --reload --port 8000
 
 docker:
 	docker compose up --build

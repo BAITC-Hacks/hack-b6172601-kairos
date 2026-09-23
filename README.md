@@ -44,8 +44,8 @@ Open http://localhost:8000 after `make run`.
 The container computes all outputs before starting FastAPI
 when outputs are absent/incomplete. The image excludes local `out/` and `.env`,
 so a clean image computes results from the supplied raw data. `/api/health`,
-`/api/tools` and the analyst viewer are available at localhost:8000. Old example
-account tools have been removed. No new deployment is part of this milestone.
+`/api/tools` and the analyst viewer are available at localhost:8000. No synthetic-data generator or example-data accessor remains.
+No new deployment is part of this milestone.
 
 ## Architecture
 

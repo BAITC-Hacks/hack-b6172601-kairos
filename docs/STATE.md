@@ -2,7 +2,8 @@
 
 Updated: 2026-09-23. Specs 01, 03, 03b (all eight items), assigned 04 and 04b
 are implemented. Spec 04 H is documentation only; spec 05 is not implemented.
-This task finishes before its 16:20 Asia/Almaty hard stop. No Fly changes.
+Spec 05 is now authorized in order C, A, B, D, E, F, with a 17:30 Asia/Almaty
+hard stop. Deploy only after the remote clean-clone gate passes.
 
 ## Viewer polish delivered
 
@@ -57,7 +58,15 @@ This task finishes before its 16:20 Asia/Almaty hard stop. No Fly changes.
   outflows unknown. Seed-hop rows are not proven organizational ranks.
 - Docker was verified in spec 01, not rebuilt here; startup/dependencies unchanged.
 
-## Next session
+## Spec 05 progress
+
+- C: removed unused synthetic seeder, JSON store and legacy UI helpers plus their
+  obsolete tests. Existing generic agent API remains tested infrastructure, not a
+  case analyst feature. Make run now uses the installed virtual environment.
+  Full tests: 65 pass; language guard passes. Pipeline rerun: 45.79 seconds.
+  Removed stale deployment instructions requiring a key.
+
+## Previous handoff
 
 Ready for the next assigned spec. Do not start spec 05 or deploy automatically.
 The updated viewer is served locally on port 8002; an older process on port 8001
