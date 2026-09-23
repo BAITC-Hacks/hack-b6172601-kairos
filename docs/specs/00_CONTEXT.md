@@ -9,6 +9,8 @@ Money flows UP the criminal hierarchy: seeds (couriers) -> consolidators -> tran
 All conclusions are hypotheses ("signs of consolidation"), never statements of guilt.
 
 ## Hard rules
+- Git: after every finished spec or finished section, run tests, update docs/STATE.md, `git commit` AND `git push`.
+  Never leave work unpushed at :50 of any hour (hourly checkpoints are judged on the remote repo). Never force-push.
 - Everything in the repo is English (code, comments, commits, UI, docs).
 - No hardcoded gids, no LLM in role assignment: roles come from explicit rules with thresholds (explainability is scored).
 - Deterministic: fixed random seeds, same input -> same output.

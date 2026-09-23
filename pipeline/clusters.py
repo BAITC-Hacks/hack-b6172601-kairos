@@ -18,7 +18,7 @@ def undirected_projection(graph: nx.DiGraph) -> nx.Graph:
     return projected
 
 
-def add_clusters(metrics: pd.DataFrame, edges: pd.DataFrame, graph: nx.DiGraph) -> tuple[pd.DataFrame, pd.DataFrame, nx.Graph]:
+def assign_clusters(metrics: pd.DataFrame, edges: pd.DataFrame, graph: nx.DiGraph) -> tuple[pd.DataFrame, nx.Graph]:
     projected = undirected_projection(graph)
     active = projected.subgraph([node for node, degree in projected.degree() if degree > 0]).copy()
     communities = list(nx.community.louvain_communities(
@@ -29,6 +29,14 @@ def add_clusters(metrics: pd.DataFrame, edges: pd.DataFrame, graph: nx.DiGraph) 
     membership = {gid: cluster_id for cluster_id, members in enumerate(communities) for gid in members}
     result = metrics.copy()
     result["cluster_id"] = result.gid.map(membership).astype(int)
+    return result, projected
+
+
+def add_clusters(metrics: pd.DataFrame, edges: pd.DataFrame, graph: nx.DiGraph) -> tuple[pd.DataFrame, pd.DataFrame, nx.Graph]:
+    result = metrics.copy()
+    projected = undirected_projection(graph)
+    membership = dict(zip(result.gid, result.cluster_id))
+    communities = [set(group.gid) for _, group in result.groupby("cluster_id", sort=True)]
     internal = edges[edges.src.map(membership).eq(edges.dst.map(membership))].copy()
     internal["cluster_id"] = internal.src.map(membership)
     internal_sums = internal.groupby("cluster_id").sum_kzt.sum().to_dict()

@@ -3,7 +3,7 @@
 import argparse
 import time
 
-from pipeline.clusters import add_clusters
+from pipeline.clusters import add_clusters, assign_clusters
 from pipeline.export import write_outputs
 from pipeline.features import compute_features
 from pipeline.load import load_data
@@ -17,7 +17,8 @@ def run(data: str = "data/raw", out: str = "out") -> None:
     nodes, edges, transactions = load_data(data)
     metrics, graph = compute_features(nodes, edges, transactions)
     metrics = add_taint(metrics, edges)
-    metrics = add_roles(metrics)
+    metrics, _ = assign_clusters(metrics, edges, graph)
+    metrics = add_roles(metrics, edges)
     metrics = add_priority(metrics)
     metrics, clusters, projected = add_clusters(metrics, edges, graph)
     write_outputs(metrics, clusters, edges, projected, out)

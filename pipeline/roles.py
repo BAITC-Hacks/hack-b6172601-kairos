@@ -19,19 +19,33 @@ def _amount(value: float) -> str:
     return f"{value:.0f}"
 
 
-def add_roles(metrics: pd.DataFrame) -> pd.DataFrame:
+def add_roles(metrics: pd.DataFrame, edges: pd.DataFrame) -> pd.DataFrame:
     result = metrics.copy()
-    cutoff = float(result.betweenness.quantile(CONFIG.coordinator_percentile))
+    # First pass identifies consolidation independently of coordinator precedence.
+    candidates = set(result.loc[result.in_deg.ge(CONFIG.consolidator_min_in), "gid"])
+    membership = dict(zip(result.gid, result.cluster_id))
+    payers = edges.groupby("dst").src.apply(lambda values: sorted(set(values))).to_dict()
+    collectors = {gid: [src for src in sources if src in candidates] for gid, sources in payers.items()}
+    result["consolidator_payers"] = result.gid.map(lambda gid: len(collectors.get(gid, [])))
+    result["source_clusters"] = result.gid.map(lambda gid: len({membership[src] for src in payers.get(gid, [])}))
     betweenness_pct = result.betweenness.rank(method="average", pct=True).to_numpy()
     roles, scores, reasons, evidence = [], [], [], []
     for index, row in enumerate(result.itertuples(index=False)):
         reason = ""
         ratio = float(row.pass_through)
-        if (not row.is_seed and row.betweenness >= cutoff and row.in_deg >= CONFIG.coordinator_min_in
-                and row.out_deg >= CONFIG.coordinator_min_out):
+        if (not row.is_seed and (
+                row.consolidator_payers >= CONFIG.coordinator_min_consolidators or
+                (row.source_clusters >= CONFIG.coordinator_min_clusters and row.in_deg >= CONFIG.coordinator_min_in))):
             role = "coordinator"
-            score = _threshold_score(betweenness_pct[index], CONFIG.coordinator_percentile)
-            explanation = f"Bridge hypothesis: top {1 - CONFIG.coordinator_percentile:.0%} betweenness; links {row.in_deg} payers and {row.out_deg} recipients."
+            support = max(row.consolidator_payers / CONFIG.coordinator_min_consolidators,
+                          row.source_clusters / CONFIG.coordinator_min_clusters if row.in_deg >= CONFIG.coordinator_min_in else 0)
+            score = min(0.99, 0.5 + 0.1 * (support - 1)) + 0.01 * betweenness_pct[index]
+            if row.consolidator_payers >= CONFIG.coordinator_min_consolidators:
+                suffixes = ", ".join("..." + str(gid)[-4:] for gid in collectors[row.gid][:3])
+                source = f"{row.consolidator_payers} consolidators ({suffixes})"
+            else:
+                source = f"{row.source_clusters} source clusters via {row.in_deg} payers"
+            explanation = f"Signs of coordination: receives from {source}, {_amount(row.in_kzt)} KZT in."
         elif row.in_deg >= CONFIG.consolidator_min_in:
             role = "consolidator"
             score = _threshold_score(row.in_deg, CONFIG.consolidator_min_in)

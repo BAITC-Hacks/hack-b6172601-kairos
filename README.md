@@ -71,7 +71,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/nodes_roles.csv` | gid, role, role_score, cluster_id, priority_score, evidence | Every one of 2,248 nodes exactly once; evidence <=200 chars |
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
-| `out/metrics.csv` | All calculated features and peripheral sub-reason | Numerical basis for explanations |
+| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
 
 | Viewer requirement | Implementation | Check |
@@ -107,7 +107,7 @@ The existing `/api/ask` endpoint retains its original configuration requirements
 <!-- ROLE_RULES_START -->
 | Role | First-matching rule |
 | --- | --- |
-| Coordinator | Non-seed; betweenness >= 99% percentile; in >= 2, out >= 2 |
+| Coordinator | Non-seed; receives from >=2 consolidator candidates OR >=2 source clusters with in-degree >=3; betweenness breaks score ties |
 | Consolidator | In-degree >= 5 |
 | Distributor | Out-degree >= 10 and >= 2 x in-degree (minimum denominator 1) |
 | Transit | Non-seed; in/out-degree >= 1; observed out/in ratio 0.8-1.2 |
@@ -191,3 +191,5 @@ See `DISCLOSURE.md` for the pre-built scaffold. Official task/context and the
 implemented specifications are `docs/specs/00_CONTEXT.md`, `01_PIPELINE.md` and
 `03_VIEWER.md`.
 The next session should read `docs/STATE.md` for verified status and scope boundaries.
+
+Coordinator roles use two passes: consolidator candidates meet the in-degree rule before coordinator precedence is applied. Source clusters are assigned before roles; cluster summaries use final roles and priorities.

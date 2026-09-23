@@ -7,9 +7,9 @@ from dataclasses import dataclass
 class PipelineConfig:
     expected_nodes: int = 2248
     aggregation_tolerance_kzt: float = 1e-6
-    coordinator_percentile: float = 0.99
-    coordinator_min_in: int = 2
-    coordinator_min_out: int = 2
+    coordinator_min_consolidators: int = 2
+    coordinator_min_clusters: int = 2
+    coordinator_min_in: int = 3
     consolidator_min_in: int = 5
     distributor_min_out: int = 10
     distributor_min_ratio: int = 2
@@ -51,7 +51,7 @@ ROLE_WEIGHTS = {
 def role_rules_markdown(config: PipelineConfig = CONFIG) -> str:
     """Render the README role thresholds from the runtime configuration."""
     rows = [
-        ("Coordinator", f"Non-seed; betweenness >= {config.coordinator_percentile:.0%} percentile; in >= {config.coordinator_min_in}, out >= {config.coordinator_min_out}"),
+        ("Coordinator", f"Non-seed; receives from >= {config.coordinator_min_consolidators} consolidator candidates OR >= {config.coordinator_min_clusters} source clusters with in-degree >= {config.coordinator_min_in}; betweenness breaks score ties"),
         ("Consolidator", f"In-degree >= {config.consolidator_min_in}"),
         ("Distributor", f"Out-degree >= {config.distributor_min_out} and >= {config.distributor_min_ratio} x in-degree (minimum denominator 1)"),
         ("Transit", f"Non-seed; in/out-degree >= 1; observed out/in ratio {config.transit_min_ratio:.1f}-{config.transit_max_ratio:.1f}"),
