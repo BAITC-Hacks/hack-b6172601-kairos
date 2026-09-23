@@ -1,0 +1,42 @@
+# Fly.io. Copy to the repository root as fly.toml, then:
+#
+#   fly launch --no-deploy --copy-config
+#   fly secrets set LLM_API_KEY=...
+#   fly deploy
+#
+# auto_stop_machines is false on purpose: the instance must answer instantly
+# during the 24-28 September review window, not cold-start.
+app = "kairos"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  APP_ENV = "production"
+  LLM_PROVIDER = "openai"
+  LLM_MODEL = "gpt-4.1-mini"
+  RATE_LIMIT_PER_MINUTE = "20"
+  TRUST_PROXY_HEADERS = "true"
+  # Fly's edge sets this and a client cannot forge it. Without it the limiter is
+  # bypassable, because Fly appends to a client-supplied X-Forwarded-For rather
+  # than replacing it.
+  CLIENT_IP_HEADER = "fly-client-ip"
+
+[http_service]
+  internal_port = 8000
+  force_https = true
+  auto_stop_machines = false
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    grace_period = "10s"
+    interval = "30s"
+    method = "GET"
+    path = "/api/health"
+    timeout = "5s"
+
+[[vm]]
+  cpu_kind = "shared"
+  cpus = 1
+  memory_mb = 512

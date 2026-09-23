@@ -1,0 +1,31 @@
+# NOTE: Docker does NOT treat a bare pattern as "at any depth" the way git does.
+# Every pattern that must match nested paths needs an explicit **/ prefix.
+
+# Secrets - the reason this file exists.
+**/.env
+**/.env.*
+!.env.example
+**/*.pem
+**/*.key
+
+# Local environments and state.
+**/.venv/
+**/venv/
+**/.git/
+**/.gitignore
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.traces/
+**/.hackathon_start
+
+# Editor and OS noise, including macOS AppleDouble sidecars.
+**/node_modules/
+**/.DS_Store
+**/._*
+**/*.log
+
+# Not needed at runtime.
+docs/
+deploy/
+audit-*/

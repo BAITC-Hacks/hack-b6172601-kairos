@@ -1,0 +1,31 @@
+# Render. Put this file at the repository root as render.yaml, or point a new
+# Web Service at this repo and let it read the Dockerfile.
+#
+#   1. render.com -> New -> Web Service -> connect the repository
+#   2. Runtime: Docker. Health check path: /api/health
+#   3. Add LLM_API_KEY as a secret environment variable
+#
+# Check the current free-tier terms before relying on them: a plan that sleeps
+# on idle is not suitable, because judging runs 24-28 September.
+services:
+  - type: web
+    name: kairos
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: LLM_PROVIDER
+        value: openai
+      - key: LLM_API_KEY
+        sync: false          # set it in the dashboard, never in the repository
+      - key: LLM_MODEL
+        value: gpt-4.1-mini
+      - key: APP_ENV
+        value: production
+      - key: RATE_LIMIT_PER_MINUTE
+        value: "20"
+      - key: TRUST_PROXY_HEADERS
+        value: "true"
+      # If the platform provides an unforgeable client-IP header, name it here.
+      - key: CLIENT_IP_HEADER
+        value: ""

@@ -1,0 +1,29 @@
+# One command for a reviewer who has Docker and nothing else:
+#
+#   docker compose up --build
+#
+# No Python on the host is needed: the container seeds the sample dataset when
+# data/ is empty. No .env file is needed either: the service starts without a
+# key and reports llm_configured=false on /api/health. To use a model, either
+# create .env from .env.example or export LLM_API_KEY before running.
+services:
+  app:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      # Values come from a .env file in this directory when present, from the
+      # shell environment otherwise, and fall back to these defaults.
+      LLM_API_KEY: "${LLM_API_KEY:-}"
+      LLM_PROVIDER: "${LLM_PROVIDER:-openai}"
+      LLM_MODEL: "${LLM_MODEL:-}"
+      LLM_BASE_URL: "${LLM_BASE_URL:-}"
+      APP_ENV: "${APP_ENV:-docker}"
+      LOG_LEVEL: "${LOG_LEVEL:-INFO}"
+      AGENT_MAX_STEPS: "${AGENT_MAX_STEPS:-8}"
+      AGENT_TIMEOUT_SECONDS: "${AGENT_TIMEOUT_SECONDS:-60}"
+      RATE_LIMIT_PER_MINUTE: "${RATE_LIMIT_PER_MINUTE:-0}"
+      TRUST_PROXY_HEADERS: "${TRUST_PROXY_HEADERS:-false}"
+      DATA_DIR: /app/data
+      TRACE_DIR: /app/.traces
+    restart: unless-stopped

@@ -1,0 +1,16 @@
+.env
+
+# Commit requirements.lock.txt before the deadline - it is what makes the
+# environment reproducible for the reviewer.
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.DS_Store
+._*
+.AppleDouble
+node_modules/
+*.log
+data/*.db
+.traces/

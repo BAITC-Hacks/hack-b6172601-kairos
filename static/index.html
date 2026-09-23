@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Kairos</title>
+<link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kairos</h1>
+    <p class="tagline" id="tagline">Agent over the case dataset. Every answer ships with the trace that produced it.</p>
+    <div class="meta" id="meta"><span class="pill">Loading service status...</span></div>
+  </header>
+
+  <main class="panel">
+    <div class="chips" id="examples">
+      <button type="button" class="chip">List the accounts of CUST-001.</button>
+      <button type="button" class="chip">What did CUST-001 spend on, by category?</button>
+      <button type="button" class="chip">Show transactions of CUST-002 above 50000.</button>
+    </div>
+
+    <label for="question" class="hint">Question</label>
+    <textarea id="question" placeholder="Ask a question about the dataset..."></textarea>
+
+    <div class="controls">
+      <button id="send" type="button">Ask</button>
+      <span class="hint" id="status">Ctrl+Enter to send</span>
+    </div>
+
+    <div id="output"></div>
+
+    <details id="trace-box" hidden>
+      <summary>Execution trace</summary>
+      <div id="trace-steps"></div>
+      <details id="trace-raw" hidden>
+        <summary>Raw JSON</summary>
+        <pre class="json" id="trace-json"></pre>
+      </details>
+    </details>
+  </main>
+</div>
+
+<script src="/ui.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+const output = $("output");
+
+/* ---------- service status ---------- */
+
+async function loadHealth() {
+  const meta = $("meta");
+  try {
+    const res = await fetch("/api/health");
+    const data = await res.json();
+    const pills = [
+      `env: ${data.env}`,
+      `model: ${data.model}`,
+      `tools: ${data.tools.length ? data.tools.join(", ") : "none"}`,
+    ];
+    meta.replaceChildren(
+      ...pills.map((text) => {
+        const s = document.createElement("span");
+        s.className = "pill";
+        s.textContent = text;
+        return s;
+      })
+    );
+    if (!data.llm_configured) {
+      const warn = document.createElement("span");
+      warn.className = "pill pill-warn";
+      warn.textContent = "no API key configured";
+      meta.append(warn);
+    }
+  } catch {
+    meta.replaceChildren(Object.assign(document.createElement("span"), {
+      className: "pill pill-warn",
+      textContent: "service unreachable",
+    }));
+  }
+}
+
+/* ---------- trace rendering ---------- */
+
+function renderTrace(trace) {
+  const box = $("trace-box");
+  const steps = $("trace-steps");
+  if (!trace || !trace.steps) { box.hidden = true; return; }
+
+  steps.replaceChildren();
+  for (const step of trace.steps) {
+    const row = UI.el("div", "trace-step");
+    row.append(UI.el("span", "trace-index", step.index));
+
+    const body = UI.el("div");
+    body.append(UI.el("span", "trace-kind", step.kind));
+    body.append(UI.el("span", "trace-name", step.name));
+    row.append(body);
+
+    row.append(UI.el("span", "trace-ms", step.duration_ms ? `${step.duration_ms} ms` : ""));
+    steps.append(row);
+  }
+
+  $("trace-json").textContent = JSON.stringify(trace, null, 2);
+  $("trace-raw").hidden = false;
+  box.hidden = false;
+}
+
+/* ---------- main flow ---------- */
+/*
+ * Replace the body of renderResult with the case-specific view. The helpers in
+ * ui.js cover the usual shapes:
+ *
+ *   mount(output, UI.kpis([...]));
+ *   append(output, UI.table(rows, {title: "Transactions"}));
+ *   append(output, UI.barChart({data: rows, title: "Spending by category"}));
+ *   append(output, UI.keyValue(obj));
+ *   append(output, UI.autoRender(unknownPayload));   // best effort
+ */
+function renderResult(data) {
+  mount(output, UI.answer(data.answer));
+
+  // The backend may attach structured data next to the text answer. When it
+  // does, show it; when it does not, the text alone is the result.
+  if (data.data !== undefined) {
+    append(output, UI.autoRender(data.data));
+  }
+}
+
+async function ask() {
+  const question = $("question").value.trim();
+  if (!question) {
+    mount(output, UI.empty("Type a question first."));
+    return;
+  }
+
+  $("send").disabled = true;
+  $("status").textContent = "";
+  $("trace-box").hidden = true;
+  mount(output, UI.loading("Running the agent..."));
+
+  const started = performance.now();
+  try {
+    const res = await fetch("/api/ask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ question }),
+    });
+
+    let data;
+    try {
+      data = await res.json();
+    } catch {
+      mount(output, UI.error(`Server returned a non-JSON response (status ${res.status}).`));
+      return;
+    }
+
+    if (!res.ok || data.ok === false) {
+      const message = data?.error?.message || `Request failed with status ${res.status}.`;
+      mount(output, UI.error(message));
+      if (data?.error?.detail) append(output, UI.json(data.error.detail));
+      return;
+    }
+
+    renderResult(data);
+    renderTrace(data.trace);
+  } catch (err) {
+    mount(output, UI.error(`Network error: ${err.message}`));
+  } finally {
+    $("status").textContent = `${Math.round(performance.now() - started)} ms`;
+    $("send").disabled = false;
+  }
+}
+
+/* ---------- wiring ---------- */
+
+$("send").addEventListener("click", ask);
+$("question").addEventListener("keydown", (e) => {
+  if ((e.metaKey || e.ctrlKey) && e.key === "Enter") ask();
+});
+$("examples").addEventListener("click", (e) => {
+  if (e.target.classList.contains("chip")) {
+    $("question").value = e.target.textContent;
+    $("question").focus();
+  }
+});
+
+loadHealth();
+</script>
+</body>
+</html>
