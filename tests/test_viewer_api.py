@@ -106,6 +106,21 @@ def test_top_clusters_and_whitelisted_downloads():
         assert response.status_code != 200
 
 
+def test_node_explanations_are_structured_and_match_graph():
+    gid = top_gid()
+    node = CLIENT.get(f"/api/node/{gid}").json()["node"]
+    graph_node = next(row for row in CLIENT.get("/api/graph").json()["nodes"] if row["id"] == gid)
+    rules = node["role_explanation"]
+    assert rules == graph_node["role_explanation"]
+    assert rules[-1]["role"] == node["role"]
+    assert rules[-1]["matched"] is True
+    assert all(not rule["matched"] for rule in rules[:-1])
+    priority = node["priority_explanation"]
+    assert priority == graph_node["priority_explanation"]
+    assert len(priority["components"]) == 5
+    assert abs(priority["score"] - node["priority_score"]) < 1e-10
+
+
 def test_missing_outputs_return_actionable_503(tmp_path, monkeypatch):
     monkeypatch.setattr(viewer, "store", viewer.OutputStore(tmp_path))
     for path in ("/api/graph", "/api/top", "/api/clusters", "/api/search?q=123",

@@ -44,7 +44,10 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
     extension_requests(metrics).to_csv(directory / "extension_requests.csv", index=False, float_format="%.12g")
     ordered[ROLE_COLUMNS].to_csv(directory / "nodes_roles.csv", index=False, float_format="%.12g")
     clusters[CLUSTER_COLUMNS].to_csv(directory / "clusters.csv", index=False, float_format="%.12g")
-    ordered.to_csv(directory / "metrics.csv", index=False, float_format="%.12g")
+    csv_metrics = ordered.copy()
+    for column in ("role_explanation", "priority_explanation"):
+        csv_metrics[column] = csv_metrics[column].map(lambda value: json.dumps(value, separators=(",", ":")))
+    csv_metrics.to_csv(directory / "metrics.csv", index=False, float_format="%.12g")
     top = metrics.sort_values(["priority_score", "gid"], ascending=[False, True]).head(CONFIG.top_count).copy()
     top.insert(0, "rank", range(1, len(top) + 1))
     top[TOP_COLUMNS].to_csv(directory / "top_nodes.csv", index=False, float_format="%.12g")
@@ -60,6 +63,8 @@ def write_outputs(metrics: pd.DataFrame, clusters: pd.DataFrame, edges: pd.DataF
             "x": x, "y": y, "evidence": row.evidence,
             "in_kzt": float(row.in_kzt), "out_kzt": float(row.out_kzt),
             "in_deg": int(row.in_deg), "out_deg": int(row.out_deg),
+            "role_explanation": row.role_explanation,
+            "priority_explanation": row.priority_explanation,
         })
     links = [{"source": str(int(row.src)), "target": str(int(row.dst)),
               "sum_kzt": float(row.sum_kzt), "n_tx": int(row.n_tx)} for row in edges.itertuples(index=False)]

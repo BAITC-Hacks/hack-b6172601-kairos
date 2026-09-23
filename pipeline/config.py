@@ -73,12 +73,29 @@ ROLE_WEIGHTS = {
 
 def role_rules_markdown(config: PipelineConfig = CONFIG) -> str:
     """Render the README role thresholds from the runtime configuration."""
-    rows = [
-        ("Coordinator", f"Non-seed; receives from >= {config.coordinator_min_consolidators} consolidator candidates (in-degree >= {config.consolidator_min_in}); betweenness breaks score ties"),
-        ("Consolidator", f"In-degree >= {config.consolidator_min_in}"),
-        ("Distributor", f"Out-degree >= {config.distributor_min_out} and >= {config.distributor_min_ratio} x in-degree (minimum denominator 1)"),
-        ("Transit", f"Non-seed; in/out-degree >= 1; observed out/in ratio {config.transit_min_ratio:.1f}-{config.transit_max_ratio:.1f}"),
-        ("Terminal", f"Depth <= {config.terminal_max_depth}; incoming > 0; zero outgoing or non-seed out/in < {config.terminal_max_pass_ratio:.1f}; in-degree >= {config.terminal_min_in} or incoming >= {config.terminal_min_kzt:,} KZT"),
-        ("Peripheral", "Everything else; cut-off, one-off, isolated seed, or other sub-reason"),
-    ]
-    return "| Role | First-matching rule |\n| --- | --- |\n" + "\n".join(f"| {role} | {rule} |" for role, rule in rows)
+    rows = method_description(config)["rules"]
+    return "| Role | First-matching rule |\n| --- | --- |\n" + "\n".join(
+        f"| {entry['role'].title()} | {entry['rule']} |" for entry in rows
+    )
+
+
+def method_description(config: PipelineConfig = CONFIG) -> dict:
+    """Describe runtime steps and ordered role rules for the viewer."""
+    return {
+        "steps": [
+            "Load and validate raw nodes, edges, and transactions.",
+            "Measure directed flow, network position, timing, and finding signals.",
+            f"Propagate observed case-money exposure for up to {config.taint_max_passes} passes.",
+            "Assign the first matching role rule to each node.",
+            "Detect graph communities and summarize their observed flows.",
+            "Rank investigation priorities from weighted signals and uncertainty discounts.",
+        ],
+        "rules": [
+            {"role": "coordinator", "rule": f"Non-seed; receives from >= {config.coordinator_min_consolidators} consolidator candidates (in-degree >= {config.consolidator_min_in}); betweenness breaks score ties"},
+            {"role": "consolidator", "rule": f"In-degree >= {config.consolidator_min_in}"},
+            {"role": "distributor", "rule": f"Out-degree >= {config.distributor_min_out} and >= {config.distributor_min_ratio} x in-degree (minimum denominator 1)"},
+            {"role": "transit", "rule": f"Non-seed; in/out-degree >= 1; observed out/in ratio {config.transit_min_ratio:.1f}-{config.transit_max_ratio:.1f}"},
+            {"role": "terminal", "rule": f"Depth <= {config.terminal_max_depth}; incoming > 0; zero outgoing or non-seed out/in < {config.terminal_max_pass_ratio:.1f}; in-degree >= {config.terminal_min_in} or incoming >= {config.terminal_min_kzt:,} KZT"},
+            {"role": "peripheral", "rule": "Everything else; cut-off, one-off, isolated seed, or other sub-reason"},
+        ],
+    }

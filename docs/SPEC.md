@@ -61,7 +61,11 @@ blocking_plan.csv for continuation, hierarchy and counterfactual analysis.
 It produces metrics.csv and graph.json
 in addition to the three required case CSVs. The read-only viewer serves these
 artifacts through the six endpoints specified in 03_VIEWER.md, preserving exact
-string identifiers, and provides offline canvas exploration. Other specs remain
+string identifiers, and provides offline canvas exploration. Spec 03b item 4 adds
+pipeline-generated role_explanation (ordered failed rules through the match) and
+priority_explanation (weighted components, bonus, multipliers, normalization and
+score) to graph nodes and JSON-valued metrics.csv columns. Node details expose
+these as structured JSON; the browser only displays them. Other specs remain
 out of scope.
 
 Core: deterministic graph analysis, role hypotheses, ranking, clustering, CSV,

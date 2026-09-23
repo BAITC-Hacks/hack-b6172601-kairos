@@ -23,7 +23,9 @@ def csv_rows(raw: bytes) -> list[dict]:
     for row in csv.DictReader(io.StringIO(raw.decode("utf-8"))):
         parsed = {}
         for key, value in row.items():
-            if key in TEXT_FIELDS:
+            if key in {"role_explanation", "priority_explanation"}:
+                parsed[key] = json.loads(value) if value else None
+            elif key in TEXT_FIELDS:
                 parsed[key] = value
             elif value in {"True", "False"}:
                 parsed[key] = value == "True"

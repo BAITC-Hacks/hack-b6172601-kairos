@@ -82,6 +82,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | Directed map, roles and communities | Canvas arrows, role filters/counts, role/cluster colours | Pan, zoom, hover and select |
 | Find any gid and inspect neighbors | Exact string and suffix search, two-hop focus, ego columns | Node card shows amounts, metrics and evidence |
 | Investigation priorities and exports | Clickable Top-30 and three CSV downloads | Read-only artifacts; no API key or CDN |
+| Explain each role and priority | Pipeline-generated rule trace and weighted score breakdown in the node card | Shows failed preceding rules, actual values, thresholds, bonuses, multipliers and normalization |
 
 Run `pytest -q tests/test_pipeline.py` to check coverage, schemas, score bounds,
 cluster assignments, cut-off handling, runtime and identical CSVs from two runs.
@@ -97,6 +98,13 @@ metrics and directed incoming/outgoing transfers. Neighbor rows navigate to that
 account. Focus highlights two hops; **Ego view** puts payers left and recipients
 right. Escape returns to overview. Drag to pan and use the wheel to zoom.
 Seeds have black rings; hollow nodes mark the depth-4 observation cutoff.
+
+**Why this role** shows the first matching rule and the earlier rules that failed,
+using the node's measured values and configured thresholds. **Why this priority**
+shows all five weighted contributions, the finding bonus, seed/cut-off discounts,
+global normalization and the payout adjustment. These explanations are generated
+by the pipeline and exported as structured JSON in `graph.json` and JSON columns
+in `metrics.csv`; the browser does not recompute the analysis.
 
 The API serves `/api/graph`, `/api/node/{gid}`, `/api/search?q=...`, `/api/top`,
 `/api/clusters` and `/api/download/{name}`. Downloads allow only `nodes_roles.csv`,

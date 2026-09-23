@@ -194,6 +194,30 @@ async function selectNode(id) {
 }
 
 function addMetric(list, label, value) { list.append(el("dt", "", label), el("dd", "", value)); }
+function explanationSections(node) {
+  const role = el("section", "card-section"), priority = el("section", "card-section");
+  role.append(el("h3", "", "Why this role"));
+  for (const rule of node.role_explanation || []) {
+    role.append(el("p", rule.matched ? "evidence" : "subtle", `Rule ${rule.rule} ${rule.role}: ${rule.detail} ${rule.matched ? "✓" : "✗"}`));
+  }
+  if (!node.role_explanation?.length) role.append(el("p", "subtle", "Run the pipeline to generate rule explanations."));
+  priority.append(el("h3", "", "Why this priority"));
+  const explanation = node.priority_explanation;
+  if (explanation) {
+    const list = el("dl", "metrics");
+    for (const component of explanation.components) {
+      addMetric(list, `${component.name} · ${percent(component.weight)} weight`, `${num(component.value).toFixed(4)} → ${num(component.contribution).toFixed(4)}`);
+    }
+    addMetric(list, "Finding bonus (before multipliers)", `+${num(explanation.finding_bonus).toFixed(4)}`);
+    addMetric(list, "Seed multiplier", `×${explanation.seed_multiplier}`);
+    addMetric(list, "Traversal cut-off multiplier", `×${explanation.truncated_multiplier}`);
+    addMetric(list, "Global maximum normalization", `÷${num(explanation.normalization_divisor).toFixed(6)}`);
+    addMetric(list, "Likely legitimate payouts multiplier", `×${explanation.payout_multiplier}`);
+    addMetric(list, "Final priority", num(explanation.score).toFixed(6));
+    priority.append(list, el("p", "subtle", "Values are percentile ranks, except the configured role weight. Contributions plus the finding bonus are multiplied, normalized, then adjusted for payout evidence. This is an investigation score, not a probability."));
+  } else priority.append(el("p", "subtle", "Run the pipeline to generate priority explanations."));
+  return [role, priority];
+}
 function linkSection(title, rows) {
   const section = el("section", "card-section"); section.append(el("h3", "", `${title} (${rows.length})`));
   if (!rows.length) { section.append(el("p", "subtle", "No observed links.")); return section; }
@@ -220,6 +244,7 @@ function renderCard(data) {
   for (const text of [`${n.role || "unknown"} · role support ${percent(n.role_score)}`, `Priority ${percent(n.priority_score)}`, ...(state.top.find((item) => String(item.gid) === gid) ? [`Rank #${state.top.find((item) => String(item.gid) === gid).rank}`] : []), `Cluster ${n.cluster_id ?? "—"}`, ...(String(n.is_seed).toLowerCase() === "true" ? ["Seed"] : []), ...(String(n.truncated).toLowerCase() === "true" ? ["Traversal cut-off"] : [])]) badges.append(el("span", "badge", text));
   card.append(badges);
   const evidence = el("section", "card-section"); evidence.append(el("h3", "", "Role evidence"), el("p", "evidence", n.evidence || "No evidence recorded.")); card.append(evidence);
+  card.append(...explanationSections(n));
   const community = el("section", "card-section"); community.append(el("h3", "", "Cluster hypothesis"), el("p", "", cluster.hypothesis || "No cluster description.")); card.append(community);
   if (n.findings) {
     const findings = el("section", "card-section");
