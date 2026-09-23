@@ -43,3 +43,32 @@ def add_findings(metrics: pd.DataFrame, transactions: pd.DataFrame, graph: nx.Di
     result["findings"] = result.apply(
         lambda row: " ".join(text for flag, text in FINDING_TEXT.items() if row[flag]), axis=1)
     return result
+
+
+def append_evidence(evidence: str, suffix: str) -> str:
+    """Keep the full cautionary suffix within the case evidence limit."""
+    room = 200 - len(suffix) - 1
+    base = evidence if len(evidence) <= room else evidence[:room - 3].rstrip() + "..."
+    return base + " " + suffix
+
+
+def add_payout_flag(metrics: pd.DataFrame, transactions: pd.DataFrame) -> pd.DataFrame:
+    result = metrics.copy()
+    dated = transactions.assign(day=transactions.date.dt.normalize())
+    daily = dated.groupby(["src", "day"]).size()
+    busiest = daily.groupby(level=0).apply(
+        lambda counts: counts.nlargest(CONFIG.payout_busiest_dates).sum() / counts.sum())
+    amounts = transactions.groupby("src").sum_kzt
+    variation = amounts.std(ddof=0).div(amounts.mean().replace(0, float("nan")))
+    result["outgoing_busiest_dates_share"] = result.gid.map(busiest).fillna(0)
+    result["outgoing_amount_cv"] = result.gid.map(variation)
+    result["likely_legit_payouts"] = (
+        result.out_deg.ge(CONFIG.payout_min_out)
+        & result.outgoing_busiest_dates_share.ge(CONFIG.payout_min_date_share)
+        & result.outgoing_amount_cv.le(CONFIG.payout_max_cv)
+        & result.taint_share.lt(CONFIG.payout_max_taint_share)
+    )
+    suffix = "Pattern resembles regular payouts (salary/business) — verify before escalating."
+    result.loc[result.likely_legit_payouts, "evidence"] = result.loc[
+        result.likely_legit_payouts, "evidence"].map(lambda evidence: append_evidence(evidence, suffix))
+    return result

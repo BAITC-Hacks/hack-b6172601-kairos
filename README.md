@@ -71,7 +71,7 @@ JavaScript cannot safely represent these approximately 1e17 integers as numbers.
 | `out/nodes_roles.csv` | gid, role, role_score, cluster_id, priority_score, evidence | Every one of 2,248 nodes exactly once; evidence <=200 chars |
 | `out/clusters.csv` | cluster_id, n_nodes, n_seed, sum_kzt_internal, top_gids, hypothesis; additional role/taint counts | Every node belongs to a reported cluster |
 | `out/top_nodes.csv` | rank, gid, role, priority_score, why | Top 30, decreasing priority with stable ties |
-| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings and one-sentence evidence |
+| `out/metrics.csv` | All calculated features, consolidator-payer/source-cluster counts and peripheral sub-reason | Numerical basis for explanations; boolean findings, payout flag and one-sentence evidence |
 | `out/extension_requests.csv` | Cut-off nodes with p_continues >=0.5, sorted by taint value then gid | Next export requests; no invented outgoing edges |
 | `out/skeleton_edges.csv` | src, dst, sum_kzt from the two-sided hierarchy trace | Drops edges below 1% of recipient inflow |
 | `out/graph.json` | String identifiers, roles, clusters, directed edges, coordinates and counts | All nodes on an interactive directed canvas |
@@ -223,3 +223,11 @@ of a retained edge. Levels are shortest forward seed-hop distances (seed = 0);
 cycles can produce same-level or backward edges, so levels are observational
 distance, not a proven organizational rank. Nonmembers have level -1.
 CSV edges and graph JSON skeleton/level fields are exported; the viewer is unchanged.
+
+
+The likely_legit_payouts flag requires out-degree >=10, at least half of outgoing
+transactions on the two busiest calendar dates, population coefficient of
+variation of outgoing amounts <=0.5, and taint_share <0.2. All conditions must
+hold. It halves the normalized priority score without changing the role.
+The evidence asks the analyst to verify possible salary/business payouts before
+escalating; this is a pattern hypothesis, not a confirmed legitimate business.

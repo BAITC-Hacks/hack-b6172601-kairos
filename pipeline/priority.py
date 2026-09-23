@@ -36,6 +36,8 @@ def add_priority(metrics: pd.DataFrame) -> pd.DataFrame:
     raw *= result.is_seed.map({True: CONFIG.seed_priority_multiplier, False: 1.0})
     raw *= result.truncated.map({True: CONFIG.truncated_priority_multiplier, False: 1.0})
     result["priority_score"] = raw / raw.max() if raw.max() > 0 else 0.0
+    if "likely_legit_payouts" in result:
+        result.loc[result.likely_legit_payouts, "priority_score"] *= CONFIG.payout_priority_multiplier
     descriptions = {
         "taint": lambda r: f"high case-money inflow ({_amount(r.taint_kzt)} KZT)",
         "seed_sources": lambda r: f"{r.seed_sources_2hop} seeds within 2 hops",

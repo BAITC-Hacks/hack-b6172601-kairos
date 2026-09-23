@@ -39,6 +39,12 @@ class PipelineConfig:
     skeleton_max_hops: int = 4
     skeleton_top_quantile: float = 0.75
     skeleton_min_inflow_share: float = 0.01
+    payout_min_out: int = 10
+    payout_busiest_dates: int = 2
+    payout_min_date_share: float = 0.5
+    payout_max_cv: float = 0.5
+    payout_max_taint_share: float = 0.2
+    payout_priority_multiplier: float = 0.5
     top_count: int = 30
     seed_priority_multiplier: float = 0.6
     truncated_priority_multiplier: float = 0.7

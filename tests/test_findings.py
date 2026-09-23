@@ -74,3 +74,29 @@ def test_skeleton_intersection_small_edges_and_levels():
     assert result.in_skeleton.dtype == bool
     metrics["role"] = "peripheral"
     assert add_skeleton(metrics, edges, graph)[1].empty
+
+
+def test_payout_flag_all_conditions_and_exact_priority_discount():
+    from pipeline.findings import add_payout_flag
+    from pipeline.priority import add_priority
+    metrics = pd.DataFrame({
+        "gid": [1, 2, 3, 4], "out_deg": [10, 10, 9, 10],
+        "taint_share": [.19, .2, .1, .1], "evidence": ["1 payer; " + "x" * 170] * 4,
+        "role": ["distributor"] * 4, "taint_kzt": [100] * 4,
+        "seed_sources_2hop": [1] * 4, "pagerank": [.1] * 4,
+        "betweenness": [0.] * 4, "is_seed": [False] * 4, "truncated": [False] * 4,
+    })
+    tx = pd.DataFrame({
+        "src": [gid for gid in range(1, 5) for _ in range(10)],
+        "date": pd.to_datetime(["2026-07-01"] * 40),
+        "sum_kzt": [100.] * 30 + [1.] * 9 + [1000.],
+    })
+    baseline = add_priority(metrics)
+    flagged = add_payout_flag(metrics, tx)
+    assert flagged.likely_legit_payouts.tolist() == [True, False, False, False]
+    assert flagged.role.tolist() == metrics.role.tolist()
+    ranked = add_priority(flagged)
+    assert ranked.loc[0, "priority_score"] == baseline.loc[0, "priority_score"] * .5
+    assert ranked.loc[1, "priority_score"] == baseline.loc[1, "priority_score"]
+    assert len(flagged.loc[0, "evidence"]) <= 200
+    assert flagged.loc[0, "evidence"].endswith("verify before escalating.")

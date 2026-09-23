@@ -18,9 +18,14 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
   extension_requests.csv sorted by taint; empty-bin fallback is documented.
 - G: two-sided hierarchy trace, small-edge filter, skeleton_edges.csv and
   boolean membership / shortest seed-hop levels in metrics and graph JSON.
+- B: payout-pattern flag requires all four thresholds and halves normalized
+  priority without changing roles; full caution suffix fits the evidence limit.
 - Existing user edit to 00_CONTEXT.md is included with A.
 
 ## Verification
+
+- Section B: full pytest -q passes (55 tests); smoke, language and diff checks pass.
+  Repeatability rerun passes after freezing a mid-test punctuation edit.
 
 - Section G: full pytest -q passes (54 tests); smoke, language and diff checks pass.
 
@@ -35,6 +40,6 @@ No Fly changes. Deadline 18:00 Asia/Almaty.
 
 ## Next
 
-Implement B, C, F in order. Test, update this file, commit and push each
+Implement C, F in order. Test, update this file, commit and push each
 section. Add H documentation only. End with make pipeline and report computed
 role counts, flag counts and blocking summary.
